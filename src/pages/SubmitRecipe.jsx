@@ -5,6 +5,7 @@ import { mockMoods } from "../mock.jsx";
 
 // You can set your backend API endpoint here
 const API_URL = "http://localhost:5002/api/food/dishes"; // Change this to your actual backend endpoint
+const CLOUDINARY_UPLOAD_URL = "http://localhost:5002/api/food/upload-recipe-image"; // Food service Cloudinary upload endpoint
 
 const SubmitRecipe = () => {
   const [formData, setFormData] = useState({
@@ -17,7 +18,8 @@ const SubmitRecipe = () => {
     ingredients: [""],
     instructions: [""],
     tags: [],
-    image: null
+    image: null,
+    imageFile: null // Store the actual file for upload
   });
 
   const [dragActive, setDragActive] = useState(false);
@@ -99,11 +101,39 @@ const SubmitRecipe = () => {
   const handleFiles = (files) => {
     const file = files[0];
     if (file && file.type.startsWith('image/')) {
+      // Store the file for upload
+      setFormData(prev => ({ ...prev, imageFile: file }));
+      
+      // Also create a preview
       const reader = new FileReader();
       reader.onload = (e) => {
         setFormData(prev => ({ ...prev, image: e.target.result }));
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Upload image to Cloudinary via food-service
+  const uploadImageToCloudinary = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('recipeImage', file);
+
+      const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload image');
+      }
+
+      const result = await response.json();
+      return result.image_url; // Return the Cloudinary URL
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
     }
   };
 
@@ -119,6 +149,20 @@ const SubmitRecipe = () => {
         return;
       }
 
+      let imageUrl = null;
+      
+      // Upload image to Cloudinary if there's an image file
+      if (formData.imageFile) {
+        try {
+          imageUrl = await uploadImageToCloudinary(formData.imageFile);
+          console.log('Image uploaded to Cloudinary:', imageUrl);
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          alert("Failed to upload image. Please try again.");
+          return;
+        }
+      }
+
       // Map frontend data to backend expected format
       const backendData = {
         title: formData.title,
@@ -130,7 +174,7 @@ const SubmitRecipe = () => {
         ingredients: formData.ingredients.filter(ing => ing.trim() !== ""),
         instructions: formData.instructions.filter(inst => inst.trim() !== ""),
         tags: formData.tags,
-        image_url: formData.image,
+        image_url: imageUrl, // Use the Cloudinary URL
         user_id: user._id || user.id // Use MongoDB _id or fallback to id
       };
 
@@ -169,7 +213,8 @@ const SubmitRecipe = () => {
         ingredients: [""],
         instructions: [""],
         tags: [],
-        image: null
+        image: null,
+        imageFile: null
       });
     } catch (error) {
       console.error('Submit error:', error);

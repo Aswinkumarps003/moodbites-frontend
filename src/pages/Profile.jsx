@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 import { 
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 import { mockUserProfile, mockRecipes, mockMoodTrends } from "../mock.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -29,6 +30,8 @@ const Profile = () => {
     confirm: false
   });
   const [saveStatus, setSaveStatus] = useState({ type: '', message: '' });
+  const [profileImage, setProfileImage] = useState(null);
+  const fileInputRef = useRef(null);
   const [profileData, setProfileData] = useState({
     // Basic Information
     name: "",
@@ -77,6 +80,7 @@ const Profile = () => {
   });
 
   const savedRecipes = mockRecipes.filter(recipe => recipe.id % 2 === 0);
+  const navigate = useNavigate();
 
   // Fetch user data from MongoDB Atlas
   useEffect(() => {
@@ -99,6 +103,11 @@ const Profile = () => {
           if (response.ok) {
             const userProfileData = await response.json();
             setUserProfile(userProfileData);
+            
+            // Set profile image if available
+            if (userProfileData.profileImage) {
+              setProfileImage(userProfileData.profileImage);
+            }
             
             // Update profile data with fetched user data
             setProfileData(prev => ({
@@ -301,6 +310,68 @@ const Profile = () => {
     }
   };
 
+  // Image upload handlers
+  const handleCameraClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setSaveStatus({ type: 'error', message: 'Please select an image file' });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setSaveStatus({ type: 'error', message: 'Image size should be less than 5MB' });
+        return;
+      }
+
+      // Upload to Cloudinary
+      uploadImageToServer(file);
+    }
+  };
+
+  const uploadImageToServer = async (file) => {
+    try {
+      setSaveStatus({ type: 'loading', message: 'Uploading image...' });
+
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:5000/api/user/upload-profile-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setProfileImage(result.profileImage);
+        setSaveStatus({ type: 'success', message: 'Image uploaded successfully!' });
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setSaveStatus({ type: '', message: '' });
+        }, 3000);
+      } else {
+        const errorData = await response.json();
+        setSaveStatus({ type: 'error', message: errorData.message || 'Failed to upload image' });
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setSaveStatus({ type: 'error', message: 'Network error. Please try again.' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 to-stone-100 flex items-center justify-center">
@@ -391,12 +462,32 @@ const Profile = () => {
               <div className="absolute inset-0 animated-gradient opacity-30" />
               <div className="absolute bottom-8 left-8 flex items-end space-x-6">
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-3xl border-4 border-white shadow-2xl bg-gradient-to-r from-[#F10100] to-[#FFD122] flex items-center justify-center text-white text-4xl font-bold">
-                    {profileData.name ? profileData.name.charAt(0).toUpperCase() : 'U'}
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                  
+                  {/* Profile image display */}
+                  <div className="w-32 h-32 rounded-3xl border-4 border-white shadow-2xl bg-gradient-to-r from-[#F10100] to-[#FFD122] flex items-center justify-center text-white text-4xl font-bold overflow-hidden">
+                    {profileImage ? (
+                      <img 
+                        src={profileImage} 
+                    alt="Profile"
+                        className="w-full h-full object-cover"
+                  />
+                    ) : (
+                      profileData.name ? profileData.name.charAt(0).toUpperCase() : 'U'
+                    )}
                   </div>
+                  
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
+                    onClick={handleCameraClick}
                     className="absolute -bottom-2 -right-2 w-10 h-10 bg-[#F10100] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#FF4444] transition-colors duration-300"
                   >
                     <Camera className="w-5 h-5" />
@@ -886,13 +977,25 @@ const Profile = () => {
                     >
                       <div className="relative h-48">
                         <img
-                          src={recipe.image}
+                          src={recipe.image_url || recipe.image}
                           alt={recipe.title}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs flex items-center space-x-1">
                           <Star className="w-3 h-3 fill-current text-yellow-400" />
-                          <span>{recipe.rating}</span>
+                          <span>{recipe.rating || '4.5'}</span>
+                        </div>
+                        {/* Manage Recipe Button */}
+                        <div className="absolute bottom-3 left-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => navigate(`/manage-recipe/${recipe.id}`)}
+                            className="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-2 rounded-xl font-semibold text-sm flex items-center space-x-1 shadow-lg hover:bg-white transition-all duration-300"
+                          >
+                            <Edit className="w-3 h-3" />
+                            <span>Manage</span>
+                          </motion.button>
                         </div>
                       </div>
                       <div className="p-6">
@@ -902,16 +1005,16 @@ const Profile = () => {
                         <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
                           <div className="flex items-center space-x-1">
                             <Clock className="w-4 h-4" />
-                            <span>{recipe.cookTime}</span>
+                            <span>{recipe.cook_time || recipe.cookTime}</span>
                           </div>
                           <span>Serves {recipe.servings}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-gray-600">
-                            by <span className="font-medium">{recipe.author}</span>
+                            Mood: <span className="font-medium text-[#F10100]">{recipe.mood}</span>
                           </span>
                           <div className="text-sm font-bold text-[#F10100]">
-                            {recipe.reviews} reviews
+                            {recipe.difficulty}
                           </div>
                         </div>
                       </div>

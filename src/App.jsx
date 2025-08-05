@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Recipes from "./pages/Recipes";
 import SubmitRecipe from "./pages/SubmitRecipe";
+import ManageRecipe from "./pages/ManageRecipe";
 import Profile from "./pages/Profile";
 import FridgeScanner from "./pages/FridgeScanner";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/submit" element={<SubmitRecipe />} />
+            <Route path="/manage-recipe/:id" element={<ManageRecipe />} />
             <Route path="/scanner" element={<FridgeScanner />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/login" element={<Login />} />
