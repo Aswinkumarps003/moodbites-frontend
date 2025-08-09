@@ -13,6 +13,12 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			// MoodBites Brand Colors
+  			'mood-red': '#F10100',
+  			'mood-green': '#476E00',
+  			'mood-yellow': '#FFD122',
+  			'mood-olive': '#D8D86B',
+  			'mood-cream': '#F1E1C8',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

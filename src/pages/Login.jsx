@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import axios from "axios";
+import { getDashboardPath } from "../utils/roleRedirect";
 
 const API_URL = 'http://localhost:5000/api/user';
 
@@ -80,8 +81,9 @@ const Login = () => {
       // Dispatch login event to update navbar
       window.dispatchEvent(new Event('moodbites-login'));
       
-      // Navigate to dashboard
-      navigate('/dashboard');
+      // Navigate to dashboard based on role
+      const role = result.data.user?.role;
+      navigate(getDashboardPath(role));
       
     } catch (err) {
       setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
@@ -106,7 +108,9 @@ const Login = () => {
       // Dispatch login event to update navbar
       window.dispatchEvent(new Event('moodbites-login'));
       
-      navigate('/dashboard');
+      // Navigate to dashboard based on role
+      const role = response.data.user?.role;
+      navigate(getDashboardPath(role));
     } catch (err) {
       setError(err.response?.data?.message || 'An unexpected error occurred.');
     } finally {
