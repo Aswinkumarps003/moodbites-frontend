@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const ML_SERVICE_URL = import.meta.env.VITE_ML_SERVICE_URL || 'http://localhost:8000';
+const ML_SERVICE_URL = import.meta.env.VITE_BLOOD_REPORT_SERVICE_URL || 'http://localhost:8000';
 
 // Optimal targets and scoring helpers
 const toNumber = (value) => {
