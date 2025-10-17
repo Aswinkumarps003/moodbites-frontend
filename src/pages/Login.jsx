@@ -5,7 +5,7 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import axios from "axios";
 import { getDashboardPath } from "../utils/roleRedirect";
 
-const API_URL = 'http://localhost:5000/api/user';
+const API_URL = 'https://user-service-o0l2.onrender.com/api/user';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });

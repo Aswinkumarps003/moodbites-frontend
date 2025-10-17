@@ -116,7 +116,7 @@ const VideoConsultation = () => {
         if (!incomingCall?.callerId) return;
         const token = localStorage.getItem('authToken');
         if (!token) return;
-        const resp = await fetch(`http://localhost:5000/api/user/profile/${incomingCall.callerId}`, {
+        const resp = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${incomingCall.callerId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (resp.ok) {

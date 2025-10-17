@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
 import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/user';
+const API_URL = 'https://user-service-o0l2.onrender.com/api/user';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();

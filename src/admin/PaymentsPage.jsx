@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://user-service-o0l2.onrender.com/api';
 
 const PaymentsTable = ({ payments, loading, height = 420 }) => {
   return (

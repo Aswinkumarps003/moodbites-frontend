@@ -23,7 +23,7 @@ const DietPlansPage = () => {
         const userIds = Array.from(new Set(dietPlans.map(p => p.userId)));
 
         // 3) Fetch user details in batch from user-service
-        const usersResp = await fetch('http://localhost:5000/api/users/batch', {
+        const usersResp = await fetch('https://user-service-o0l2.onrender.com/api/users/batch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userIds })

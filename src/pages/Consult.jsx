@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Video, MessageCircle, Search, Star, Calendar, Clock, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://user-service-o0l2.onrender.com/api';
 
 const Consult = () => {
   const [dieticians, setDieticians] = useState([]);

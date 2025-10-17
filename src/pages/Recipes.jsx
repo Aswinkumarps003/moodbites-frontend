@@ -55,7 +55,7 @@ const Recipes = () => {
   const fetchAllUsers = async () => {
     try {
       // Fetch all users from MongoDB API endpoint
-      const response = await fetch('http://localhost:5000/api/user/users', {
+      const response = await fetch('https://user-service-o0l2.onrender.com/api/user/users', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

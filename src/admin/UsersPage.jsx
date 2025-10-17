@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://user-service-o0l2.onrender.com/api';
 
 const Table = ({ title, users, onToggleVerify, loading, height = 320, accent = 'orange', headerActions = null }) => {
   const color = useMemo(() => ({

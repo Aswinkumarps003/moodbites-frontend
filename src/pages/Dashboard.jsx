@@ -164,7 +164,7 @@ const Dashboard = () => {
       
       // Fetch user profile from backend
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/profile/${userData._id}`, {
+      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${userData._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -567,7 +567,7 @@ const Dashboard = () => {
       
       // Update user profile in backend
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/profile/${user._id}`, {
+      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${user._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -621,7 +621,7 @@ const Dashboard = () => {
       setSaveStatus({ type: 'loading', message: 'Updating password...' });
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/change-password`, {
+      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/change-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -688,7 +688,7 @@ const Dashboard = () => {
       formData.append('profileImage', file);
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/upload-profile-image`, {
+      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/upload-profile-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1403,7 +1403,7 @@ const Dashboard = () => {
                                   handleMarkMealComplete(mealType, mealData.calories);
                                   try {
                                     const token = localStorage.getItem('authToken');
-                                    await fetch('http://localhost:5000/api/user/activity', {
+                                    await fetch('https://user-service-o0l2.onrender.com/api/user/activity', {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                                       body: JSON.stringify({

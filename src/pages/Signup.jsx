@@ -5,7 +5,7 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle, User, CheckCircle, Shield, Shield
 import { useForm } from "react-hook-form";
 import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/user';
+const API_URL = 'https://user-service-o0l2.onrender.com/api/user';
 
 // Simple vertical wheel picker component
 const WheelPicker = ({ values = [], value, onChange, visibleCount = 5, itemClass = "", getLabel }) => {

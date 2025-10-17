@@ -93,7 +93,7 @@ const Profile = () => {
           
           // Fetch user profile from backend
           const token = localStorage.getItem('authToken');
-          const response = await fetch(`http://localhost:5000/api/user/profile/${parsedUser._id}`, {
+          const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${parsedUser._id}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -231,7 +231,7 @@ const Profile = () => {
       
       // Update user profile in backend
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/profile/${user._id}`, {
+      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${user._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -279,7 +279,7 @@ const Profile = () => {
       setSaveStatus({ type: 'loading', message: 'Updating password...' });
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/change-password`, {
+      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/change-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -345,7 +345,7 @@ const Profile = () => {
       formData.append('profileImage', file);
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/upload-profile-image`, {
+      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/upload-profile-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
