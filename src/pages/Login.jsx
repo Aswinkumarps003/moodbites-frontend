@@ -5,7 +5,7 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import axios from "axios";
 import { getDashboardPath } from "../utils/roleRedirect";
 
-const API_URL = 'https://user-service-o0l2.onrender.com/api/user';
+const API_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -21,7 +21,7 @@ const Login = () => {
     const token = localStorage.getItem('authToken');
     if (!token) return;
     axios
-      .get(`${API_URL}/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .get(`${API_URL}/api/user/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         const role = res.data?.role;
         navigate(getDashboardPath(role), { replace: true });
@@ -86,7 +86,7 @@ const Login = () => {
       setGoogleLoading(true);
       setError(null);
 
-      const result = await axios.post(`${API_URL}/google-signin`, {
+      const result = await axios.post(`${API_URL}/api/user/google-signin`, {
         credential: response.credential,
       });
 
@@ -124,7 +124,7 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(`${API_URL}/login`, formData);
+      const response = await axios.post(`${API_URL}/api/user/login`, formData);
       const u = response.data.user;
       // Restrict any user if active === false
       if (u && u.active === false) {

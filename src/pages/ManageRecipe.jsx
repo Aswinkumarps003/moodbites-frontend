@@ -17,8 +17,9 @@ import {
 } from "lucide-react";
 import { mockMoods } from "../mock.jsx";
 
-const API_URL = "http://localhost:5002/api/food/dishes";
-const CLOUDINARY_UPLOAD_URL = "http://localhost:5002/api/food/upload-recipe-image";
+const FOOD_SERVICE_URL = import.meta.env.VITE_FOOD_SERVICE_URL || 'http://localhost:5002';
+const API_URL = `${FOOD_SERVICE_URL}/api/food/dishes`;
+const CLOUDINARY_UPLOAD_URL = `${FOOD_SERVICE_URL}/api/food/upload-recipe-image`;
 
 const ManageRecipe = () => {
   const { id } = useParams();

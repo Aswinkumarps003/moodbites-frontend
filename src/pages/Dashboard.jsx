@@ -11,6 +11,10 @@ import ScrollReveal from "../components/ScrollReveal";
 import { mockMoods, mockUserProfile, mockMoodTrends, mockRecipes } from "../mock.jsx";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
+const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
+const FOOD_SERVICE_URL = import.meta.env.VITE_FOOD_SERVICE_URL || 'http://localhost:5002';
+const DIET_PLANNER_URL = import.meta.env.VITE_DIET_PLANNER_SERVICE_URL || 'http://localhost:5005';
+
 const Dashboard = () => {
   // Navigation state
   const [activeTab, setActiveTab] = useState("overview");
@@ -164,7 +168,7 @@ const Dashboard = () => {
       
       // Fetch user profile from backend
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${userData._id}`, {
+      const response = await fetch(`${USER_SERVICE_URL}/api/user/profile/${userData._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -323,7 +327,7 @@ const Dashboard = () => {
   const fetchDietPlan = async (userId) => {
     try {
       setDietPlanLoading(true);
-      const response = await fetch(`http://localhost:5005/api/diet-planner/${userId}`);
+      const response = await fetch(`${DIET_PLANNER_URL}/api/diet-planner/${userId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.diets && data.diets.length > 0) {
@@ -344,7 +348,7 @@ const Dashboard = () => {
     try {
       console.log('Fetching recipes for user:', userId);
       
-      const response = await fetch(`http://localhost:5002/api/food/users/${userId}/dishes`);
+      const response = await fetch(`${FOOD_SERVICE_URL}/api/food/users/${userId}/dishes`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch user recipes');
@@ -377,7 +381,7 @@ const Dashboard = () => {
 
   const fetchSavedRecipes = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:5002/api/food/users/${userId}/saved-recipes`);
+      const response = await fetch(`${FOOD_SERVICE_URL}/api/food/users/${userId}/saved-recipes`);
       if (!response.ok) throw new Error('Failed to fetch saved recipes');
       const data = await response.json();
       setSavedRecipes(Array.isArray(data) ? data : []);
@@ -392,7 +396,7 @@ const Dashboard = () => {
     try {
       console.log('Fetching recipe count for user:', userId);
       // Try dedicated count endpoint first
-      const response = await fetch(`http://localhost:5002/api/food/users/${userId}/dishes/count`);
+      const response = await fetch(`${FOOD_SERVICE_URL}/api/food/users/${userId}/dishes/count`);
       if (response.ok) {
         const json = await response.json();
         setUserRecipeCount(Number(json.count) || 0);
@@ -401,7 +405,7 @@ const Dashboard = () => {
 
       // If count endpoint is missing (404) or failed, fall back to listing dishes and counting
       console.warn('Count endpoint unavailable, falling back to list length');
-      const listResp = await fetch(`http://localhost:5002/api/food/users/${userId}/dishes`);
+        const listResp = await fetch(`${FOOD_SERVICE_URL}/api/food/users/${userId}/dishes`);
       if (listResp.ok) {
         const dishes = await listResp.json();
         setUserRecipeCount(Array.isArray(dishes) ? dishes.length : 0);
@@ -567,7 +571,7 @@ const Dashboard = () => {
       
       // Update user profile in backend
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${user._id}`, {
+      const response = await fetch(`${USER_SERVICE_URL}/api/user/profile/${user._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -621,7 +625,7 @@ const Dashboard = () => {
       setSaveStatus({ type: 'loading', message: 'Updating password...' });
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/change-password`, {
+      const response = await fetch(`${USER_SERVICE_URL}/api/user/change-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -688,7 +692,7 @@ const Dashboard = () => {
       formData.append('profileImage', file);
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/upload-profile-image`, {
+      const response = await fetch(`${USER_SERVICE_URL}/api/user/upload-profile-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1364,7 +1368,7 @@ const Dashboard = () => {
                                       ready_in_minutes: null,
                                       nutrition: null
                                     };
-                                    await fetch('http://localhost:5002/api/food/saved-recipes', {
+                                    await fetch(`${FOOD_SERVICE_URL}/api/food/saved-recipes`, {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json' },
                                       body: JSON.stringify(body)
@@ -1403,7 +1407,7 @@ const Dashboard = () => {
                                   handleMarkMealComplete(mealType, mealData.calories);
                                   try {
                                     const token = localStorage.getItem('authToken');
-                                    await fetch('https://user-service-o0l2.onrender.com/api/user/activity', {
+                                    await fetch(`${USER_SERVICE_URL}/api/user/activity`, {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                                       body: JSON.stringify({
@@ -1509,7 +1513,7 @@ const Dashboard = () => {
                               onClick={async (e) => {
                                 e.stopPropagation();
                                 try {
-                                  await fetch(`http://localhost:5002/api/food/saved-recipes/${recipe.id}` , { method: 'DELETE' });
+                                  await fetch(`${FOOD_SERVICE_URL}/api/food/saved-recipes/${recipe.id}` , { method: 'DELETE' });
                                   setSavedRecipes(prev => prev.filter(r => r.id !== recipe.id));
                                 } catch (err) {
                                   console.error('Failed to delete saved recipe', err);

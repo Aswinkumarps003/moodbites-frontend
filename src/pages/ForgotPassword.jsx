@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
 import axios from "axios";
 
-const API_URL = 'https://user-service-o0l2.onrender.com/api/user';
+const API_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -19,7 +19,7 @@ const ForgotPassword = () => {
     setSuccess(false);
     
     try {
-      const response = await axios.post(`${API_URL}/forgot-password`, { email });
+      const response = await axios.post(`${API_URL}/api/user/forgot-password`, { email });
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'An unexpected error occurred.');

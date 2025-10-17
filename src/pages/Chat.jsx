@@ -75,6 +75,12 @@ import AudioRecorder from '../components/AudioRecorder';
 import FileUploader from '../components/FileUploader';
 import MessageBubble from '../components/MessageBubble';
 
+const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
+const CHAT_SERVICE_URL = import.meta.env.VITE_CHAT_SERVICE_URL || 'http://localhost:3006';
+const SIGNALING_SERVICE_URL = import.meta.env.VITE_SIGNALING_SERVICE_URL || 'http://localhost:3007';
+const DIET_PLANNER_URL = import.meta.env.VITE_DIET_PLANNER_SERVICE_URL || 'http://localhost:5005';
+const MOOD_SERVICE_URL = import.meta.env.VITE_MOOD_SERVICE_URL || 'http://localhost:3001';
+
 const Chat = () => {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -136,7 +142,7 @@ const Chat = () => {
     }
 
     setConnectionStatus('connecting');
-    const newSocket = io('http://localhost:3006', {
+    const newSocket = io(CHAT_SERVICE_URL, {
       auth: {
         token: token
       }
@@ -295,7 +301,7 @@ const Chat = () => {
   // Initialize signaling socket for WebRTC call requests
   useEffect(() => {
     if (!user) return;
-    const s = io('http://localhost:3007', {
+    const s = io(SIGNALING_SERVICE_URL, {
       query: { userId: user._id, userName: user.name }
     });
     s.on('connect', () => {
@@ -327,7 +333,7 @@ const Chat = () => {
     const fetchDietician = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${dieticianId}`, {
+        const response = await fetch(`${USER_SERVICE_URL}/api/user/profile/${dieticianId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -358,7 +364,7 @@ const Chat = () => {
   useEffect(() => {
     const fetchConversation = async () => {
       try {
-        const response = await fetch(`http://localhost:3006/api/conversations/${user._id}`, {
+        const response = await fetch(`${CHAT_SERVICE_URL}/api/conversations/${user._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -419,7 +425,7 @@ const Chat = () => {
       try {
         const subjectUserId = isDietician ? chatPartnerId : user._id;
         if (!subjectUserId) return;
-        const response = await fetch(`http://localhost:5005/api/diet-plans/${subjectUserId}`, {
+        const response = await fetch(`${DIET_PLANNER_URL}/api/diet-plans/${subjectUserId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -494,7 +500,7 @@ const Chat = () => {
   const handleSharePlan = async (plan) => {
     try {
       // 1) Mark as shared in diet-service
-      await fetch(`http://localhost:5005/api/diet-plans/${plan._id}/share`, {
+      await fetch(`${DIET_PLANNER_URL}/api/diet-plans/${plan._id}/share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ dieticianId })
@@ -597,7 +603,7 @@ const Chat = () => {
       formData.append('audio', audioBlob, 'voice-message.webm');
       
       // Upload audio file to server (you'll need to implement this endpoint)
-      const uploadResponse = await fetch('http://localhost:3006/api/upload/audio', {
+      const uploadResponse = await fetch(`${CHAT_SERVICE_URL}/api/upload/audio`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -651,7 +657,7 @@ const Chat = () => {
       formData.append('fileType', fileType);
       
       // Upload file to server (you'll need to implement this endpoint)
-      const uploadResponse = await fetch('http://localhost:3006/api/upload/file', {
+      const uploadResponse = await fetch(`${CHAT_SERVICE_URL}/api/upload/file`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -710,7 +716,7 @@ const Chat = () => {
 
   const generateDietPlan = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/diet-planner/generate/${user._id}`, {
+      const response = await fetch(`${MOOD_SERVICE_URL}/api/diet-planner/generate/${user._id}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -720,7 +726,7 @@ const Chat = () => {
         setSelectedDietPlan(data.plan);
         
         // Refresh diet plans
-        const plansResponse = await fetch(`http://localhost:5005/api/diet-plans/${user._id}`, {
+        const plansResponse = await fetch(`${DIET_PLANNER_URL}/api/diet-plans/${user._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (plansResponse.ok) {

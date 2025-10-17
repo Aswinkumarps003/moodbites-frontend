@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, Loader, Mail } from "lucide-react";
 import axios from "axios";
 
-const API_URL = 'https://user-service-o0l2.onrender.com/api/user';
+const API_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -24,7 +24,7 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await axios.get(`${API_URL}/verify-email/${token}`);
+        const response = await axios.get(`${API_URL}/api/user/verify-email/${token}`);
         
         setStatus('success');
         setMessage(response.data.message);

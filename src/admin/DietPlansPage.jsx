@@ -1,6 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 
+const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
+const DIET_PLANNER_URL = import.meta.env.VITE_DIET_PLANNER_SERVICE_URL || 'http://localhost:5005';
+
 const DietPlansPage = () => {
   const [plans, setPlans] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -14,7 +17,7 @@ const DietPlansPage = () => {
         setError(null);
 
         // 1) Fetch all active diet plans from diet-service
-        const dietResp = await fetch('http://localhost:5005/api/diet-plans');
+        const dietResp = await fetch(`${DIET_PLANNER_URL}/api/diet-plans`);
         if (!dietResp.ok) throw new Error(`diet-service ${dietResp.status}`);
         const dietJson = await dietResp.json();
         const dietPlans = dietJson?.dietPlans || [];
@@ -23,7 +26,7 @@ const DietPlansPage = () => {
         const userIds = Array.from(new Set(dietPlans.map(p => p.userId)));
 
         // 3) Fetch user details in batch from user-service
-        const usersResp = await fetch('https://user-service-o0l2.onrender.com/api/users/batch', {
+        const usersResp = await fetch(`${USER_SERVICE_URL}/api/users/batch`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userIds })
@@ -61,7 +64,7 @@ const DietPlansPage = () => {
   const toggleStatus = async (planId, nextActive) => {
     try {
       setSavingId(planId);
-      const resp = await fetch(`http://localhost:5005/api/diet-plans/${planId}/status`, {
+      const resp = await fetch(`${DIET_PLANNER_URL}/api/diet-plans/${planId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: nextActive })

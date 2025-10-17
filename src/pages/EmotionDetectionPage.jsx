@@ -33,6 +33,9 @@ import {
   Activity
 } from "lucide-react";
 
+const MOOD_SERVICE_URL = import.meta.env.VITE_MOOD_SERVICE_URL || 'http://localhost:3001';
+const ML_SERVICE_URL = import.meta.env.VITE_ML_SERVICE_URL || 'http://localhost:8000';
+
 const EmotionDetectionPage = () => {
   const [currentMood, setCurrentMood] = useState(null);
   const [moodIntensity, setMoodIntensity] = useState(5);
@@ -62,7 +65,7 @@ const EmotionDetectionPage = () => {
     setRecipeError(null);
     
     try {
-      const response = await fetch('http://localhost:3001/api/recipes/mood', {
+      const response = await fetch(`${MOOD_SERVICE_URL}/api/recipes/mood`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -208,7 +211,7 @@ const EmotionDetectionPage = () => {
     
     setIsTextAnalyzing(true);
     try {
-      const response = await fetch('http://localhost:8000/detect-mood', {
+      const response = await fetch(`${ML_SERVICE_URL}/detect-mood`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

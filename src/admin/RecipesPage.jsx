@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 
-const API_URL = "http://localhost:5002/api/food";
+const FOOD_SERVICE_URL = import.meta.env.VITE_FOOD_SERVICE_URL || 'http://localhost:5002';
+const API_URL = `${FOOD_SERVICE_URL}/api/food`;
 
 const RecipesPage = () => {
   const [search, setSearch] = useState("");

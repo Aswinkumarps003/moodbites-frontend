@@ -189,7 +189,7 @@ const ChatPanel = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await fetch('https://user-service-o0l2.onrender.com/api/user/users/role/1', {
+        const response = await fetch('http://localhost:5000/api/user/users/role/1', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) {

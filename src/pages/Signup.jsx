@@ -5,7 +5,7 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle, User, CheckCircle, Shield, Shield
 import { useForm } from "react-hook-form";
 import axios from "axios";
 
-const API_URL = 'https://user-service-o0l2.onrender.com/api/user';
+const API_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
 
 // Simple vertical wheel picker component
 const WheelPicker = ({ values = [], value, onChange, visibleCount = 5, itemClass = "", getLabel }) => {
@@ -104,7 +104,7 @@ const Signup = () => {
     const token = localStorage.getItem('authToken');
     if (!token) return;
     axios
-      .get(`${API_URL}/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .get(`${API_URL}/api/user/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         const role = res.data?.role;
         navigate('/dashboard', { replace: true });
@@ -170,7 +170,7 @@ const Signup = () => {
     setEmailChecking(true);
     const t = setTimeout(async () => {
       try {
-        const res = await axios.get(`${API_URL}/check-email`, { params: { email } });
+        const res = await axios.get(`${API_URL}/api/user/check-email`, { params: { email } });
         setEmailExists(!!res.data?.exists);
       } catch (e) {
         // Silently ignore; do not block user
@@ -294,7 +294,7 @@ const Signup = () => {
       setError(null);
       setSuccess(null);
 
-      const result = await axios.post(`${API_URL}/google-signin`, {
+      const result = await axios.post(`${API_URL}/api/user/google-signin`, {
         credential: response.credential,
       });
 
@@ -345,7 +345,7 @@ const Signup = () => {
         normalizedWeightKg = Math.round((Number(data.weight || 0) * 0.453592) * 10) / 10;
       }
 
-      const response = await axios.post(`${API_URL}/register`, {
+      const response = await axios.post(`${API_URL}/api/user/register`, {
         name: data.name,
         email: data.email,
         password: data.password,
@@ -423,7 +423,7 @@ const Signup = () => {
     setSuccess(null);
     
     try {
-      const response = await axios.post(`${API_URL}/register-dietician`, formData, {
+      const response = await axios.post(`${API_URL}/api/user/register-dietician`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       

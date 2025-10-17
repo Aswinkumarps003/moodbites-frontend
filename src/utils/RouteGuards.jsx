@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { getDashboardPath } from "./roleRedirect";
 
-const API_URL = 'https://user-service-o0l2.onrender.com/api/user';
+const API_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
 
 export const RequireAuth = ({ children }) => {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export const RequireAuth = ({ children }) => {
       return;
     }
     axios
-      .get(`${API_URL}/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .get(`${API_URL}/api/user/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         const user = res.data;
         if (user?.active === false) {
@@ -58,7 +58,7 @@ export const RequireRole = ({ roles = [], children }) => {
       return;
     }
     axios
-      .get(`${API_URL}/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .get(`${API_URL}/api/user/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         const user = res.data;
         if (user?.active === false) {

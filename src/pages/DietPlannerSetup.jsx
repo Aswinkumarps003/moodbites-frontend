@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 
+const DIET_PLANNER_URL = import.meta.env.VITE_DIET_PLANNER_SERVICE_URL || 'http://localhost:5005';
+const ML_SERVICE_URL = import.meta.env.VITE_ML_SERVICE_URL || 'http://localhost:8000';
+
 const steps = ["Activity", "Goals", "Preferences", "Goal Details", "Conditions", "Review"];
 
 const DietPlannerSetup = () => {
@@ -74,7 +77,7 @@ const DietPlannerSetup = () => {
       setGenerating(true);
       setGeneratedPlan(null);
 
-      const resp = await fetch('http://localhost:5005/api/diet-planner', {
+      const resp = await fetch(`${DIET_PLANNER_URL}/api/diet-planner`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id, ...form })
@@ -83,7 +86,7 @@ const DietPlannerSetup = () => {
       const data = await resp.json();
       console.log('Saved diet:', data);
 
-      const genResp = await fetch(`http://localhost:5005/api/diet-planner/generate/${user._id}`, {
+      const genResp = await fetch(`${DIET_PLANNER_URL}/api/diet-planner/generate/${user._id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -114,7 +117,7 @@ const DietPlannerSetup = () => {
         if (!user?._id) return;
         setBioLoading(true);
         setBioError('');
-        const resp = await fetch(`http://localhost:8000/api/blood-report/latest/${user._id}`);
+        const resp = await fetch(`${ML_SERVICE_URL}/api/blood-report/latest/${user._id}`);
         if (!resp.ok) throw new Error('No blood report found');
         const json = await resp.json();
         const report = json.report || {};

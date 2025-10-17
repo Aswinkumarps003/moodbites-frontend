@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const ML_SERVICE_URL = import.meta.env.VITE_ML_SERVICE_URL || 'http://localhost:8000';
+
 // Optimal targets and scoring helpers
 const toNumber = (value) => {
   if (value == null) return NaN;
@@ -244,7 +246,7 @@ const BloodReport = () => {
       formData.append('bloodReport', selectedFile);
       formData.append('userId', user._id);
 
-      const response = await fetch('http://localhost:8000/api/blood-report/analyze', {
+      const response = await fetch(`${ML_SERVICE_URL}/api/blood-report/analyze`, {
         method: 'POST',
         headers: {
           // Do not set Content-Type, browser does it automatically for FormData

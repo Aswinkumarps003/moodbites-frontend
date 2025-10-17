@@ -5,6 +5,8 @@ import { Camera, Upload, Scan, X, ChefHat, Clock, Zap, RefreshCw, CheckCircle } 
 import ScrollReveal from "../components/ScrollReveal";
 import { mockFridgeScans } from "../mock.jsx";
 
+const FRIDGE_SCANNER_URL = import.meta.env.VITE_FRIDGE_SCANNER_SERVICE_URL || 'http://localhost:4010';
+
 const FridgeScanner = () => {
   const [scanMode, setScanMode] = useState("camera"); // camera, upload, results
   const [isScanning, setIsScanning] = useState(false);
@@ -82,7 +84,7 @@ const FridgeScanner = () => {
       formData.append('file', blob, 'fridge_scan.jpg');
       
       // Call YOLO model API
-      const apiResponse = await fetch('http://localhost:4010/api/predict', {
+      const apiResponse = await fetch(`${FRIDGE_SCANNER_URL}/api/predict`, {
         method: 'POST',
         body: formData
       });

@@ -5,6 +5,9 @@ import { Link } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { createClient } from "@supabase/supabase-js";
 
+const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
+const FOOD_SERVICE_URL = import.meta.env.VITE_FOOD_SERVICE_URL || 'http://localhost:5002';
+
 const Recipes = () => {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,7 +58,7 @@ const Recipes = () => {
   const fetchAllUsers = async () => {
     try {
       // Fetch all users from MongoDB API endpoint
-      const response = await fetch('https://user-service-o0l2.onrender.com/api/user/users', {
+      const response = await fetch(`${USER_SERVICE_URL}/api/user/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +202,7 @@ const Recipes = () => {
           setSavedRecipes([]);
           return;
         }
-        const resp = await fetch(`http://localhost:5002/api/food/users/${user._id}/saved-recipes`);
+        const resp = await fetch(`${FOOD_SERVICE_URL}/api/food/users/${user._id}/saved-recipes`);
         if (!resp.ok) throw new Error('Failed to fetch saved recipes');
         const data = await resp.json();
         if (!isMounted) return;

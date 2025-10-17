@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Video, MessageCircle, Search, Star, Calendar, Clock, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = 'https://user-service-o0l2.onrender.com/api';
+const API_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
 
 const Consult = () => {
   const [dieticians, setDieticians] = useState([]);
@@ -41,7 +41,7 @@ const Consult = () => {
     // Fetch premium status
     const fetchMe = async () => {
       try {
-        const resp = await fetch(`${API_URL}/user/me`, { headers: { Authorization: `Bearer ${token}` } });
+        const resp = await fetch(`${API_URL}/api/user/me`, { headers: { Authorization: `Bearer ${token}` } });
         if (resp.ok) {
           const me = await resp.json();
           setIsPremium(!!me.isPremium);
@@ -69,7 +69,7 @@ const Consult = () => {
       try {
         setLoading(true);
         setError(null);
-        const resp = await fetch(`${API_URL}/user/dieticians/active`, {
+        const resp = await fetch(`${API_URL}/api/user/dieticians/active`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!resp.ok) throw new Error('Failed to load dieticians');
@@ -477,7 +477,7 @@ const Consult = () => {
                         setPayError("");
                         setPayLoading(true);
                         // 1) Create order (server enforces amount)
-                        const createResp = await fetch(`${API_URL}/billing/create-order`, {
+                        const createResp = await fetch(`${API_URL}/api/billing/create-order`, {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                           body: JSON.stringify({ currency: 'INR', notes: { feature: 'premium_unlock', name: payForm.name, email: payForm.email } })
@@ -514,7 +514,7 @@ const Consult = () => {
                           theme: { color: '#10B981' },
                           handler: async (resp) => {
                             try {
-                              const verifyResp = await fetch(`${API_URL}/billing/verify-payment`, {
+                              const verifyResp = await fetch(`${API_URL}/api/billing/verify-payment`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                                 body: JSON.stringify({

@@ -10,6 +10,9 @@ import CallRequestModal from '../components/CallRequestModal';
 import { requestMediaPermissions } from '../utils/mediaPermissions';
 import { io } from 'socket.io-client';
 
+const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
+const SIGNALING_SERVICE_URL = import.meta.env.VITE_SIGNALING_SERVICE_URL || 'http://localhost:3007';
+
 const VideoConsultation = () => {
   const { roomId, userRole } = useParams();
   const navigate = useNavigate();
@@ -53,7 +56,7 @@ const VideoConsultation = () => {
   useEffect(() => {
     if (!user) return;
 
-    const signalingSocket = io('http://localhost:3007', {
+    const signalingSocket = io(SIGNALING_SERVICE_URL, {
       query: {
         userId: user._id,
         userName: user.name
@@ -116,7 +119,7 @@ const VideoConsultation = () => {
         if (!incomingCall?.callerId) return;
         const token = localStorage.getItem('authToken');
         if (!token) return;
-        const resp = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${incomingCall.callerId}`, {
+        const resp = await fetch(`${USER_SERVICE_URL}/api/user/profile/${incomingCall.callerId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (resp.ok) {

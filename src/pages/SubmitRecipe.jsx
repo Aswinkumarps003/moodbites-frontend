@@ -4,8 +4,9 @@ import { Upload, Plus, X, Camera, Clock, Users, Heart } from "lucide-react";
 import { mockMoods } from "../mock.jsx";
 
 // You can set your backend API endpoint here
-const API_URL = "http://localhost:5002/api/food/dishes"; // Change this to your actual backend endpoint
-const CLOUDINARY_UPLOAD_URL = "http://localhost:5002/api/food/upload-recipe-image"; // Food service Cloudinary upload endpoint
+const FOOD_SERVICE_URL = import.meta.env.VITE_FOOD_SERVICE_URL || 'http://localhost:5002';
+const API_URL = `${FOOD_SERVICE_URL}/api/food/dishes`; // Change this to your actual backend endpoint
+const CLOUDINARY_UPLOAD_URL = `${FOOD_SERVICE_URL}/api/food/upload-recipe-image`; // Food service Cloudinary upload endpoint
 
 const SubmitRecipe = () => {
   const [formData, setFormData] = useState({

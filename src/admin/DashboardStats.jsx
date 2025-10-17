@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Users, Brain, Smile, Dumbbell, UserCheck, UserX } from 'lucide-react';
 import StatCard from './StatCard';
 
+const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
+
 const DashboardStats = () => {
   const [stats, setStats] = useState([
     { label: "Total Users", value: 0, icon: Users, bgGradient: "bg-gradient-to-r from-orange-100 to-amber-200", loading: true },
@@ -40,13 +42,13 @@ const DashboardStats = () => {
 
       // Fetch all users by role
       const [patientsResponse, dieticiansResponse] = await Promise.all([
-        fetch('https://user-service-o0l2.onrender.com/api/user/users/role/1', {
+        fetch(`${USER_SERVICE_URL}/api/user/users/role/1`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }),
-        fetch('https://user-service-o0l2.onrender.com/api/user/users/role/2', {
+        fetch(`${USER_SERVICE_URL}/api/user/users/role/2`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
