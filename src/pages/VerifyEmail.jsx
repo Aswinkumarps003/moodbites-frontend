@@ -72,14 +72,14 @@ const VerifyEmail = () => {
           textColor: 'text-green-700'
         };
       case 'error':
-        return {
-          icon: <XCircle className="w-12 h-12 text-red-500" />,
-          title: 'Verification Failed',
-          message: message,
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          textColor: 'text-red-700'
-        };
+        // return {
+        //   icon: <XCircle className="w-12 h-12 text-red-500" />,
+        //   title: 'Verification Failed',
+        //   message: message,
+        //   bgColor: 'bg-red-50',
+        //   borderColor: 'border-red-200',
+        //   textColor: 'text-red-700'
+        // };
       default:
         return {
           icon: <Mail className="w-12 h-12 text-gray-500" />,

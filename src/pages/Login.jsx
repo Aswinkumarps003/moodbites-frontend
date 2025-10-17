@@ -13,7 +13,23 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [restrictedMsg, setRestrictedMsg] = useState("");
   const navigate = useNavigate();
+
+  // If already authenticated, redirect away from login
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    axios
+      .get(`${API_URL}/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        const role = res.data?.role;
+        navigate(getDashboardPath(role), { replace: true });
+      })
+      .catch(() => {
+        // not authenticated; stay on login
+      });
+  }, [navigate]);
 
   // Initialize Google Sign-In
   useEffect(() => {
@@ -74,15 +90,22 @@ const Login = () => {
         credential: response.credential,
       });
 
+      // Restrict any user if active === false
+      const u = result.data.user;
+      if (u && u.active === false) {
+        setRestrictedMsg('Your login is restricted by the admin. Please contact support.');
+        return;
+      }
+
       // Store user data and token
       localStorage.setItem('authToken', result.data.token);
-      localStorage.setItem('user', JSON.stringify(result.data.user));
+      localStorage.setItem('user', JSON.stringify(u));
       
       // Dispatch login event to update navbar
       window.dispatchEvent(new Event('moodbites-login'));
       
       // Navigate to dashboard based on role
-      const role = result.data.user?.role;
+      const role = u?.role;
       navigate(getDashboardPath(role));
       
     } catch (err) {
@@ -102,14 +125,22 @@ const Login = () => {
     setError(null);
     try {
       const response = await axios.post(`${API_URL}/login`, formData);
+      const u = response.data.user;
+      // Restrict any user if active === false
+      if (u && u.active === false) {
+        setRestrictedMsg('Your login is restricted by the admin. Please contact support.');
+        return;
+      }
+
+      // Normal users can login regardless, dieticians must be active
       localStorage.setItem('authToken', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('user', JSON.stringify(u));
       
       // Dispatch login event to update navbar
       window.dispatchEvent(new Event('moodbites-login'));
       
       // Navigate to dashboard based on role
-      const role = response.data.user?.role;
+      const role = u?.role;
       navigate(getDashboardPath(role));
     } catch (err) {
       setError(err.response?.data?.message || 'An unexpected error occurred.');
@@ -157,6 +188,41 @@ const Login = () => {
               >
                 <AlertCircle className="w-5 h-5" />
                 <span className="text-sm font-medium">{error}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Restricted Modal */}
+          <AnimatePresence>
+            {restrictedMsg && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+              >
+                <motion.div
+                  initial={{ scale: 0.95, y: 10, opacity: 0 }}
+                  animate={{ scale: 1, y: 0, opacity: 1 }}
+                  exit={{ scale: 0.95, y: 10, opacity: 0 }}
+                  className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                      <AlertCircle className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Login Restricted</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">{restrictedMsg}</p>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => setRestrictedMsg("")}
+                      className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>

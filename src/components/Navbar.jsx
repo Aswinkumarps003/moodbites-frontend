@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, Utensils, Home, BarChart3, BookOpen, Plus, User, Scan, LogOut, Settings } from "lucide-react";
+import { Menu, X, Utensils, Home, BarChart3, BookOpen, Plus, User, Scan, LogOut, Settings, Brain, Activity } from "lucide-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,11 +81,12 @@ const Navbar = () => {
 
   const navigation = [
     { name: "Home", href: "/", icon: Home },
-    { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
+    { name: "Dashboard", href: "/dashboard", icon: BarChart3, requiresAuth: true },
+    { name: "Emotion Detection", href: "/emotion-detection", icon: Brain },
+    { name: "Blood Report", href: "/blood-report", icon: Activity, requiresAuth: true },
     { name: "Recipes", href: "/recipes", icon: BookOpen },
     { name: "Scanner", href: "/scanner", icon: Scan },
-    { name: "Submit", href: "/submit", icon: Plus },
-    { name: "Profile", href: "/profile", icon: User },
+    { name: "Submit", href: "/submit", icon: Plus, requiresAuth: true },
   ];
 
   return (
@@ -98,7 +99,7 @@ const Navbar = () => {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <motion.div
@@ -113,7 +114,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            {navigation.map((item) => {
+            {navigation.filter((item) => !item.requiresAuth || isLoggedIn).map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
               return (
@@ -187,17 +188,7 @@ const Navbar = () => {
                       <p className="text-sm font-medium text-gray-900">Hi, {user?.name || 'User'}!</p>
                       <p className="text-xs text-gray-500">{user?.email}</p>
                     </div>
-                    <Link
-                      to="/profile"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => {
-                        console.log('Profile link clicked');
-                        setUserDropdown(false);
-                      }}
-                    >
-                      <User className="w-4 h-4 mr-3" />
-                      Profile
-                    </Link>
+                    
                     <Link
                       to="/dashboard"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -248,7 +239,7 @@ const Navbar = () => {
         className="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200 overflow-hidden shadow-professional"
       >
         <div className="px-4 py-2 space-y-1">
-          {navigation.map((item) => {
+          {navigation.filter((item) => !item.requiresAuth || isLoggedIn).map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.href;
             return (
@@ -292,14 +283,7 @@ const Navbar = () => {
                 <div className="text-sm text-gray-600 mb-2">
                   Hi, {user?.name || 'User'}!
                 </div>
-                <Link
-                  to="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:text-[#F10100] hover:bg-gray-50 transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Profile</span>
-                </Link>
+                
                 <button
                   onClick={() => { setIsOpen(false); handleLogout(); }}
                   className="flex items-center space-x-3 px-3 py-2 text-red-600 hover:text-red-700 transition-colors"

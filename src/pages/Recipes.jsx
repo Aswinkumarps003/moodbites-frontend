@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Star, Clock, Users, Heart, Plus } from "lucide-react";
+import { Search, Filter, Star, Clock, Users, Heart, Plus, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
-import { mockRecipes, mockMoods } from "../mock.jsx";
 import { AnimatePresence } from "framer-motion";
+import { createClient } from "@supabase/supabase-js";
 
 const Recipes = () => {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [likedRecipes, setLikedRecipes] = useState(new Set());
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [recipes, setRecipes] = useState([]);
+  const [savedRecipes, setSavedRecipes] = useState([]);
+  const [source, setSource] = useState('all'); // 'all' | 'saved'
+  const [moods, setMoods] = useState([]); // kept for backward-compat, not used for filters now
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userNames, setUserNames] = useState({});
+  const [userImages, setUserImages] = useState({});
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -36,10 +44,212 @@ const Recipes = () => {
     };
   }, []);
 
-  const filters = ["All", ...mockMoods.map(mood => mood.name)];
+  // Build Supabase client (expects VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY)
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const supabase = (supabaseUrl && supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;
 
-  const filteredRecipes = mockRecipes.filter(recipe => {
-    const matchesFilter = selectedFilter === "All" || recipe.mood === selectedFilter;
+  // Function to fetch all users from MongoDB
+  const fetchAllUsers = async () => {
+    try {
+      // Fetch all users from MongoDB API endpoint
+      const response = await fetch('http://localhost:5000/api/user/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const userData = await response.json();
+      
+      // Create maps for quick lookup using the users array
+      const nameMap = {};
+      const imageMap = {};
+      
+      userData.users.forEach(user => {
+        nameMap[user._id] = user.name;
+        imageMap[user._id] = user.profileImage;
+      });
+
+      setUserNames(nameMap);
+      setUserImages(imageMap);
+
+      return { nameMap, imageMap };
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return { nameMap: {}, imageMap: {} };
+    }
+  };
+
+  // Simple category inference helpers
+  const inferIsGlutenFree = (title = '', ingredients = []) => {
+    const hay = `${title} ${ingredients.join(' ')}`.toLowerCase();
+    if (hay.includes('gluten free') || hay.includes('gluten-free')) return true;
+    // Heuristic: if explicitly mentions wheat/barley/rye, assume not GF
+    if (/(wheat|barley|rye|maida)/i.test(hay)) return false;
+    return false; // default unknown -> not GF
+  };
+
+  const inferIsDessert = (title = '', ingredients = []) => {
+    const hay = `${title} ${ingredients.join(' ')}`.toLowerCase();
+    return /(dessert|cake|cookie|brownie|ice cream|pudding|pastry|sweet|muffin|pie|tart|custard)/i.test(hay);
+  };
+
+  const inferIsNonVeg = (title = '', ingredients = []) => {
+    const hay = `${title} ${ingredients.join(' ')}`.toLowerCase();
+    return /(chicken|beef|pork|mutton|fish|prawn|shrimp|egg|bacon|lamb|turkey|ham|salmon|tuna)/i.test(hay);
+  };
+
+  const inferCategory = (raw) => {
+    // Prefer explicit field if your table has one
+    const explicit = raw.category || raw.diet || raw.type;
+    if (explicit && typeof explicit === 'string') {
+      const e = explicit.toLowerCase();
+      if (e.includes('gluten')) return 'Gluten-Free';
+      if (/(dessert|sweet)/.test(e)) return 'Dessert';
+      if (/(veg|vegetarian)/.test(e)) return 'Vegetarian';
+      if (/(non[- ]?veg|meat|chicken|fish)/.test(e)) return 'Non-Veg';
+    }
+    const ingredients = Array.isArray(raw.ingredients) ? raw.ingredients : (raw.ingredients ? String(raw.ingredients).split(',').map(s=>s.trim()) : []);
+    const title = raw.title || '';
+    if (inferIsDessert(title, ingredients)) return 'Dessert';
+    if (inferIsNonVeg(title, ingredients)) return 'Non-Veg';
+    // If not non-veg and hints of veg
+    if (!inferIsNonVeg(title, ingredients)) return 'Vegetarian';
+    return 'Vegetarian';
+  };
+
+  // Fetch active recipes from Supabase
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchActiveRecipes() {
+      try {
+        setLoading(true);
+        setError(null);
+        if (!supabase) {
+          throw new Error("Supabase client not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+        }
+        // Adjust table/columns as per your schema
+        const { data, error: sbError } = await supabase
+          .from("recipes")
+          .select("id,title,image_url,difficulty,description,mood,ingredients,cook_time,servings,user_id,is_active")
+          .eq("is_active", true)
+          .order("id", { ascending: false });
+        if (sbError) throw sbError;
+
+        const normalized = (data || []).map(r => ({
+          id: r.id,
+          title: r.title || "Untitled Recipe",
+          image: r.image_url || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800",
+          mood: r.mood || "Neutral",
+          ingredients: Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(",").map(s => s.trim()) : []),
+          rating: typeof r.rating === "number" ? r.rating : 4.5,
+          cookTime: r.cook_time || "30 mins",
+          servings: r.servings || 2,
+          author: "Loading...", // Will be updated after fetching user data
+          userId: r.user_id,
+          category: inferCategory(r),
+          glutenFree: inferIsGlutenFree(r.title, Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s=>s.trim()) : []))
+        }));
+
+        if (!isMounted) return;
+
+        // Fetch all users from MongoDB first
+        const { nameMap, imageMap } = await fetchAllUsers();
+
+        // Update recipes with user data
+        const enrichedRecipes = normalized.map(recipe => ({
+          ...recipe,
+          author: nameMap[recipe.userId] || "MoodBites Chef",
+          userImage: imageMap[recipe.userId] || null
+        }));
+
+        setRecipes(enrichedRecipes);
+        
+        // We no longer use moods for filtering UI; keep state if needed elsewhere
+        const uniqueMoods = Array.from(new Set(enrichedRecipes.map(r => r.mood))).filter(Boolean);
+        setMoods(uniqueMoods.map(name => ({ name, color: "#F10100" })));
+      } catch (e) {
+        if (!isMounted) return;
+        setError(e.message || "Failed to load recipes");
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    fetchActiveRecipes();
+    return () => { isMounted = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabaseUrl, supabaseAnonKey]);
+
+  // Fetch saved recipes for the logged-in user from food-service (Supabase saved_recipes)
+  useEffect(() => {
+    let isMounted = true;
+    async function run() {
+      try {
+        if (source !== 'saved') return;
+        const userRaw = localStorage.getItem('user');
+        const user = userRaw ? JSON.parse(userRaw) : null;
+        if (!user?._id) {
+          setSavedRecipes([]);
+          return;
+        }
+        const resp = await fetch(`http://localhost:5002/api/food/users/${user._id}/saved-recipes`);
+        if (!resp.ok) throw new Error('Failed to fetch saved recipes');
+        const data = await resp.json();
+        if (!isMounted) return;
+        const normalized = (Array.isArray(data) ? data : []).map(r => ({
+          id: r.id,
+          title: r.title || 'Untitled Recipe',
+          image: r.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+          mood: r.mood || 'Personal',
+          ingredients: Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s=>s.trim()) : []),
+          rating: 4.7,
+          cookTime: r.cook_time || (r.ready_in_minutes ? `${r.ready_in_minutes} mins` : '30 mins'),
+          servings: r.servings || 1,
+          author: 'You',
+          userId: r.user_id,
+          category: inferCategory(r),
+          glutenFree: inferIsGlutenFree(r.title, Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s=>s.trim()) : []))
+        }));
+        setSavedRecipes(normalized);
+      } catch (e) {
+        if (!isMounted) return;
+        setSavedRecipes([]);
+      }
+    }
+    run();
+    return () => { isMounted = false; };
+  }, [source]);
+
+  const filters = ["All", "Gluten-Free", "Dessert", "Vegetarian", "Non-Veg"];
+
+  const activeList = source === 'saved' ? savedRecipes : recipes;
+  const filteredRecipes = activeList.filter(recipe => {
+    let matchesFilter = true;
+    if (selectedFilter !== "All") {
+      switch (selectedFilter) {
+        case 'Gluten-Free':
+          matchesFilter = !!recipe.glutenFree || (recipe.category === 'Gluten-Free');
+          break;
+        case 'Dessert':
+          matchesFilter = recipe.category === 'Dessert';
+          break;
+        case 'Vegetarian':
+          matchesFilter = recipe.category === 'Vegetarian';
+          break;
+        case 'Non-Veg':
+          matchesFilter = recipe.category === 'Non-Veg';
+          break;
+        default:
+          matchesFilter = true;
+      }
+    }
     const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          recipe.ingredients.some(ing => ing.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesFilter && matchesSearch;
@@ -53,6 +263,19 @@ const Recipes = () => {
       newLiked.add(recipeId);
     }
     setLikedRecipes(newLiked);
+  };
+
+  const addToDietPlan = (recipe) => {
+    // Here you can implement the logic to add recipe to diet plan
+    console.log('Adding recipe to diet plan:', recipe);
+    // You might want to:
+    // 1. Open a modal to select meal type (breakfast, lunch, dinner, snack)
+    // 2. Select date
+    // 3. Call API to save to diet plan
+    // 4. Show success message
+    
+    // For now, let's show a simple alert
+    alert(`Added "${recipe.title}" to your diet plan!`);
   };
 
   return (
@@ -77,7 +300,7 @@ const Recipes = () => {
           </p>
         </motion.div>
 
-        {/* Search and Filters */}
+        {/* Search, Source Toggle and Filters */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -95,6 +318,22 @@ const Recipes = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#F10100]/20 focus:border-[#F10100] transition-all duration-300"
               />
+            </div>
+
+            {/* Source Toggle */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setSource('all')}
+                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${source === 'all' ? 'bg-[#F10100] text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              >
+                All Recipes
+              </button>
+              <button
+                onClick={() => setSource('saved')}
+                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${source === 'saved' ? 'bg-[#F10100] text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              >
+                Saved Recipes
+              </button>
             </div>
 
             {/* Filter Buttons */}
@@ -143,6 +382,19 @@ const Recipes = () => {
           )}
         </AnimatePresence>
 
+        {/* Loading / Error */}
+        {loading && (
+          <div className="text-center py-16">
+            <div className="text-2xl text-gray-600">Loading active recipes...</div>
+          </div>
+        )}
+        {error && !loading && (
+          <div className="text-center py-16">
+            <div className="text-red-600 font-semibold">{error}</div>
+            <div className="text-gray-500 text-sm mt-2">Ensure Supabase env vars are set and table/columns exist.</div>
+          </div>
+        )}
+
         {/* Recipe Grid */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -151,7 +403,7 @@ const Recipes = () => {
           className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
           {filteredRecipes.map((recipe, index) => {
-            const moodColor = mockMoods.find(mood => mood.name === recipe.mood)?.color || "#F10100";
+            const moodColor = moods.find(mood => mood.name === recipe.mood)?.color || "#F10100";
             const isLiked = likedRecipes.has(recipe.id);
             
             return (
@@ -245,9 +497,36 @@ const Recipes = () => {
 
                   {/* Author */}
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      {recipe.userImage ? (
+                        <img
+                          src={recipe.userImage}
+                          alt={recipe.author}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                          {recipe.author.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span>
                       by <span className="font-medium">{recipe.author}</span>
+                      </span>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      {/* Add to Diet Plan Button - Only show when logged in */}
+                      {isLoggedIn && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => addToDietPlan(recipe)}
+                          className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg text-xs font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-1"
+                          title="Add to Diet Plan"
+                        >
+                          <Calendar className="w-3 h-3" />
+                          <span>Add to Plan</span>
+                        </motion.button>
+                      )}
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -255,6 +534,7 @@ const Recipes = () => {
                     >
                       View Recipe
                     </motion.button>
+                    </div>
                   </div>
                 </div>
               </motion.div>

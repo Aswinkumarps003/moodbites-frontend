@@ -1,13 +1,15 @@
 import React from "react";
 import { motion, useSpring, useTransform } from "framer-motion";
 
-const StatCard = ({ label, value, icon: Icon, bgGradient }) => {
+const StatCard = ({ label, value, icon: Icon, bgGradient, loading = false, error = false }) => {
   const count = useSpring(value, { stiffness: 80, damping: 15 });
   const rounded = useTransform(count, latest => Math.round(latest));
 
   React.useEffect(() => {
-    count.set(value);
-  }, [value, count]);
+    if (!loading && !error) {
+      count.set(value);
+    }
+  }, [value, count, loading, error]);
 
   return (
     <motion.div
@@ -18,7 +20,13 @@ const StatCard = ({ label, value, icon: Icon, bgGradient }) => {
     >
       <div className="text-3xl mb-2"><Icon /></div>
       <motion.div className="text-3xl font-bold text-gray-900 mb-1">
-        {rounded}
+        {loading ? (
+          <div className="animate-pulse bg-gray-300 h-8 w-16 rounded"></div>
+        ) : error ? (
+          <span className="text-red-500">Error</span>
+        ) : (
+          rounded
+        )}
       </motion.div>
       <div className="text-md text-gray-600 font-semibold">{label}</div>
     </motion.div>

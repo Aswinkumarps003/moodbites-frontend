@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Brain, Heart, Utensils, Scan, ChefHat, TrendingUp } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
+import homeBg1 from "../admin/images/home bg 1.jpg";
 
 const Home = () => {
   const features = [
@@ -65,7 +66,7 @@ const Home = () => {
       className="pt-16"
     >
       {/* Hero Section */}
-      <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden" style={{ backgroundImage: `url(${homeBg1})`, backgroundSize: "cover", backgroundPosition: "center" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Animated Background Elements */}
           <div className="absolute inset-0 -z-10">
@@ -140,6 +141,17 @@ const Home = () => {
                   <span className="relative z-10">Start Your Journey</span>
                   <ArrowRight className="w-6 h-6 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-r from-[#FF4444] to-[#F10100] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </motion.button>
+              </Link>
+              
+              <Link to="/emotion-detection">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="border-2 border-gray-300 text-gray-700 hover:border-[#FFD122] hover:text-[#FFD122] hover:bg-[#FFD122]/5 px-10 py-5 rounded-2xl font-bold text-xl transition-all duration-300 flex items-center space-x-3"
+                >
+                  <Brain className="w-6 h-6" />
+                  <span>Detect My Mood</span>
                 </motion.button>
               </Link>
               

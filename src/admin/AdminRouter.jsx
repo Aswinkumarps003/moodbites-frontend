@@ -9,69 +9,64 @@ import StatusCard from "./StatusCard";
 import UsersPage from "./UsersPage";
 import RecipesPage from "./RecipesPage";
 import AIInsightsPage from "./AIInsightsPage";
-import FridgeScannerPage from "./FridgeScannerPage";
 import DietPlansPage from "./DietPlansPage";
 import FeedbackPage from "./FeedbackPage";
 import SettingsPage from "./SettingsPage";
-import { Users, Brain, Smile, Dumbbell } from "lucide-react";
+import PaymentsPage from "./PaymentsPage";
+import DashboardStats from "./DashboardStats";
 import { motion, AnimatePresence } from "framer-motion";
 
-const stats = [
-  { label: "Total Users", value: 12430, icon: Users, bgGradient: "bg-gradient-to-r from-orange-100 to-amber-200" },
-  { label: "AI Scans", value: 8219, icon: Brain, bgGradient: "bg-gradient-to-r from-amber-100 to-orange-200" },
-  { label: "Mood Trends", value: 78, icon: Smile, bgGradient: "bg-gradient-to-r from-yellow-100 to-orange-100" },
-  { label: "Gym Plans", value: 1522, icon: Dumbbell, bgGradient: "bg-gradient-to-r from-lime-100 to-green-100" },
-];
-
-const lineData = [
-  { name: "Mon", value: 120 },
-  { name: "Tue", value: 210 },
-  { name: "Wed", value: 180 },
-  { name: "Thu", value: 250 },
-  { name: "Fri", value: 300 },
-  { name: "Sat", value: 200 },
-  { name: "Sun", value: 400 },
-];
-
-const barData = [
-  { name: "Calorie Intake", value: 2200 },
-  { name: "Calorie Burn", value: 1800 },
-];
-
 const pageComponents = {
-  Dashboard: () => (
-    <motion.div
-      key="dashboard"
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 40 }}
-      transition={{ duration: 0.4, type: "spring" }}
-      className="flex flex-col gap-6"
-    >
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <StatCard key={stat.label} {...stat} />
-        ))}
-      </div>
-      {/* Charts and Lists */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <ChartCard title="Top Active Users" type="line" data={lineData} />
-        <ChartCard title="Diet Trends" type="bar" data={barData} />
-        <RecipeList />
-      </div>
-      {/* Flagged Content & System Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        <FlaggedContent />
-        <StatusCard />
-      </div>
-    </motion.div>
-  ),
+  Dashboard: () => {
+    const { stats, chartData, refreshData } = DashboardStats();
+    
+    return (
+      <motion.div
+        key="dashboard"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 40 }}
+        transition={{ duration: 0.4, type: "spring" }}
+        className="flex flex-col gap-6"
+      >
+        {/* Refresh Button */}
+        <div className="flex justify-end">
+          <button
+            onClick={refreshData}
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh Data
+          </button>
+        </div>
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat) => (
+            <StatCard key={stat.label} {...stat} />
+          ))}
+        </div>
+        {/* Charts and Lists */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <ChartCard title="Weekly Registrations" type="line" data={chartData.userRegistration} />
+          <ChartCard title="User Distribution" type="bar" data={chartData.userRoles} />
+          <RecipeList />
+        </div>
+        {/* Flagged Content & System Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <FlaggedContent />
+          <StatusCard />
+        </div>
+      </motion.div>
+    );
+  },
   Users: UsersPage,
   Recipes: RecipesPage,
   "AI Insights": AIInsightsPage,
-  "Fridge Scanner": FridgeScannerPage,
   "Diet Plans": DietPlansPage,
+  Payments: PaymentsPage,
   Feedback: FeedbackPage,
   Settings: SettingsPage,
 };
@@ -81,8 +76,8 @@ const navOrder = [
   "Users",
   "Recipes",
   "AI Insights",
-  "Fridge Scanner",
   "Diet Plans",
+  "Payments",
   "Feedback",
   "Settings",
 ];

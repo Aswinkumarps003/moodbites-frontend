@@ -10,89 +10,191 @@ const FridgeScanner = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResults, setScanResults] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
+  const [error, setError] = useState(null);
   const webcamRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  // Categorize ingredients based on their names
+  const categorizeIngredient = (ingredientName) => {
+    const name = ingredientName.toLowerCase();
+    
+    // Fruits
+    if (['apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberry', 'lemon', 'lime', 'pear', 'peach', 'plum', 'cherry', 'watermelon', 'pineapple', 'mango', 'kiwi', 'avocado'].some(fruit => name.includes(fruit))) {
+      return 'Fruits';
+    }
+    
+    // Vegetables
+    if (['tomato', 'potato', 'onion', 'garlic', 'carrot', 'broccoli', 'spinach', 'lettuce', 'cabbage', 'pepper', 'cucumber', 'zucchini', 'eggplant', 'corn', 'peas', 'beans', 'celery', 'mushroom', 'radish', 'beet'].some(veg => name.includes(veg))) {
+      return 'Vegetables';
+    }
+    
+    // Default category
+    return 'Produce';
+  };
+
   const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
+    const imageSrc = webcamRef.current?.getScreenshot();
+    if (!imageSrc || typeof imageSrc !== 'string' || !imageSrc.startsWith('data:image')) {
+      setError('Could not capture image from camera. Please allow camera access and try again.');
+      return;
+    }
     setCapturedImage(imageSrc);
     performScan(imageSrc);
   }, [webcamRef]);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCapturedImage(e.target.result);
-        performScan(e.target.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    if (!file.type || !file.type.startsWith('image/')) {
+      setError('Please upload a valid image file.');
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result;
+      if (!result || typeof result !== 'string' || !result.startsWith('data:image')) {
+        setError('Selected file could not be read as an image.');
+        return;
+      }
+      setCapturedImage(result);
+      performScan(result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const performScan = async (imageData) => {
+    if (!imageData || typeof imageData !== 'string' || !imageData.startsWith('data:image')) {
+      setError('Invalid image data for scanning.');
+      setScanMode('camera');
+      setIsScanning(false);
+      return;
+    }
     setIsScanning(true);
     setScanMode("scanning");
     
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Mock scan results
-    const mockResults = {
-      detectedIngredients: [
-        { name: "Eggs", confidence: 95, category: "Protein" },
-        { name: "Spinach", confidence: 92, category: "Vegetables" },
-        { name: "Tomatoes", confidence: 89, category: "Vegetables" },
-        { name: "Bell Peppers", confidence: 87, category: "Vegetables" },
-        { name: "Cheese", confidence: 83, category: "Dairy" },
-        { name: "Milk", confidence: 78, category: "Dairy" }
-      ],
-      suggestedRecipes: [
-        {
-          id: 1,
-          name: "Mediterranean Veggie Omelet",
-          cookTime: "12 mins",
-          calories: 285,
-          difficulty: "Easy",
-          matchedIngredients: 5,
-          totalIngredients: 6,
-          image: "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-          mood: "Energetic"
-        },
-        {
-          id: 2,
-          name: "Garden Fresh Scramble",
-          cookTime: "8 mins",
-          calories: 220,
-          difficulty: "Easy",
-          matchedIngredients: 4,
-          totalIngredients: 5,
-          image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-          mood: "Happy"
-        },
-        {
-          id: 3,
-          name: "Loaded Bell Pepper Frittata",
-          cookTime: "18 mins",
-          calories: 340,
-          difficulty: "Medium",
-          matchedIngredients: 6,
-          totalIngredients: 7,
-          image: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-          mood: "Focused"
-        }
-      ],
-      nutritionSummary: {
-        estimatedMeals: 3,
-        avgCalories: 282,
-        categories: ["High Protein", "Low Carb", "Mediterranean"]
+    try {
+      // Convert base64 image to blob for upload
+      const response = await fetch(imageData);
+      const blob = await response.blob();
+      
+      // Create FormData for API call
+      const formData = new FormData();
+      formData.append('file', blob, 'fridge_scan.jpg');
+      
+      // Call YOLO model API
+      const apiResponse = await fetch('http://localhost:4010/api/predict', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!apiResponse.ok) {
+        throw new Error(`API Error: ${apiResponse.status}`);
       }
-    };
+      
+      const predictions = await apiResponse.json();
+      console.log('Raw predictions from backend:', predictions);
+      
+      // Transform YOLO predictions to our format
+      const detectedIngredients = predictions.predictions.map(pred => ({
+        name: pred.className,
+        confidence: Math.round(pred.confidence * 100), // Convert decimal to percentage
+        category: categorizeIngredient(pred.className),
+        bbox: pred.bbox
+      })).filter(item => item.confidence > 0.1) // Filter low confidence detections (10% threshold)
+        .sort((a, b) => b.confidence - a.confidence); // Sort by confidence
+      
+      console.log('Processed detected ingredients:', detectedIngredients);
+      
+      // If no ingredients detected, show fallback message
+      if (detectedIngredients.length === 0) {
+        setError("No ingredients detected. Try taking a clearer photo with better lighting.");
+        setIsScanning(false);
+        setScanMode("camera");
+        return;
+      }
+
+      // Generate recipe suggestions based on detected ingredients
+      const suggestedRecipes = generateRecipeSuggestions(detectedIngredients);
+      
+      // Create nutrition summary
+      const nutritionSummary = {
+        estimatedMeals: Math.min(detectedIngredients.length, 5),
+        avgCalories: Math.round(detectedIngredients.length * 45 + Math.random() * 100),
+        categories: getCategoriesFromIngredients(detectedIngredients)
+      };
+
+      const results = {
+        detectedIngredients,
+        suggestedRecipes,
+        nutritionSummary
+      };
+      
+      setScanResults(results);
+      setError(null);
+      
+      // Tell the component to switch to the results view
+      setScanMode("results");
+      
+    } catch (error) {
+      console.error('Scan error:', error);
+      setError(`Scanning failed: ${error.message}. Make sure the YOLO model server is running on port 4010.`);
+      setScanMode("camera");
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  // Generate recipe suggestions based on detected ingredients
+  const generateRecipeSuggestions = (ingredients) => {
+    const recipes = [
+      {
+        id: 1,
+        name: "Fresh Garden Salad",
+        cookTime: "5 mins",
+        calories: 150,
+        difficulty: "Easy",
+        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        mood: "Fresh"
+      },
+      {
+        id: 2,
+        name: "Roasted Vegetable Medley",
+        cookTime: "25 mins",
+        calories: 220,
+        difficulty: "Easy",
+        image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        mood: "Comforting"
+      },
+      {
+        id: 3,
+        name: "Fruit & Veggie Smoothie Bowl",
+        cookTime: "10 mins",
+        calories: 280,
+        difficulty: "Easy",
+        image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        mood: "Energetic"
+      }
+    ];
+
+    return recipes.map(recipe => ({
+      ...recipe,
+      matchedIngredients: Math.min(ingredients.length, Math.floor(Math.random() * 4) + 2),
+      totalIngredients: Math.floor(Math.random() * 3) + 4
+    }));
+  };
+
+  // Get categories from detected ingredients
+  const getCategoriesFromIngredients = (ingredients) => {
+    const categories = new Set();
+    ingredients.forEach(ingredient => {
+      categories.add(ingredient.category);
+    });
     
-    setScanResults(mockResults);
-    setIsScanning(false);
-    setScanMode("results");
+    const categoryList = Array.from(categories);
+    if (categoryList.includes('Fruits')) categoryList.push('High Vitamin C');
+    if (categoryList.includes('Vegetables')) categoryList.push('High Fiber');
+    
+    return categoryList.slice(0, 3);
   };
 
   const resetScanner = () => {
@@ -100,6 +202,7 @@ const FridgeScanner = () => {
     setScanResults(null);
     setCapturedImage(null);
     setIsScanning(false);
+    setError(null);
   };
 
   if (scanMode === "scanning") {
@@ -115,7 +218,7 @@ const FridgeScanner = () => {
           </motion.div>
           <h2 className="text-3xl font-bold text-gray-900 mb-4 font-display">Analyzing Your Fridge</h2>
           <p className="text-xl text-gray-600 mb-8 max-w-md mx-auto">
-            Our AI is identifying ingredients and finding the perfect recipes for you...
+            Our YOLO AI model is detecting fruits and vegetables to suggest perfect recipes...
           </p>
           <div className="flex justify-center space-x-4 text-sm text-gray-500">
             <motion.div
@@ -165,9 +268,22 @@ const FridgeScanner = () => {
                   Scan Complete!
                 </h1>
               </div>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                We found amazing recipes using your available ingredients
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
+                We detected <span className="font-bold text-green-600">{scanResults.detectedIngredients.length} ingredient{scanResults.detectedIngredients.length !== 1 ? 's' : ''}</span> and found amazing recipes using your available items
               </p>
+              <div className="flex justify-center items-center space-x-2 text-sm text-gray-500">
+                <span>Detected:</span>
+                {scanResults.detectedIngredients.slice(0, 3).map((ingredient, index) => (
+                  <span key={index} className="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+                    {ingredient.name}
+                  </span>
+                ))}
+                {scanResults.detectedIngredients.length > 3 && (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                    +{scanResults.detectedIngredients.length - 3} more
+                  </span>
+                )}
+              </div>
             </div>
           </ScrollReveal>
 
@@ -182,20 +298,28 @@ const FridgeScanner = () => {
                   <div className="space-y-3">
                     {scanResults.detectedIngredients.map((ingredient, index) => (
                       <motion.div
-                        key={ingredient.name}
+                        key={`${ingredient.name}-${index}`}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl"
+                        className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl border border-green-100 hover:shadow-md transition-all duration-200"
                       >
-                        <div>
-                          <span className="font-semibold text-gray-900">{ingredient.name}</span>
-                          <div className="text-sm text-gray-500">{ingredient.category}</div>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <div>
+                            <span className="font-bold text-lg text-gray-900 capitalize">
+                              {ingredient.name}
+                            </span>
+                            <div className="text-sm text-gray-600">
+                              Category: <span className="font-medium">{ingredient.category}</span>
+                            </div>
+                          </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm font-medium text-green-600">
+                          <div className="text-lg font-bold text-green-600">
                             {ingredient.confidence}%
                           </div>
+                          <div className="text-xs text-gray-500">confidence</div>
                         </div>
                       </motion.div>
                     ))}
@@ -383,6 +507,20 @@ const FridgeScanner = () => {
             </div>
 
             <div className="p-8">
+              {/* Error Display */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl"
+                >
+                  <div className="flex items-center space-x-2">
+                    <X className="w-5 h-5 text-red-500" />
+                    <p className="text-red-700 font-medium">{error}</p>
+                  </div>
+                </motion.div>
+              )}
+
               {scanMode === "camera" ? (
                 <div className="space-y-6">
                   <div className="relative bg-gray-900 rounded-2xl overflow-hidden">
@@ -404,10 +542,10 @@ const FridgeScanner = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={capture}
                       disabled={isScanning}
-                      className="bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl hover:shadow-2xl transition-all duration-300 mx-auto"
+                      className="bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl hover:shadow-2xl transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Scan className="w-6 h-6" />
-                      <span>Scan Fridge</span>
+                      <span>{isScanning ? 'Scanning...' : 'Scan Fridge'}</span>
                     </motion.button>
                   </div>
                 </div>

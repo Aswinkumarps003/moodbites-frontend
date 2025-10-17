@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Users, BookOpen, Brain, ScanLine, Salad, MessageCircle, Settings, LogOut } from "lucide-react";
+import { Home, Users, BookOpen, Brain, Salad, MessageCircle, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const iconMap = {
@@ -7,7 +7,6 @@ const iconMap = {
   Users: Users,
   Recipes: BookOpen,
   "AI Insights": Brain,
-  "Fridge Scanner": ScanLine,
   "Diet Plans": Salad,
   Feedback: MessageCircle,
   Settings: Settings,
@@ -45,8 +44,13 @@ const Sidebar = ({ activePage, setActivePage, navOrder }) => (
       whileHover={{ scale: 1.05 }}
       className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-red-600 bg-red-100 hover:bg-red-200 transition-all duration-200"
       onClick={() => {
-        localStorage.removeItem("user");
-        window.location.reload();
+        try {
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("user");
+          window.dispatchEvent(new Event('moodbites-logout'));
+        } finally {
+          window.location.href = '/login';
+        }
       }}
     >
       <LogOut className="w-6 h-6" />

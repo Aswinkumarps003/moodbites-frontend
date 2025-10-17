@@ -1,11 +1,64 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, AlertCircle, User, CheckCircle, Shield, ShieldCheck, ShieldX } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, User, CheckCircle, Shield, ShieldCheck, ShieldX, Users, UtensilsCrossed } from "lucide-react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 
 const API_URL = 'http://localhost:5000/api/user';
+
+// Simple vertical wheel picker component
+const WheelPicker = ({ values = [], value, onChange, visibleCount = 5, itemClass = "", getLabel }) => {
+  const itemHeight = 40; // px
+  const paddingItems = Math.floor(visibleCount / 2);
+  const displayValues = useMemo(() => {
+    const padTop = Array.from({ length: paddingItems }).map((_, i) => `__pad_top_${i}`);
+    const padBot = Array.from({ length: paddingItems }).map((_, i) => `__pad_bot_${i}`);
+    return [...padTop, ...values, ...padBot];
+  }, [values, paddingItems]);
+
+  const handleScroll = (e) => {
+    const scrollTop = e.currentTarget.scrollTop;
+    const index = Math.round(scrollTop / itemHeight);
+    const actualIndex = Math.min(Math.max(index, 0), values.length - 1);
+    const selected = values[actualIndex];
+    if (selected !== undefined && selected !== value) onChange(selected);
+  };
+
+  useEffect(() => {
+    const container = document.getElementById(`wheel-${itemClass}`);
+    if (!container) return;
+    const idx = values.findIndex((v) => v === value);
+    const targetIdx = idx >= 0 ? idx : 0;
+    container.scrollTo({ top: targetIdx * itemHeight, behavior: 'instant' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="relative">
+      <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: `${(visibleCount/2)*itemHeight - itemHeight}px`, height: `${itemHeight}px` }}>
+        <div className="border border-gray-200 rounded-xl" />
+      </div>
+      <div
+        id={`wheel-${itemClass}`}
+        onScroll={handleScroll}
+        className="overflow-y-scroll snap-y snap-mandatory no-scrollbar h-40 relative"
+        style={{ scrollSnapType: 'y mandatory' }}
+      >
+        {displayValues.map((v, i) => (
+          <div
+            key={`${v}-${i}`}
+            className={`h-10 flex items-center justify-center snap-start ${typeof v === 'string' && v.startsWith('__pad_') ? 'invisible' : ''} ${itemClass}`}
+          >
+            <span className={`text-sm font-medium ${value === v ? 'text-gray-900' : 'text-gray-500'}`}>
+              {typeof v === 'string' && v.startsWith('__pad_') ? '' : (getLabel ? getLabel(v) : v)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const Signup = () => {
   const {
@@ -21,17 +74,73 @@ const Signup = () => {
     defaultValues: {
       name: '',
       email: '',
-      password: ''
+      password: '',
+      role: '1', // Default to normal user
+      gender: 'Male',
+      age: 25,
+      heightUnit: 'cm',
+      heightCm: 170,
+      heightFt: 5,
+      heightIn: 7,
+      weightUnit: 'kg',
+      weight: 70
     }
   });
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [certificate, setCertificate] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, feedback: [] });
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
   const navigate = useNavigate();
+  const [step, setStep] = useState(1); // 1 = account, 2 = details
+
+  // If already authenticated, redirect away from signup
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    axios
+      .get(`${API_URL}/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        const role = res.data?.role;
+        navigate('/dashboard', { replace: true });
+      })
+      .catch(() => {
+        // not authenticated; stay on signup
+      });
+  }, [navigate]);
+
+  // Local UI state for pickers
+  const [gender, setGender] = useState('Male');
+  const [age, setAge] = useState(25);
+  const [heightUnit, setHeightUnit] = useState('cm'); // 'cm' | 'ftin'
+  const [heightCm, setHeightCm] = useState(170);
+  const [heightFt, setHeightFt] = useState(5);
+  const [heightIn, setHeightIn] = useState(7);
+  const [weightUnit, setWeightUnit] = useState('kg'); // 'kg' | 'lb'
+  const [weight, setWeight] = useState(70);
+
+  // Sync with form values
+  useEffect(() => {
+    setValue('gender', gender, { shouldValidate: true });
+  }, [gender, setValue]);
+  useEffect(() => {
+    setValue('age', age, { shouldValidate: true });
+  }, [age, setValue]);
+  useEffect(() => {
+    setValue('heightUnit', heightUnit);
+    setValue('heightCm', heightCm);
+    setValue('heightFt', heightFt);
+    setValue('heightIn', heightIn);
+  }, [heightUnit, heightCm, heightFt, heightIn, setValue]);
+  useEffect(() => {
+    setValue('weightUnit', weightUnit);
+    setValue('weight', weight);
+  }, [weightUnit, weight, setValue]);
 
   // Watch all fields for real-time validation
   const watchedPassword = watch("password");
@@ -50,6 +159,27 @@ const Signup = () => {
       trigger("email");
     }
   }, [watchedEmail, trigger]);
+
+  // Debounced AJAX email availability check
+  useEffect(() => {
+    const email = watchedEmail?.trim();
+    setEmailExists(false);
+    if (!email) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return;
+    setEmailChecking(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await axios.get(`${API_URL}/check-email`, { params: { email } });
+        setEmailExists(!!res.data?.exists);
+      } catch (e) {
+        // Silently ignore; do not block user
+      } finally {
+        setEmailChecking(false);
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [watchedEmail]);
 
   // Password strength checker
   const checkPasswordStrength = (password) => {
@@ -185,11 +315,18 @@ const Signup = () => {
     }
   };
 
-  // Form submission handler
+  // Form submission handler for normal users
   const onSubmit = async (data) => {
+    // Only allow submit on step 2
+    if (step === 1) return;
+
     // Additional password strength validation
     if (passwordStrength.score < 3) {
       setError("Password is too weak. Please make it stronger.");
+      return;
+    }
+    if (emailExists) {
+      setError('Email already registered. Please use another email.');
       return;
     }
 
@@ -198,10 +335,25 @@ const Signup = () => {
     setSuccess(null);
     
     try {
+      // Normalize height (to cm) and weight (to kg)
+      let normalizedHeightCm = data.heightCm;
+      if (data.heightUnit === 'ftin') {
+        normalizedHeightCm = Math.round((Number(data.heightFt || 0) * 30.48 + Number(data.heightIn || 0) * 2.54));
+      }
+      let normalizedWeightKg = data.weight;
+      if (data.weightUnit === 'lb') {
+        normalizedWeightKg = Math.round((Number(data.weight || 0) * 0.453592) * 10) / 10;
+      }
+
       const response = await axios.post(`${API_URL}/register`, {
         name: data.name,
         email: data.email,
-        password: data.password
+        password: data.password,
+        role: parseInt(data.role), // Convert string to integer
+        gender: data.gender,
+        age: Number(data.age),
+        heightCm: Number(normalizedHeightCm),
+        weightKg: Number(normalizedWeightKg)
       });
       
       // Show success message
@@ -210,6 +362,78 @@ const Signup = () => {
       // Reset form
       reset();
       setPasswordStrength({ score: 0, feedback: [] });
+      
+    } catch (err) {
+      setError(err.response?.data?.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNext = async () => {
+    // Validate step 1 fields
+    const ok = await trigger(["name", "email", "password", "role"], { shouldFocus: true });
+    if (!ok) return;
+    if (passwordStrength.score < 3) {
+      setError("Password is too weak. Please make it stronger.");
+      return;
+    }
+    if (emailExists) {
+      setError('Email already registered. Please use another email.');
+      return;
+    }
+    setError(null);
+    
+    // If user is a dietician, require certificate and submit multipart
+    if (watch("role") === "2") {
+      // Validate certificate presence and type/size
+      if (!certificate) {
+        setError('Please upload your dietician certificate (image or PDF, max 10MB).');
+        return;
+      }
+      const allowedTypes = ['image/jpeg','image/png','image/webp','image/gif','application/pdf'];
+      if (!allowedTypes.includes(certificate.type)) {
+        setError('Invalid file type. Upload an image (jpg, png, webp, gif) or PDF.');
+        return;
+      }
+      if (certificate.size > 10 * 1024 * 1024) { // 10MB
+        setError('File too large. Maximum size is 10MB.');
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append('name', watch('name'));
+      fd.append('email', watch('email'));
+      fd.append('password', watch('password'));
+      fd.append('role', parseInt(watch('role')));
+      fd.append('certificate', certificate);
+
+      await submitDieticianRegistration(fd);
+    } else {
+      setStep(2);
+    }
+  };
+
+  const handleBack = () => setStep(1);
+
+  // Separate submission function for dieticians (multipart)
+  const submitDieticianRegistration = async (formData) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      const response = await axios.post(`${API_URL}/register-dietician`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      // Show success message
+      setSuccess(response.data.message);
+      
+      // Reset form
+      reset();
+      setPasswordStrength({ score: 0, feedback: [] });
+      setCertificate(null);
       
     } catch (err) {
       setError(err.response?.data?.message || 'An unexpected error occurred.');
@@ -368,6 +592,9 @@ const Signup = () => {
             )}
           </AnimatePresence>
 
+          {/* STEP 1: Account */}
+          {step === 1 && (
+            <>
           {/* Google Sign-In Button */}
           <div className="mb-6">
             <div id="google-signin-button" className="w-full"></div>
@@ -398,7 +625,7 @@ const Signup = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <div className="space-y-6">
             {/* Name Field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -449,6 +676,22 @@ const Signup = () => {
                   }`}
                   placeholder="you@example.com"
                 />
+              </div>
+              {/* AJAX email check feedback */}
+              <div className="mt-2">
+                {emailChecking && (
+                  <div className="text-xs text-gray-500">Checking email availability...</div>
+                )}
+                {!errors.email && !emailChecking && emailExists && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
+                  >
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span className="font-medium">Email already registered. Try logging in or use another email.</span>
+                  </motion.p>
+                )}
               </div>
               {errors.email && (
                 <motion.p
@@ -553,17 +796,231 @@ const Signup = () => {
               )}
             </div>
 
-            {/* Submit Button */}
+            {/* Role Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Account Type
+              </label>
+              <div className="space-y-3">
+                <label className="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200 group">
+                  <input
+                    type="radio"
+                    value="1"
+                    {...register("role")}
+                    className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
+                  />
+                  <div className="ml-3 flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors duration-200">
+                      <Users className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">Normal User</div>
+                      <div className="text-xs text-gray-500">Access to food recommendations and mood tracking</div>
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200 group">
+                  <input
+                    type="radio"
+                    value="2"
+                    {...register("role")}
+                    className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
+                  />
+                  <div className="ml-3 flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors duration-200">
+                      <UtensilsCrossed className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">Dietician</div>
+                      <div className="text-xs text-gray-500">Professional access to manage recipes and diet plans</div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Certificate upload for Dietician */}
+            {watch("role") === "2" && (
+              <div className="mt-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Dietician Certificate (image or PDF)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setCertificate(e.target.files?.[0] || null)}
+                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-gray-200 rounded-xl p-2"
+                />
+                <p className="text-xs text-gray-500 mt-2">Required for dietician accounts. Max 10MB. Accepted: images, PDF.</p>
+              </div>
+            )}
+
+                <div>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleNext}
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Creating account..." : (watch("role") === "2" ? "Create Account" : "Continue")}
+                  </motion.button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* STEP 2: Details - Only for Normal Users */}
+          {step === 2 && watch("role") === "1" && (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Gender Selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-3">Gender</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="Male"
+                      checked={gender === 'Male'}
+                      onChange={() => setGender('Male')}
+                      className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
+                    />
+                    <span className="ml-3 text-sm font-medium text-gray-900">Male</span>
+                  </label>
+                  <label className="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="Female"
+                      checked={gender === 'Female'}
+                      onChange={() => setGender('Female')}
+                      className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
+                    />
+                    <span className="ml-3 text-sm font-medium text-gray-900">Female</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Age, Height, Weight Pickers */}
+              <div className="mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-3">Age, Height & Weight</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Age */}
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <div className="text-xs text-gray-500 mb-2">Age</div>
+                    <WheelPicker
+                      values={Array.from({ length: 83 }).map((_, i) => i + 18)}
+                      value={age}
+                      onChange={setAge}
+                      itemClass="age-picker"
+                    />
+                    <div className="mt-2 text-center text-sm font-semibold text-gray-900">{age} yrs</div>
+                  </div>
+
+                  {/* Height */}
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs text-gray-500">Height</div>
+                      <div className="bg-white rounded-lg p-1 border border-gray-200">
+                        <button
+                          type="button"
+                          onClick={() => setHeightUnit('cm')}
+                          className={`px-2 py-1 text-xs rounded-md ${heightUnit === 'cm' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
+                        >cm</button>
+                        <button
+                          type="button"
+                          onClick={() => setHeightUnit('ftin')}
+                          className={`px-2 py-1 text-xs rounded-md ${heightUnit === 'ftin' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
+                        >ft/in</button>
+                      </div>
+                    </div>
+                    {heightUnit === 'cm' ? (
+                      <>
+                        <WheelPicker
+                          values={Array.from({ length: 141 }).map((_, i) => i + 100)}
+                          value={heightCm}
+                          onChange={setHeightCm}
+                          itemClass="height-cm-picker"
+                        />
+                        <div className="mt-2 text-center text-sm font-semibold text-gray-900">{heightCm} cm</div>
+                      </>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">ft</div>
+                          <WheelPicker
+                            values={Array.from({ length: 4 }).map((_, i) => i + 4)}
+                            value={heightFt}
+                            onChange={setHeightFt}
+                            itemClass="height-ft-picker"
+                          />
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">in</div>
+                          <WheelPicker
+                            values={Array.from({ length: 12 }).map((_, i) => i)}
+                            value={heightIn}
+                            onChange={setHeightIn}
+                            itemClass="height-in-picker"
+                          />
+                        </div>
+                        <div className="col-span-2 mt-2 text-center text-sm font-semibold text-gray-900">{heightFt} ft {heightIn} in</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Weight */}
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs text-gray-500">Weight</div>
+                      <div className="bg-white rounded-lg p-1 border border-gray-200">
+                        <button
+                          type="button"
+                          onClick={() => setWeightUnit('kg')}
+                          className={`px-2 py-1 text-xs rounded-md ${weightUnit === 'kg' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
+                        >kg</button>
+                        <button
+                          type="button"
+                          onClick={() => setWeightUnit('lb')}
+                          className={`px-2 py-1 text-xs rounded-md ${weightUnit === 'lb' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
+                        >lb</button>
+                      </div>
+                    </div>
+                    <WheelPicker
+                      values={weightUnit === 'kg' ? Array.from({ length: 151 }).map((_, i) => i + 30) : Array.from({ length: 331 }).map((_, i) => i + 66)}
+                      value={weight}
+                      onChange={setWeight}
+                      itemClass="weight-picker"
+                      getLabel={(v) => `${v}`}
+                    />
+                    <div className="mt-2 text-center text-sm font-semibold text-gray-900">{weight} {weightUnit}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-2xl font-semibold hover:bg-gray-50 transition-all duration-300"
+                >
+                  Back
+                </button>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading || !isFormValid}
-              className="w-full bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white py-3 px-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating account..." : "Create account"}
             </motion.button>
+              </div>
           </form>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">

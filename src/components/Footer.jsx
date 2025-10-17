@@ -9,6 +9,7 @@ const Footer = () => {
       title: "Platform",
       links: [
         { name: "Dashboard", href: "/dashboard" },
+        { name: "Emotion Detection", href: "/emotion-detection" },
         { name: "Recipes", href: "/recipes" },
         { name: "Submit Recipe", href: "/submit" },
         { name: "Profile", href: "/profile" }
