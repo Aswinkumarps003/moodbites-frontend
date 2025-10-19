@@ -286,7 +286,7 @@ const ChatPanel = () => {
     const fetchPatientDietPlans = async () => {
       if (!selectedPatient || !token) return;
       try {
-        const response = await fetch(`http://localhost:5005/api/diet-plans/${selectedPatient._id}`, {
+        const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${selectedPatient._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) {
