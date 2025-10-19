@@ -425,7 +425,7 @@ const Chat = () => {
       try {
         const subjectUserId = isDietician ? chatPartnerId : user._id;
         if (!subjectUserId) return;
-        const response = await fetch(`${DIET_PLANNER_URL}/api/diet-plans/${subjectUserId}`, {
+        const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
