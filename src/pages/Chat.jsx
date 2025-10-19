@@ -428,7 +428,8 @@ const Chat = () => {
         const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+        console.log(`https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`);
+        console.log(response);
         if (response.ok) {
           const data = await response.json();
           const allPlans = (data.dietPlans || []).slice();
