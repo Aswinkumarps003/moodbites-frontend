@@ -35,7 +35,7 @@ const SubmitRecipe = () => {
   // --- Food-related validation helpers ---
   const FOOD_KEYWORDS = new Set([
     // staple foods (grains, breads, pasta, noodles)
-    'strong' ,'brew','brewed','steep','rolled','chamomile','ada', 'adai', 'akki roti', 'amaranth', 'appam', 'arborio', 'atta', 'bagel', 'baguette', 'bajra', 'bajra roti', 'barley', 'basmati', 'besan', 'bhakri', 'bhatura', 'bread', 'brioche', 'brown rice', 'buckwheat', 'bulgur', 'carnaroli', 'cellophane noodles', 'chapati', 'cheela', 'chawal', 'ciabatta', 'cornbread', 'cornmeal', 'couscous', 'cracker', 'croissant', 'dosa', 'egg noodles', 'farro', 'fettuccine', 'flour', 'focaccia', 'freekeh', 'fusilli', 'gehun', 'gnocchi', 'gram flour', 'grits', 'idiyappam', 'idli', 'jau', 'jowar', 'jowar roti', 'kamut', 'khamiri roti', 'kulcha', 'kuttu', 'lachha paratha', 'lasagna', 'linguine', 'lobia', 'luchi', 'macaroni', 'maida', 'makki', 'makki di roti', 'malabar parotta', 'masala dosa', 'millet', 'missi roti', 'murmura', 'naan', 'neer dosa', 'noodles', 'oats', 'orzo', 'paratha', 'parotta', 'pasta', 'penne', 'pesarattu', 'pita', 'poha', 'polenta', 'pongal', 'puri', 'pumpernickel', 'puttu', 'quinoa', 'ragi', 'ragi roti', 'ramen', 'rava', 'rava dosa', 'ravioli', 'rice', 'rice flour', 'rice noodles', 'rigatoni', 'risotto', 'roti', 'rumali roti', 'rye', 'sago', 'sabudana', 'sattu', 'semolina', 'set dosa', 'sheermal', 'soba', 'sooji', 'sorghum', 'sourdough', 'spaghetti', 'spelt', 'sticky rice', 'suji', 'sushi rice', 'taftan', 'tagliatelle', 'tapioca', 'teff', 'thalipeeth', 'thepla', 'tortellini', 'tortilla', 'udon', 'upma', 'uttapam', 'valencia', 'vermicelli', 'wheat', 'wild rice',
+    'strong' ,'brew','brewed','steep','rolled','chamomile','ada', 'adai', 'akki roti', 'amaranth', 'appam', 'arborio', 'atta', 'bagel', 'baguette', 'bajra', 'bajra roti', 'barley', 'basmati', 'besan', 'bhakri', 'bhatura', 'bread', 'brioche', 'brown rice', 'buckwheat', 'bulgur', 'carnaroli', 'cellophane noodles', 'chapati', 'cheela', 'chawal', 'ciabatta', 'cornbread', 'cornmeal', 'couscous', 'cracker', 'croissant', 'dosa', 'egg noodles', 'farro', 'fettuccine', 'flour', 'focaccia', 'freekeh', 'fusilli', 'gehun', 'gnocchi', 'gram flour', 'grits', 'idiyappam', 'idli', 'jau', 'jowar', 'jowar roti', 'kamut', 'khamiri roti', 'kulcha', 'kuttu', 'lachha paratha', 'lasagna', 'linguine', 'lobia', 'luchi', 'macaroni', 'maida', 'makki', 'makki di roti', 'malabar parotta', 'masala dosa', 'millet', 'missi roti', 'murmura', 'naan', 'neer dosa', 'noodles', 'oatmeal', 'oats', 'orzo', 'paratha', 'parotta', 'pasta', 'penne', 'pesarattu', 'pita', 'poha', 'polenta', 'pongal', 'puri', 'pumpernickel', 'puttu', 'quinoa', 'ragi', 'ragi roti', 'ramen', 'rava', 'rava dosa', 'ravioli', 'rice', 'rice flour', 'rice noodles', 'rigatoni', 'risotto', 'roti', 'rumali roti', 'rye', 'sago', 'sabudana', 'sattu', 'semolina', 'set dosa', 'sheermal', 'soba', 'sooji', 'sorghum', 'sourdough', 'spaghetti', 'spelt', 'sticky rice', 'suji', 'sushi rice', 'taftan', 'tagliatelle', 'tapioca', 'teff', 'thalipeeth', 'thepla', 'tortellini', 'tortilla', 'udon', 'upma', 'uttapam', 'valencia', 'vermicelli', 'wheat', 'wild rice',
 
     // proteins (meat, poultry, seafood, dairy, legumes, nuts, seeds)
     'abalone', 'albacore', 'almond', 'anchovy', 'arhar dal', 'bacon', 'bass', 'bean', 'beans', 'beef', 'black bean', 'black chana', 'brie', 'camembert', 'carp', 'cashew', 'catfish', 'chana', 'chana dal', 'cheddar', 'cheese', 'chenna', 'cherrystone', 'chia', 'chickpea', 'chickpeas', 'chicken', 'clam', 'cod', 'conch', 'cottage cheese', 'crab', 'crayfish', 'cream cheese', 'curd', 'dahi', 'dal', 'doodh', 'duck', 'edamame', 'eel', 'egg', 'eggs', 'emmental', 'escargot', 'fava bean', 'feta', 'fish', 'flax', 'gorgonzola', 'gosht', 'gouda', 'gram', 'grouper', 'gruyere', 'haddock', 'halibut', 'halloumi', 'ham', 'hazelnut', 'hemp', 'herring', 'jerky', 'kabuli chana', 'kala chana', 'kefir', 'khoya', 'kidney', 'kulthi', 'lamb', 'langoustine', 'lentil', 'lentils', 'lima bean', 'liver', 'lobster', 'lobia', 'macadamia', 'mackerel', 'mahi-mahi', 'malai', 'manchego', 'mascarpone', 'masoor', 'masoor dal', 'matar', 'matki', 'mawa', 'milk', 'monkfish', 'moong', 'moong dal', 'mortadella', 'moth bean', 'mozzarella', 'mung', 'mussel', 'mutton', 'natto', 'nut', 'nuts', 'octopus', 'offal', 'oyster', 'pancetta', 'paneer', 'parmesan', 'pea', 'peanut', 'peas', 'pecan', 'pecorino', 'pepperoni', 'perch', 'pike', 'pine nut', 'pinto bean', 'pistachio', 'pollock', 'pork', 'prawn', 'prosciutto', 'provolone', 'pumpkin seed', 'quail', 'rabbit', 'rajma', 'red snapper', 'ricotta', 'roquefort', 'salami', 'salmon', 'sardine', 'sausage', 'scallop', 'sea urchin', 'seed', 'seeds', 'seitan', 'sesame seed', 'shrimp', 'snapper', 'soy', 'squid', 'steak', 'stilton', 'sunflower seed', 'swordfish', 'tempeh', 'tilapia', 'tofu', 'toor dal', 'tripe', 'trout', 'tuna', 'turbot', 'turkey', 'uni', 'urad', 'urad dal', 'veal', 'venison', 'walnut', 'white bean', 'yogurt',
@@ -120,7 +120,7 @@ const SubmitRecipe = () => {
   };
 
   const GENERIC_ALLOWED = new Set([
-    'good','great','nice','tasty','delicious','yummy','awesome','hearty','savory','sweet','spicy','mild','flavorful','aromatic','fresh','healthy','simple','quick','easy','homemade','home','style','authentic','classic','comfort','comforting','diet','dish','meal','food','really','very','super','ultra','best'
+    'good','great','nice','tasty','delicious','yummy','awesome','hearty','savory','sweet','spicy','mild','flavorful','aromatic','fresh','healthy','simple','quick','easy','homemade','home','style','authentic','classic','comfort','comforting','diet','dish','meal','food','really','very','super','ultra','best','warm','hot','cold','cool','room','temperature','stovetop','stove','oven','pan','pot','bowl','plate','cup','mug','glass','jar','container','utensil','spoon','fork','knife','whisk','ladle','tongs','thermometer','timer','timer','cookware','bakeware','kitchen','appliance','equipment','tool','gadget','device'
   ]);
 
   const findNonFoodTokens = (text) => {
@@ -562,22 +562,22 @@ const SubmitRecipe = () => {
       }
 
       // Final food-related guard (cross-field):
-      const combinedTexts = [
-        formData.title,
-        formData.description,
-        ...formData.ingredients,
-        ...formData.instructions,
-        ...formData.tags
-      ].join(' ');
-      const nonFood = findNonFoodTokens(combinedTexts);
-      if (nonFood.length) {
-        setNonFoodModal({
-          title: 'Details not food-related',
-          details: `Found non-food terms: ${nonFood.join(', ')}. Please remove them before submitting.`
-        });
-        setSubmitting(false);
-        return;
-      }
+      // const combinedTexts = [
+      //   formData.title,
+      //   formData.description,
+      //   ...formData.ingredients,
+      //   ...formData.instructions,
+      //   ...formData.tags
+      // ].join(' ');
+      // const nonFood = findNonFoodTokens(combinedTexts);
+      // if (nonFood.length) {
+      //   setNonFoodModal({
+      //     title: 'Details not food-related',
+      //     details: `Found non-food terms: ${nonFood.join(', ')}. Please remove them before submitting.`
+      //   });
+      //   setSubmitting(false);
+      //   return;
+      // }
 
       let imageUrl = null;
       
