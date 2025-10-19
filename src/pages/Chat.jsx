@@ -1238,7 +1238,7 @@ const Chat = () => {
                         <div className="w-12 h-12 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
                           <Utensils className="w-6 h-6 text-emerald-500" />
                         </div>
-                        <h5 className="font-medium text-gray-800 mb-2">No Diet Plans</h5>
+                        <h5 className="font-medium text-gray-800 mb-2">No Diet Plans hehe</h5>
                         {!isDietician && (
                           <>
                             <p className="text-sm text-gray-600 mb-3">Generate your first personalized diet plan</p>
