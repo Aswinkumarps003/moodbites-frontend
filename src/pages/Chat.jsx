@@ -327,7 +327,7 @@ const Chat = () => {
     const fetchDietician = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://user-service-o0l2.onrender.com/api/user/profile/${dieticianId}`, {
+        const response = await fetch(`http://localhost:5000/api/user/profile/${dieticianId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -419,10 +419,10 @@ const Chat = () => {
       try {
         const subjectUserId = isDietician ? chatPartnerId : user._id;
         if (!subjectUserId) return;
-        const response = await fetch(`http://localhost:5005/api/diet-plans/${subjectUserId}`, {
+        const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/68bd5ae01da5747f7cfe432d`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+        console.log(`https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`)
         if (response.ok) {
           const data = await response.json();
           const allPlans = (data.dietPlans || []).slice();

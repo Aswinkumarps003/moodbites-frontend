@@ -40,13 +40,13 @@ const DashboardStats = () => {
 
       // Fetch all users by role
       const [patientsResponse, dieticiansResponse] = await Promise.all([
-        fetch('https://user-service-o0l2.onrender.com/api/user/users/role/1', {
+        fetch('http://localhost:5000/api/user/users/role/1', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }),
-        fetch('https://user-service-o0l2.onrender.com/api/user/users/role/2', {
+        fetch('http://localhost:5000/api/user/users/role/2', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
