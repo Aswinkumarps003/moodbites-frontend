@@ -383,7 +383,7 @@ const ChatPanel = () => {
       formData.append('audio', audioBlob, 'voice-message.webm');
       
       // Upload audio file to server
-      const uploadResponse = await fetch('http://localhost:3006/api/upload/audio', {
+      const uploadResponse = await fetch('https://chat-service-latest-m6az.onrender.com/api/upload/audio', {
         method: 'POST',
         body: formData,
         headers: {
@@ -422,7 +422,7 @@ const ChatPanel = () => {
       formData.append('fileType', fileType);
       
       // Upload file to server
-      const uploadResponse = await fetch('http://localhost:3006/api/upload/file', {
+      const uploadResponse = await fetch('https://chat-service-latest-m6az.onrender.com/api/upload/file', {
         method: 'POST',
         body: formData,
         headers: {
