@@ -160,8 +160,6 @@ const SubmitRecipe = () => {
     if (!description.trim()) return "Description is required";
     if (description.trim().length < 10) return "Description must be at least 10 characters";
     if (description.trim().length > 500) return "Description must be less than 500 characters";
-    const bad = findNonFoodTokens(description);
-    if (bad.length) return `Description contains non-food terms: ${bad.join(', ')}`;
     return null;
   };
 

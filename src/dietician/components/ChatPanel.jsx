@@ -84,7 +84,7 @@ const ChatPanel = () => {
   useEffect(() => {
     if (!token || !dietician) return;
 
-    const newSocket = io('http://localhost:3006', {
+    const newSocket = io('https://chat-service-latest-m6az.onrender.com', {
       auth: { token: token }
     });
 
@@ -189,7 +189,7 @@ const ChatPanel = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/user/users/role/1', {
+        const response = await fetch('https://user-service-latest-bae8.onrender.com/api/user/users/role/1', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) {
@@ -217,7 +217,7 @@ const ChatPanel = () => {
       if (!selectedPatient || !token) return;
 
       try {
-        const response = await fetch(`http://localhost:3006/api/conversations/${dietician._id}`, {
+        const response = await fetch(`https://chat-service-latest-m6az.onrender.com/api/conversations/${dietician._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -286,7 +286,7 @@ const ChatPanel = () => {
     const fetchPatientDietPlans = async () => {
       if (!selectedPatient || !token) return;
       try {
-        const response = await fetch(`http://localhost:5005/api/diet-plans/${selectedPatient._id}`, {
+        const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${selectedPatient._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) {
@@ -314,19 +314,19 @@ const ChatPanel = () => {
       if (regenFlags.lowSaturatedFat) params.set('lowSaturatedFat', 'true');
       if (regenFlags.lowCarb) params.set('lowCarb', 'true');
       params.set('number', '1');
-      const searchResp = await fetch(`http://localhost:5005/api/spoonacular/search?${params.toString()}`);
+      const searchResp = await fetch(`https://diet-service-latest.onrender.com/api/spoonacular/search?${params.toString()}`);
       if (!searchResp.ok) throw new Error('Search failed');
       const searchJson = await searchResp.json();
       const first = (searchJson.results || [])[0];
       if (!first) throw new Error('No matching recipe found');
-      const replaceResp = await fetch(`http://localhost:5005/api/diet-plans/${planId}/meals/replace`, {
+      const replaceResp = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${planId}/meals/replace`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mealIndex: mealIdx, spoonacularId: first.id })
       });
       if (!replaceResp.ok) throw new Error('Replace failed');
       // Refresh plans
-      const response = await fetch(`http://localhost:5005/api/diet-plans/${selectedPatient._id}`, {
+      const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${selectedPatient._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.ok) {
@@ -383,7 +383,7 @@ const ChatPanel = () => {
       formData.append('audio', audioBlob, 'voice-message.webm');
       
       // Upload audio file to server
-      const uploadResponse = await fetch('http://localhost:3006/api/upload/audio', {
+      const uploadResponse = await fetch('https://chat-service-latest-m6az.onrender.com/api/upload/audio', {
         method: 'POST',
         body: formData,
         headers: {
@@ -422,7 +422,7 @@ const ChatPanel = () => {
       formData.append('fileType', fileType);
       
       // Upload file to server
-      const uploadResponse = await fetch('http://localhost:3006/api/upload/file', {
+      const uploadResponse = await fetch('https://chat-service-latest-m6az.onrender.com/api/upload/file', {
         method: 'POST',
         body: formData,
         headers: {

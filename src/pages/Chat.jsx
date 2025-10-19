@@ -78,7 +78,7 @@ import MessageBubble from '../components/MessageBubble';
 const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
 const CHAT_SERVICE_URL = import.meta.env.VITE_CHAT_SERVICE_URL || 'http://localhost:3006';
 const SIGNALING_SERVICE_URL = import.meta.env.VITE_SIGNALING_SERVICE_URL || 'http://localhost:3007';
-const DIET_PLANNER_URL = import.meta.env.VITE_DIET_PLANNER_SERVICE_URL || 'http://localhost:5005';
+const DIET_PLANNER_URL = import.meta.env.VITE_DIET_SERVICE_URL;
 const MOOD_SERVICE_URL = import.meta.env.VITE_MOOD_SERVICE_URL || 'http://localhost:3001';
 
 const Chat = () => {
@@ -425,10 +425,11 @@ const Chat = () => {
       try {
         const subjectUserId = isDietician ? chatPartnerId : user._id;
         if (!subjectUserId) return;
-        const response = await fetch(`${DIET_PLANNER_URL}/api/diet-plans/${subjectUserId}`, {
+        const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+        console.log(`https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`);
+        console.log(response);
         if (response.ok) {
           const data = await response.json();
           const allPlans = (data.dietPlans || []).slice();
@@ -1238,7 +1239,7 @@ const Chat = () => {
                         <div className="w-12 h-12 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
                           <Utensils className="w-6 h-6 text-emerald-500" />
                         </div>
-                        <h5 className="font-medium text-gray-800 mb-2">No Diet Plans</h5>
+                        <h5 className="font-medium text-gray-800 mb-2">No Diet Plans hehe</h5>
                         {!isDietician && (
                           <>
                             <p className="text-sm text-gray-600 mb-3">Generate your first personalized diet plan</p>

@@ -57,7 +57,7 @@ const VideoConsultation = ({ fullWidth = false }) => {
       }
 
       // Fetch users with role = 1 from user-service
-      const response = await fetch('http://localhost:5000/api/user/users/role/1', {
+      const response = await fetch('https://user-service-latest-bae8.onrender.com/api/user/users/role/1', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,7 +150,7 @@ const VideoConsultation = ({ fullWidth = false }) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!user._id) return;
 
-    const signalingSocket = io('http://localhost:3007', {
+    const signalingSocket = io('VITE_WEBRTC_SERVICE_URL', {
       query: {
         userId: user._id,
         userName: user.name
