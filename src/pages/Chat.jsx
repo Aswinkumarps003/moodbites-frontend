@@ -78,7 +78,7 @@ import MessageBubble from '../components/MessageBubble';
 const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:5000';
 const CHAT_SERVICE_URL = import.meta.env.VITE_CHAT_SERVICE_URL || 'http://localhost:3006';
 const SIGNALING_SERVICE_URL = import.meta.env.VITE_SIGNALING_SERVICE_URL || 'http://localhost:3007';
-const DIET_PLANNER_URL = import.meta.env.VITE_DIET_PLANNER_SERVICE_URL || 'http://localhost:5005';
+const DIET_PLANNER_URL = import.meta.env.VITE_DIET_SERVICE_URL || 'http://localhost:5005';
 const MOOD_SERVICE_URL = import.meta.env.VITE_MOOD_SERVICE_URL || 'http://localhost:3001';
 
 const Chat = () => {
