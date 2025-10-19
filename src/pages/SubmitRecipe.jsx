@@ -153,8 +153,6 @@ const SubmitRecipe = () => {
     if (title.trim().length < 3) return "Title must be at least 3 characters";
     if (title.trim().length > 100) return "Title must be less than 100 characters";
     if (!/^[a-zA-Z0-9\s\-&,.'()]+$/.test(title.trim())) return "Title contains invalid characters";
-    const bad = findNonFoodTokens(title);
-    if (bad.length) return `Non-food terms detected: ${bad.join(', ')}`;
     return null;
   };
 
