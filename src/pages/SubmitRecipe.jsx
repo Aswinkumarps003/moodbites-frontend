@@ -152,7 +152,9 @@ const SubmitRecipe = () => {
     if (!title.trim()) return "Recipe title is required";
     if (title.trim().length < 3) return "Title must be at least 3 characters";
     if (title.trim().length > 100) return "Title must be less than 100 characters";
-    if (!/^[a-zA-Z0-9\s\-&,.'()]+$/.test(title.trim())) return "Title contains invalid characters";
+    if (!/^[a-zA-Z\s]+$/.test(title.trim())) return "Title can only contain alphabets and spaces";
+    const bad = findNonFoodTokens(title);
+    if (bad.length) return `Non-food terms detected: ${bad.join(', ')}`;
     return null;
   };
 
@@ -160,6 +162,7 @@ const SubmitRecipe = () => {
     if (!description.trim()) return "Description is required";
     if (description.trim().length < 10) return "Description must be at least 10 characters";
     if (description.trim().length > 500) return "Description must be less than 500 characters";
+    if (!/^[a-zA-Z\s]+$/.test(description.trim())) return "Description can only contain alphabets and spaces";
     return null;
   };
 
