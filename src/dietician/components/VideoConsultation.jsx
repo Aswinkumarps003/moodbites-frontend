@@ -150,7 +150,7 @@ const VideoConsultation = ({ fullWidth = false }) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!user._id) return;
 
-    const signalingSocket = io('http://localhost:3007', {
+    const signalingSocket = io('VITE_WEBRTC_SERVICE_URL', {
       query: {
         userId: user._id,
         userName: user.name
