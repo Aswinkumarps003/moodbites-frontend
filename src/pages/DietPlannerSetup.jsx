@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 
-const DIET_PLANNER_URL = import.meta.env.VITE_DIET_PLANNER_SERVICE_URL || 'http://localhost:5005';
+const DIET_PLANNER_URL = import.meta.env.VITE_DIET_SERVICE_URL || 'https://diet-service-latest.onrender.com';
 const ML_SERVICE_URL = import.meta.env.VITE_ML_SERVICE_URL || 'http://localhost:8000';
 
 const steps = ["Activity", "Goals", "Preferences", "Goal Details", "Conditions", "Review"];
