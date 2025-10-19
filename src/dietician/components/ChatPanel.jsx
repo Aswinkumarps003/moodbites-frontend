@@ -84,7 +84,7 @@ const ChatPanel = () => {
   useEffect(() => {
     if (!token || !dietician) return;
 
-    const newSocket = io('http://localhost:3006', {
+    const newSocket = io('https://chat-service-latest-m6az.onrender.com', {
       auth: { token: token }
     });
 
@@ -189,7 +189,7 @@ const ChatPanel = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/user/users/role/1', {
+        const response = await fetch('https://user-service-latest-bae8.onrender.com/api/user/users/role/1', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) {
