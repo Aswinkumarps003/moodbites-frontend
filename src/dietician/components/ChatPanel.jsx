@@ -217,7 +217,7 @@ const ChatPanel = () => {
       if (!selectedPatient || !token) return;
 
       try {
-        const response = await fetch(`http://localhost:3006/api/conversations/${dietician._id}`, {
+        const response = await fetch(`https://chat-service-latest-m6az.onrender.com/api/conversations/${dietician._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
