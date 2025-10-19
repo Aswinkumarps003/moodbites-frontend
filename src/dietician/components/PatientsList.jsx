@@ -21,7 +21,7 @@ const PatientsList = ({ fullWidth = false, user }) => {
   //         return;
   //       }
 
-  //       const response = await fetch('http://localhost:5000/api/appointments/dietician', {
+  //       const response = await fetch('https://user-service-latest-bae8.onrender.com/api/appointments/dietician', {
   //         headers: {
   //           'Authorization': `Bearer ${token}`
   //         }
@@ -69,7 +69,7 @@ const PatientsList = ({ fullWidth = false, user }) => {
         // 1) Conversations where dietician is a participant
         let conversations = [];
         try {
-          const resp = await fetch(`http://localhost:3006/api/conversations/${dieticianId}`);
+          const resp = await fetch(`https://chat-service-latest-m6az.onrender.com/api/conversations/${dieticianId}`);
           if (resp.ok) conversations = await resp.json();
         } catch (_) {}
 
@@ -84,7 +84,7 @@ const PatientsList = ({ fullWidth = false, user }) => {
         // 2) Upcoming appointments for dietician
         let appts = [];
         try {
-          const a = await fetch('http://localhost:5000/api/appointments/dietician', { headers });
+          const a = await fetch('https://user-service-latest-bae8.onrender.com/api/appointments/dietician', { headers });
           if (a.ok) {
             const aj = await a.json();
             appts = aj.appointments || [];
@@ -98,7 +98,7 @@ const PatientsList = ({ fullWidth = false, user }) => {
         // 3) Fetch user details for contacts
         let userMap = {};
         if (uniqueIds.length > 0) {
-          const ur = await fetch('http://localhost:5000/api/users/batch', {
+          const ur = await fetch('https://user-service-latest-bae8.onrender.com/api/users/batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...headers },
             body: JSON.stringify({ userIds: uniqueIds })
