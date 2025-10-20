@@ -156,25 +156,6 @@ const SubmitRecipe = () => {
     if (title.trim().length < 3) return "Title must be at least 3 characters";
     if (title.trim().length > 100) return "Title must be less than 100 characters";
     if (!/^[a-zA-Z\s]+$/.test(title.trim())) return "Title can only contain alphabets and spaces";
-    
-    // Check if title contains valid food terms from any of the food lists
-    const tokens = tokenize(title);
-    let hasValidFoodTerm = false;
-    let hasNonFoodTerm = false;
-    
-    for (const token of tokens) {
-      if (isUnitOrNumber(token)) continue;
-      if (FOOD_KEYWORDS.has(token) || COOKING_VERBS.includes(token) || GENERIC_ALLOWED.has(token)) {
-        hasValidFoodTerm = true;
-      }
-      if (NON_FOOD_BLOCKLIST.has(token)) {
-        hasNonFoodTerm = true;
-      }
-    }
-    
-    if (hasNonFoodTerm) return `Title contains non-food term`;
-    if (!hasValidFoodTerm) return "Title must contain recognizable food terms";
-    
     return null;
   };
 
@@ -183,25 +164,6 @@ const SubmitRecipe = () => {
     if (description.trim().length < 10) return "Description must be at least 10 characters";
     if (description.trim().length > 500) return "Description must be less than 500 characters";
     if (!/^[a-zA-Z\s]+$/.test(description.trim())) return "Description can only contain alphabets and spaces";
-    
-    // Check if description contains valid food terms from any of the food lists
-    const tokens = tokenize(description);
-    let hasValidFoodTerm = false;
-    let hasNonFoodTerm = false;
-    
-    for (const token of tokens) {
-      if (isUnitOrNumber(token)) continue;
-      if (FOOD_KEYWORDS.has(token) || COOKING_VERBS.includes(token) || GENERIC_ALLOWED.has(token)) {
-        hasValidFoodTerm = true;
-      }
-      if (NON_FOOD_BLOCKLIST.has(token)) {
-        hasNonFoodTerm = true;
-      }
-    }
-    
-    if (hasNonFoodTerm) return `Description contains non-food term`;
-    if (!hasValidFoodTerm) return "Description must contain recognizable food terms";
-    
     return null;
   };
 
@@ -243,24 +205,6 @@ const SubmitRecipe = () => {
     for (let ingredient of validIngredients) {
       if (ingredient.trim().length < 2) return "Each ingredient must be at least 2 characters";
       if (ingredient.trim().length > 50) return "Each ingredient must be less than 50 characters";
-      
-      // Check if ingredient contains valid food terms from any of the food lists
-      const tokens = tokenize(ingredient);
-      let hasValidFoodTerm = false;
-      let hasNonFoodTerm = false;
-      
-      for (const token of tokens) {
-        if (isUnitOrNumber(token)) continue;
-        if (FOOD_KEYWORDS.has(token) || COOKING_VERBS.includes(token) || GENERIC_ALLOWED.has(token)) {
-          hasValidFoodTerm = true;
-        }
-        if (NON_FOOD_BLOCKLIST.has(token)) {
-          hasNonFoodTerm = true;
-        }
-      }
-      
-      if (hasNonFoodTerm) return `Ingredient contains non-food term`;
-      if (!hasValidFoodTerm) return "Ingredient must contain recognizable food terms";
     }
     return null;
   };
@@ -275,24 +219,6 @@ const SubmitRecipe = () => {
     for (let instruction of validInstructions) {
       if (instruction.trim().length < 10) return "Each instruction must be at least 10 characters";
       if (instruction.trim().length > 200) return "Each instruction must be less than 200 characters";
-      
-      // Check if instruction contains valid food/cooking terms from any of the lists
-      const tokens = tokenize(instruction);
-      let hasValidTerm = false;
-      let hasNonFoodTerm = false;
-      
-      for (const token of tokens) {
-        if (isUnitOrNumber(token)) continue;
-        if (FOOD_KEYWORDS.has(token) || COOKING_VERBS.includes(token) || GENERIC_ALLOWED.has(token)) {
-          hasValidTerm = true;
-        }
-        if (NON_FOOD_BLOCKLIST.has(token)) {
-          hasNonFoodTerm = true;
-        }
-      }
-      
-      if (hasNonFoodTerm) return `Instruction contains non-food term`;
-      if (!hasValidTerm) return "Instruction must contain recognizable food or cooking terms";
     }
     return null;
   };
@@ -303,24 +229,6 @@ const SubmitRecipe = () => {
       if (tag.length < 2) return "Each tag must be at least 2 characters";
       if (tag.length > 20) return "Each tag must be less than 20 characters";
       if (!/^[a-zA-Z0-9\s\-]+$/.test(tag)) return "Tags can only contain letters, numbers, spaces, and hyphens";
-      
-      // Check if tag contains valid food terms from any of the food lists
-      const tokens = tokenize(tag);
-      let hasValidFoodTerm = false;
-      let hasNonFoodTerm = false;
-      
-      for (const token of tokens) {
-        if (isUnitOrNumber(token)) continue;
-        if (FOOD_KEYWORDS.has(token) || COOKING_VERBS.includes(token) || GENERIC_ALLOWED.has(token)) {
-          hasValidFoodTerm = true;
-        }
-        if (NON_FOOD_BLOCKLIST.has(token)) {
-          hasNonFoodTerm = true;
-        }
-      }
-      
-      if (hasNonFoodTerm) return `Tag contains non-food term`;
-      if (!hasValidFoodTerm) return "Tag must contain recognizable food terms";
     }
     return null;
   };
@@ -560,24 +468,6 @@ const SubmitRecipe = () => {
         setSubmitting(false);
         return;
       }
-
-      // Final food-related guard (cross-field):
-      // const combinedTexts = [
-      //   formData.title,
-      //   formData.description,
-      //   ...formData.ingredients,
-      //   ...formData.instructions,
-      //   ...formData.tags
-      // ].join(' ');
-      // const nonFood = findNonFoodTokens(combinedTexts);
-      // if (nonFood.length) {
-      //   setNonFoodModal({
-      //     title: 'Details not food-related',
-      //     details: `Found non-food terms: ${nonFood.join(', ')}. Please remove them before submitting.`
-      //   });
-      //   setSubmitting(false);
-      //   return;
-      // }
 
       let imageUrl = null;
       
