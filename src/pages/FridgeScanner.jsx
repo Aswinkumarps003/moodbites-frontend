@@ -202,7 +202,7 @@ const FridgeScanner = () => {
       formData.append('file', blob, 'fridge_scan.jpg');
       
       // Call YOLO model API
-      const apiResponse = await fetch('http://localhost:4010/api/predict', {
+      const apiResponse = await fetch('https://moodbites-fridge-service.onrender.com/api/predict', {
         method: 'POST',
         body: formData
       });
@@ -313,7 +313,7 @@ const FridgeScanner = () => {
 
       // Fallback to local food service API
       console.log('Mood-analysis service failed, trying local food service...');
-      const foodServiceResponse = await fetch(`http://localhost:5002/api/food/recipes/by-ingredients?ingredients=${encodeURIComponent(ingredientNames)}`, {
+      const foodServiceResponse = await fetch(`https://food-service-latest.onrender.com/api/food/recipes/by-ingredients?ingredients=${encodeURIComponent(ingredientNames)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
