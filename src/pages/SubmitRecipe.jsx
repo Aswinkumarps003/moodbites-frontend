@@ -34,7 +34,7 @@ const SubmitRecipe = () => {
   // --- Food-related validation helpers ---
   const FOOD_KEYWORDS = new Set([
     // staple foods (grains, breads, pasta, noodles)
-    'ada', 'adai', 'akki roti', 'amaranth', 'appam', 'arborio', 'atta', 'bagel', 'baguette', 'bajra', 'bajra roti', 'barley', 'basmati', 'besan', 'bhakri', 'bhatura', 'bread', 'brioche', 'brown rice', 'buckwheat', 'bulgur', 'carnaroli', 'cellophane noodles', 'chapati', 'cheela', 'chawal', 'ciabatta', 'cornbread', 'cornmeal', 'couscous', 'cracker', 'croissant', 'dosa', 'egg noodles', 'farro', 'fettuccine', 'flour', 'focaccia', 'freekeh', 'fusilli', 'gehun', 'gnocchi', 'gram flour', 'grits', 'idiyappam', 'idli', 'jau', 'jowar', 'jowar roti', 'kamut', 'khamiri roti', 'kulcha', 'kuttu', 'lachha paratha', 'lasagna', 'linguine', 'lobia', 'luchi', 'macaroni', 'maida', 'makki', 'makki di roti', 'malabar parotta', 'masala dosa', 'millet', 'missi roti', 'murmura', 'naan', 'neer dosa', 'noodles', 'oats', 'orzo', 'paratha', 'parotta', 'pasta', 'penne', 'pesarattu', 'pita', 'poha', 'polenta', 'pongal', 'puri', 'pumpernickel', 'puttu', 'quinoa', 'ragi', 'ragi roti', 'ramen', 'rava', 'rava dosa', 'ravioli', 'rice', 'rice flour', 'rice noodles', 'rigatoni', 'risotto', 'roti', 'rumali roti', 'rye', 'sago', 'sabudana', 'sattu', 'semolina', 'set dosa', 'sheermal', 'soba', 'sooji', 'sorghum', 'sourdough', 'spaghetti', 'spelt', 'sticky rice', 'suji', 'sushi rice', 'taftan', 'tagliatelle', 'tapioca', 'teff', 'thalipeeth', 'thepla', 'tortellini', 'tortilla', 'udon', 'upma', 'uttapam', 'valencia', 'vermicelli', 'wheat', 'wild rice',
+    'strong' ,'brew','brewed','steep','rolled','chamomile','ada', 'adai', 'akki roti', 'amaranth', 'appam', 'arborio', 'atta', 'bagel', 'baguette', 'bajra', 'bajra roti', 'barley', 'basmati', 'besan', 'bhakri', 'bhatura', 'bread', 'brioche', 'brown rice', 'buckwheat', 'bulgur', 'carnaroli', 'cellophane noodles', 'chapati', 'cheela', 'chawal', 'ciabatta', 'cornbread', 'cornmeal', 'couscous', 'cracker', 'croissant', 'dosa', 'egg noodles', 'farro', 'fettuccine', 'flour', 'focaccia', 'freekeh', 'fusilli', 'gehun', 'gnocchi', 'gram flour', 'grits', 'idiyappam', 'idli', 'jau', 'jowar', 'jowar roti', 'kamut', 'khamiri roti', 'kulcha', 'kuttu', 'lachha paratha', 'lasagna', 'linguine', 'lobia', 'luchi', 'macaroni', 'maida', 'makki', 'makki di roti', 'malabar parotta', 'masala dosa', 'millet', 'missi roti', 'murmura', 'naan', 'neer dosa', 'noodles', 'oats', 'orzo', 'paratha', 'parotta', 'pasta', 'penne', 'pesarattu', 'pita', 'poha', 'polenta', 'pongal', 'puri', 'pumpernickel', 'puttu', 'quinoa', 'ragi', 'ragi roti', 'ramen', 'rava', 'rava dosa', 'ravioli', 'rice', 'rice flour', 'rice noodles', 'rigatoni', 'risotto', 'roti', 'rumali roti', 'rye', 'sago', 'sabudana', 'sattu', 'semolina', 'set dosa', 'sheermal', 'soba', 'sooji', 'sorghum', 'sourdough', 'spaghetti', 'spelt', 'sticky rice', 'suji', 'sushi rice', 'taftan', 'tagliatelle', 'tapioca', 'teff', 'thalipeeth', 'thepla', 'tortellini', 'tortilla', 'udon', 'upma', 'uttapam', 'valencia', 'vermicelli', 'wheat', 'wild rice',
 
     // proteins (meat, poultry, seafood, dairy, legumes, nuts, seeds)
     'abalone', 'albacore', 'almond', 'anchovy', 'arhar dal', 'bacon', 'bass', 'bean', 'beans', 'beef', 'black bean', 'black chana', 'brie', 'camembert', 'carp', 'cashew', 'catfish', 'chana', 'chana dal', 'cheddar', 'cheese', 'chenna', 'cherrystone', 'chia', 'chickpea', 'chickpeas', 'chicken', 'clam', 'cod', 'conch', 'cottage cheese', 'crab', 'crayfish', 'cream cheese', 'curd', 'dahi', 'dal', 'doodh', 'duck', 'edamame', 'eel', 'egg', 'eggs', 'emmental', 'escargot', 'fava bean', 'feta', 'fish', 'flax', 'gorgonzola', 'gosht', 'gouda', 'gram', 'grouper', 'gruyere', 'haddock', 'halibut', 'halloumi', 'ham', 'hazelnut', 'hemp', 'herring', 'jerky', 'kabuli chana', 'kala chana', 'kefir', 'khoya', 'kidney', 'kulthi', 'lamb', 'langoustine', 'lentil', 'lentils', 'lima bean', 'liver', 'lobster', 'lobia', 'macadamia', 'mackerel', 'mahi-mahi', 'malai', 'manchego', 'mascarpone', 'masoor', 'masoor dal', 'matar', 'matki', 'mawa', 'milk', 'monkfish', 'moong', 'moong dal', 'mortadella', 'moth bean', 'mozzarella', 'mung', 'mussel', 'mutton', 'natto', 'nut', 'nuts', 'octopus', 'offal', 'oyster', 'pancetta', 'paneer', 'parmesan', 'pea', 'peanut', 'peas', 'pecan', 'pecorino', 'pepperoni', 'perch', 'pike', 'pine nut', 'pinto bean', 'pistachio', 'pollock', 'pork', 'prawn', 'prosciutto', 'provolone', 'pumpkin seed', 'quail', 'rabbit', 'rajma', 'red snapper', 'ricotta', 'roquefort', 'salami', 'salmon', 'sardine', 'sausage', 'scallop', 'sea urchin', 'seed', 'seeds', 'seitan', 'sesame seed', 'shrimp', 'snapper', 'soy', 'squid', 'steak', 'stilton', 'sunflower seed', 'swordfish', 'tempeh', 'tilapia', 'tofu', 'toor dal', 'tripe', 'trout', 'tuna', 'turbot', 'turkey', 'uni', 'urad', 'urad dal', 'veal', 'venison', 'walnut', 'white bean', 'yogurt',
@@ -81,7 +81,10 @@ const SubmitRecipe = () => {
     'adobo', 'bibimbap', 'borscht', 'bouillabaisse', 'burger', 'burrito', 'carbonara', 'casserole', 'ceviche', 'chili con carne', 'chowder', 'coq au vin', 'croquette', 'curry', 'dim sum', 'dumpling', 'enchilada', 'fajita', 'falafel', 'foie gras', 'fondue', 'frittata', 'gazpacho', 'goulash', 'gumbo', 'jambalaya', 'jollof', 'laksa', 'lasagna', 'moussaka', 'pad thai', 'paella', 'pancake', 'pho', 'pie', 'pierogi', 'pizza', 'poke', 'quesadilla', 'quiche', 'ratatouille', 'salad', 'sandwich', 'sashimi', 'satay', 'sauerbraten', 'shawarma', 'shepherds pie', 'soup', 'spring roll', 'stew', 'stir-fry', 'stroganoff', 'sushi', 'tabbouleh', 'taco', 'tagine', 'tamale', 'tapas', 'tart', 'tempura', 'teriyaki', 'tom yum', 'waffle',
 
     // units, commons & descriptors
-    'baked', 'blanched', 'blend', 'boiled', 'braised', 'broiled', 'bunch', 'canned', 'charred', 'chiffonade', 'chop', 'chopped', 'clove', 'coarse', 'confit', 'core', 'creamed', 'crushed', 'crystalized', 'cube', 'cubed', 'cups', 'cured', 'dash', 'deglazed', 'dehydrated', 'deseeded', 'dice', 'diced', 'distilled', 'dollop', 'dried', 'dum', 'emulsify', 'fermented', 'filet', 'fillet', 'fine', 'flambe', 'floret', 'fold', 'fresh', 'fried', 'frozen', 'g', 'gallon', 'glaze', 'grated', 'grilled', 'grind', 'ground', 'half', 'head', 'infused', 'julienne', 'kg', 'knead', 'l', 'lb', 'marinated', 'mashed', 'melted', 'minced', 'mix', 'ml', 'ounce', 'oz', 'parboiled', 'pasteurized', 'peel', 'peeled', 'pickled', 'piece', 'pieces', 'pinch', 'pint', 'pitted', 'poached', 'powdered', 'pressed', 'pureed', 'quart', 'raw', 'reduce', 'rendered', 'ribbon', 'roasted', 'rough', 'scalded', 'scored', 'seared', 'shaved', 'shredded', 'sifted', 'simmered', 'slice', 'sliced', 'slices', 'smoked', 'soaked', 'spoonful', 'sprig', 'steamed', 'stewed', 'stir', 'stuffed', 'tadka', 'tarka', 'tablespoon', 'tbsp', 'teaspoon', 'thick', 'thin', 'toasted', 'tsp', 'whipped', 'whole', 'zest'
+    'baked', 'blanched', 'blend', 'boiled', 'braised', 'broiled', 'bunch', 'canned', 'charred', 'chiffonade', 'chop', 'chopped', 'clove', 'coarse', 'confit', 'core', 'creamed', 'crushed', 'crystalized', 'cube', 'cubed', 'cups', 'cured', 'dash', 'deglazed', 'dehydrated', 'deseeded', 'dice', 'diced', 'distilled', 'dollop', 'dried', 'dum', 'emulsify', 'fermented', 'filet', 'fillet', 'fine', 'flambe', 'floret', 'fold', 'fresh', 'fried', 'frozen', 'g', 'gallon', 'glaze', 'grated', 'grilled', 'grind', 'ground', 'half', 'head', 'infused', 'julienne', 'kg', 'knead', 'l', 'lb', 'marinated', 'mashed', 'melted', 'minced', 'mix', 'ml', 'ounce', 'oz', 'parboiled', 'pasteurized', 'peel', 'peeled', 'pickled', 'piece', 'pieces', 'pinch', 'pint', 'pitted', 'poached', 'powdered', 'pressed', 'pureed', 'quart', 'raw', 'reduce', 'rendered', 'ribbon', 'roasted', 'rough', 'scalded', 'scored', 'seared', 'shaved', 'shredded', 'sifted', 'simmered', 'slice', 'sliced', 'slices', 'smoked', 'soaked', 'spoonful', 'sprig', 'steamed', 'stewed', 'stir', 'stuffed', 'tadka', 'tarka', 'tablespoon', 'tbsp', 'teaspoon', 'thick', 'thin', 'toasted', 'tsp', 'whipped', 'whole', 'zest',
+    
+    // NEW: Basic Instruction Terms
+    'saucepan','add', 'adjust', 'allow', 'arrange', 'bake', 'beat', 'blanch', 'blend', 'boil', 'braise', 'break', 'brew', 'bring to a boil', 'brush', 'caramelize', 'chill', 'churn', 'combine', 'cool', 'cook', 'cover', 'cream', 'crush', 'cure', 'cut', 'deglaze', 'dice', 'dissolve', 'drain', 'dredge', 'drizzle', 'dust', 'emulsify', 'ferment', 'filter', 'fold', 'freeze', 'fry', 'garnish', 'grate', 'grill', 'heat', 'incorporate', 'infuse', 'knead', 'let sit', 'marinate', 'mash', 'melt', 'mince', 'mix', 'pat dry', 'preheat', 'press', 'puree', 'reduce', 'refrigerate', 'remove', 'rest', 'rinse', 'roast', 'roll', 'sauté', 'scald', 'sear', 'season', 'serve', 'set aside', 'shred', 'sift', 'simmer', 'slice', 'smoke', 'soak', 'spread', 'sprinkle', 'steam', 'steep', 'stir', 'strain', 'stuff', 'thicken', 'toast', 'toss', 'whip', 'whisk', 'wrap'
 ]);
 
   const NON_FOOD_BLOCKLIST = new Set([
@@ -116,7 +119,7 @@ const SubmitRecipe = () => {
   };
 
   const GENERIC_ALLOWED = new Set([
-    'good','great','nice','tasty','delicious','yummy','awesome','hearty','savory','sweet','spicy','mild','flavorful','aromatic','fresh','healthy','simple','quick','easy','homemade','home','style','authentic','classic','comfort','comforting','diet','dish','meal','food','really','very','super','ultra','best'
+    'ingredient','ingredients','good','great','nice','tasty','delicious','yummy','awesome','hearty','savory','sweet','spicy','mild','flavorful','aromatic','fresh','healthy','simple','quick','easy','homemade','home','style','authentic','classic','comfort','comforting','diet','dish','meal','food','really','very','super','ultra','best'
   ]);
 
   const findNonFoodTokens = (text) => {
@@ -151,7 +154,13 @@ const SubmitRecipe = () => {
     if (!title.trim()) return "Recipe title is required";
     if (title.trim().length < 3) return "Title must be at least 3 characters";
     if (title.trim().length > 100) return "Title must be less than 100 characters";
+    
+    // Check for numbers
+    if (/\d/.test(title.trim())) return "Title cannot contain numbers";
+    
+    // Check for special characters (allow only alphabets and spaces)
     if (!/^[a-zA-Z\s]+$/.test(title.trim())) return "Title can only contain alphabets and spaces";
+    
     return null;
   };
 
@@ -159,8 +168,14 @@ const SubmitRecipe = () => {
     if (!description.trim()) return "Description is required";
     if (description.trim().length < 10) return "Description must be at least 10 characters";
     if (description.trim().length > 500) return "Description must be less than 500 characters";
-    const bad = findNonFoodTokens(description);
-    if (bad.length) return `Description contains non-food terms: ${bad.join(', ')}`;
+    
+    // Check for numbers
+    if (/\d/.test(description.trim())) return "Description cannot contain numbers";
+    
+    // Check for special characters (allow only alphabets and spaces)
+    if (!/^[a-zA-Z\s]+$/.test(description.trim())) return "Description can only contain alphabets and spaces";
+    
+    
     return null;
   };
 
@@ -475,22 +490,22 @@ const SubmitRecipe = () => {
       }
 
       // Final food-related guard (cross-field):
-      const combinedTexts = [
-        formData.title,
-        formData.description,
-        ...formData.ingredients,
-        ...formData.instructions,
-        ...formData.tags
-      ].join(' ');
-      const nonFood = findNonFoodTokens(combinedTexts);
-      if (nonFood.length) {
-        setNonFoodModal({
-          title: 'Details not food-related',
-          details: `Found non-food terms: ${nonFood.join(', ')}. Please remove them before submitting.`
-        });
-        setSubmitting(false);
-        return;
-      }
+      // const combinedTexts = [
+      //   formData.title,
+      //   formData.description,
+      //   ...formData.ingredients,
+      //   ...formData.instructions,
+      //   ...formData.tags
+      // ].join(' ');
+      // const nonFood = findNonFoodTokens(combinedTexts);
+      // if (nonFood.length) {
+      //   setNonFoodModal({
+      //     title: 'Details not food-related',
+      //     details: `Found non-food terms: ${nonFood.join(', ')}. Please remove them before submitting.`
+      //   });
+      //   setSubmitting(false);
+      //   return;
+      // }
 
       let imageUrl = null;
       
