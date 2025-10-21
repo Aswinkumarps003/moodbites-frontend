@@ -202,7 +202,7 @@ const FridgeScanner = () => {
       formData.append('file', blob, 'fridge_scan.jpg');
       
       // Call YOLO model API
-      const apiResponse = await fetch('https://moodbites-fridge-service.onrender.com/api/predict', {
+      const apiResponse = await fetch('http://localhost:4010/api/predict', {
         method: 'POST',
         body: formData
       });
