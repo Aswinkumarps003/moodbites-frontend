@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, AlertCircle, User, CheckCircle, Shield, ShieldCheck, ShieldX, Users, UtensilsCrossed } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, User, CheckCircle, Shield, ShieldCheck, ShieldX, Users, UtensilsCrossed, Utensils, Brain, Scan, Heart } from "lucide-react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/user';
+const API_URL = 'https://user-service-latest-bae8.onrender.com/api/user';
 
 // Simple vertical wheel picker component
 const WheelPicker = ({ values = [], value, onChange, visibleCount = 5, itemClass = "", getLabel }) => {
@@ -36,7 +36,7 @@ const WheelPicker = ({ values = [], value, onChange, visibleCount = 5, itemClass
 
   return (
     <div className="relative">
-      <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: `${(visibleCount/2)*itemHeight - itemHeight}px`, height: `${itemHeight}px` }}>
+      <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: `${(visibleCount / 2) * itemHeight - itemHeight}px`, height: `${itemHeight}px` }}>
         <div className="border border-gray-200 rounded-xl" />
       </div>
       <div
@@ -271,7 +271,7 @@ const Signup = () => {
                 size: 'large',
                 text: 'signup_with',
                 shape: 'rectangular',
-                width: '100%',
+                width: 300,
               }
             );
           } catch (error) {
@@ -301,13 +301,13 @@ const Signup = () => {
       // Store user data and token
       localStorage.setItem('authToken', result.data.token);
       localStorage.setItem('user', JSON.stringify(result.data.user));
-      
+
       // Dispatch login event to update navbar
       window.dispatchEvent(new Event('moodbites-login'));
-      
+
       // Navigate to dashboard
       navigate('/dashboard');
-      
+
     } catch (err) {
       setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
     } finally {
@@ -333,7 +333,7 @@ const Signup = () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
-    
+
     try {
       // Normalize height (to cm) and weight (to kg)
       let normalizedHeightCm = data.heightCm;
@@ -355,14 +355,14 @@ const Signup = () => {
         heightCm: Number(normalizedHeightCm),
         weightKg: Number(normalizedWeightKg)
       });
-      
+
       // Show success message
       setSuccess(response.data.message);
-      
+
       // Reset form
       reset();
       setPasswordStrength({ score: 0, feedback: [] });
-      
+
     } catch (err) {
       setError(err.response?.data?.message || 'An unexpected error occurred.');
     } finally {
@@ -383,7 +383,7 @@ const Signup = () => {
       return;
     }
     setError(null);
-    
+
     // If user is a dietician, require certificate and submit multipart
     if (watch("role") === "2") {
       // Validate certificate presence and type/size
@@ -391,7 +391,7 @@ const Signup = () => {
         setError('Please upload your dietician certificate (image or PDF, max 10MB).');
         return;
       }
-      const allowedTypes = ['image/jpeg','image/png','image/webp','image/gif','application/pdf'];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
       if (!allowedTypes.includes(certificate.type)) {
         setError('Invalid file type. Upload an image (jpg, png, webp, gif) or PDF.');
         return;
@@ -421,20 +421,20 @@ const Signup = () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
-    
+
     try {
       const response = await axios.post(`${API_URL}/register-dietician`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
+
       // Show success message
       setSuccess(response.data.message);
-      
+
       // Reset form
       reset();
       setPasswordStrength({ score: 0, feedback: [] });
       setCertificate(null);
-      
+
     } catch (err) {
       setError(err.response?.data?.message || 'An unexpected error occurred.');
     } finally {
@@ -477,25 +477,25 @@ const Signup = () => {
             /^demo@demo\.\w+$/i, // demo@demo.com
             /^example@example\.\w+$/i, // example@example.com
           ];
-          
+
           for (const pattern of simplePatterns) {
             if (pattern.test(value)) {
               return "Please enter a real email address, not a test pattern";
             }
           }
-          
+
           // Check for very short local parts
           const localPart = value.split('@')[0];
           if (localPart && localPart.length < 2) {
             return "Email local part must be at least 2 characters";
           }
-          
+
           // Check for very short domain parts
           const domainPart = value.split('@')[1]?.split('.')[0];
           if (domainPart && domainPart.length < 2) {
             return "Email domain must be at least 2 characters";
           }
-          
+
           return true;
         }
       }
@@ -532,509 +532,590 @@ const Signup = () => {
   // Check if form is ready for submission
   const isFormValid = isValid && passwordStrength.score >= 3;
 
+  const floatingIcons = [
+    { emoji: "🥗", top: "10%", left: "8%", delay: 0 },
+    { emoji: "🍎", top: "25%", left: "75%", delay: 0.5 },
+    { emoji: "🥑", top: "60%", left: "12%", delay: 1 },
+    { emoji: "🍊", top: "75%", left: "80%", delay: 1.5 },
+    { emoji: "🥕", top: "45%", left: "90%", delay: 2 },
+    { emoji: "🍇", top: "85%", left: "15%", delay: 0.8 },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-stone-100 py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full space-y-8"
-      >
-        <div className="text-center">
+    <div className="min-h-screen flex">
+      {/* Left Side - Visual Panel */}
+      <div className="hidden lg:flex lg:w-5/12 relative overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&q=80"
+          alt="Fresh healthy salad"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#476E00]/80 via-[#476E00]/60 to-[#FFD122]/50" />
+
+        {floatingIcons.map((item, i) => (
           <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            className="mx-auto w-16 h-16 bg-gradient-to-r from-[#F10100] to-[#FFD122] rounded-2xl flex items-center justify-center shadow-lg mb-6"
+            key={i}
+            className="absolute text-4xl opacity-40 pointer-events-none"
+            style={{ top: item.top, left: item.left }}
+            animate={{ y: [0, -15, 0], rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 4 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: item.delay }}
           >
-            <span className="text-2xl">🍽️</span>
+            {item.emoji}
           </motion.div>
-          <h2 className="text-3xl font-bold text-gray-900 font-display">
-            Join MoodBites!
-          </h2>
-          <p className="mt-2 text-gray-600">
-            Create your account to start your journey.
-          </p>
+        ))}
+
+        <div className="relative z-10 flex flex-col justify-center items-start p-16 text-white">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <div className="flex items-center space-x-3 mb-8">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                <Utensils className="w-8 h-8 text-white" />
+              </div>
+              <span className="text-3xl font-bold font-display">MoodBites</span>
+            </div>
+
+            <h1 className="text-5xl font-bold mb-6 font-display leading-tight">
+              Start Your<br />
+              <span className="text-[#FFD122]">Wellness Journey</span>
+            </h1>
+
+            <p className="text-white/80 text-lg mb-10 max-w-md leading-relaxed">
+              Create your free account and unlock personalized nutrition recommendations powered by AI.
+            </p>
+
+            <div className="space-y-4">
+              {[
+                { icon: Brain, text: "AI-powered mood detection" },
+                { icon: Scan, text: "Smart fridge scanning" },
+                { icon: Heart, text: "Personalized wellness plans" }
+              ].map((feat, idx) => {
+                const Icon = feat.icon;
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + idx * 0.15 }}
+                    className="flex items-center space-x-3"
+                  >
+                    <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                      <Icon className="w-4 h-4 text-[#FFD122]" />
+                    </div>
+                    <span className="text-white/90 font-medium">{feat.text}</span>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
         </div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-stone-100 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 dots-pattern opacity-30 pointer-events-none" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#476E00]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#FFD122]/5 rounded-full blur-3xl pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100"
+          className="max-w-md w-full space-y-8 relative z-10"
         >
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3"
-              >
-                <AlertCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">{error}</span>
-              </motion.div>
-            )}
-            
-            {success && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-3"
-              >
-                <CheckCircle className="w-5 h-5" />
-                <div className="text-sm">
-                  <div className="font-medium">{success}</div>
-                  <div className="text-xs mt-1">
-                    Please check your email and click the verification link to complete your registration.
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* STEP 1: Account */}
-          {step === 1 && (
-            <>
-          {/* Google Sign-In Button */}
-          <div className="mb-6">
-            <div id="google-signin-button" className="w-full"></div>
-            {googleLoading && (
-              <div className="mt-3 text-center">
-                <div className="inline-flex items-center text-sm text-gray-600">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#F10100] mr-2"></div>
-                  Signing in with Google...
-                </div>
-              </div>
-            )}
-            {(!import.meta.env.VITE_GOOGLE_CLIENT_ID || import.meta.env.VITE_GOOGLE_CLIENT_ID === 'your-google-client-id') && (
-              <div className="mt-3 text-center">
-                <div className="text-xs text-gray-500">
-                  Google Sign-In not configured. Please set up your Google OAuth credentials.
-                </div>
-              </div>
-            )}
+          <div className="text-center">
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              className="mx-auto w-16 h-16 bg-gradient-to-br from-[#476E00] to-[#FFD122] rounded-2xl flex items-center justify-center shadow-lg shadow-[#476E00]/20 mb-6 lg:hidden"
+            >
+              <span className="text-2xl">🍽️</span>
+            </motion.div>
+            <h2 className="text-3xl font-bold text-gray-900 font-display">
+              Join MoodBites!
+            </h2>
+            <p className="mt-2 text-gray-500">
+              Create your account to start your journey.
+            </p>
           </div>
 
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
-            </div>
-          </div>
-
-              <div className="space-y-6">
-            {/* Name Field */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="name"
-                  type="text"
-                  {...register("name", validationSchema.name)}
-                  onKeyUp={() => trigger("name")}
-                  onBlur={() => trigger("name")}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#F10100] focus:border-[#F10100] transition-all duration-200 ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="John Doe"
-                />
-              </div>
-              {errors.name && (
-                <motion.p
-                  initial={{ opacity: 0, y: -5 }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-premium p-8 border border-white/40"
+          >
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3"
                 >
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-medium">{errors.name.message}</span>
-                </motion.p>
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="text-sm font-medium">{error}</span>
+                </motion.div>
               )}
-            </div>
 
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="email"
-                  type="email"
-                  {...register("email", validationSchema.email)}
-                  onKeyUp={() => trigger("email")}
-                  onBlur={() => trigger("email")}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#F10100] focus:border-[#F10100] transition-all duration-200 ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="you@example.com"
-                />
-              </div>
-              {/* AJAX email check feedback */}
-              <div className="mt-2">
-                {emailChecking && (
-                  <div className="text-xs text-gray-500">Checking email availability...</div>
-                )}
-                {!errors.email && !emailChecking && emailExists && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
-                  >
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <span className="font-medium">Email already registered. Try logging in or use another email.</span>
-                  </motion.p>
-                )}
-              </div>
-              {errors.email && (
-                <motion.p
-                  initial={{ opacity: 0, y: -5 }}
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-3"
                 >
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-medium">{errors.email.message}</span>
-                </motion.p>
+                  <CheckCircle className="w-5 h-5" />
+                  <div className="text-sm">
+                    <div className="font-medium">{success}</div>
+                    <div className="text-xs mt-1">
+                      Please check your email and click the verification link to complete your registration.
+                    </div>
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
 
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  {...register("password", validationSchema.password)}
-                  onKeyUp={() => trigger("password")}
-                  onBlur={() => trigger("password")}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#F10100] focus:border-[#F10100] transition-all duration-200 ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-              
-              {/* Password Validation Errors */}
-              {errors.password && (
-                <motion.p
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
-                >
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-medium">{errors.password.message}</span>
-                </motion.p>
-              )}
-              
-              {/* Password Strength Indicator */}
-              {watchedPassword && (
-                <div className="mt-2">
-                  <div className="flex items-center gap-2 mb-2">
-                    {getStrengthIcon(passwordStrength.score)}
-                    <span className={`text-sm font-medium ${getStrengthColor(passwordStrength.score)}`}>
-                      {getStrengthText(passwordStrength.score)}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        passwordStrength.score >= 4 ? 'bg-green-500' :
-                        passwordStrength.score >= 3 ? 'bg-yellow-500' :
-                        passwordStrength.score >= 2 ? 'bg-orange-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
-                    ></div>
-                  </div>
-                  
-                  {/* Show feedback only when requirements are not met */}
-                  {passwordStrength.score < 5 && (
-                    <div className="mt-2 space-y-1">
-                      {passwordStrength.feedback.map((feedback, index) => {
-                        const isMet = feedback.startsWith('Contains') || feedback.startsWith('At least');
-                        return (
-                          <div key={index} className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${
-                              isMet ? 'bg-green-500' : 'bg-gray-300'
-                            }`}></div>
-                            <span className={`text-xs ${isMet ? 'text-green-600' : 'text-gray-600'}`}>
-                              {feedback}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  
-                  {/* Show success message when all criteria are met */}
-                  {passwordStrength.score === 5 && (
-                    <div className="mt-2 flex items-center gap-2 text-green-600 text-xs">
-                      <CheckCircle className="w-3 h-3" />
-                      All password requirements met!
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Role Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Account Type
-              </label>
-              <div className="space-y-3">
-                <label className="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200 group">
-                  <input
-                    type="radio"
-                    value="1"
-                    {...register("role")}
-                    className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
-                  />
-                  <div className="ml-3 flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors duration-200">
-                      <Users className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">Normal User</div>
-                      <div className="text-xs text-gray-500">Access to food recommendations and mood tracking</div>
-                    </div>
-                  </div>
-                </label>
-                
-                <label className="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200 group">
-                  <input
-                    type="radio"
-                    value="2"
-                    {...register("role")}
-                    className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
-                  />
-                  <div className="ml-3 flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors duration-200">
-                      <UtensilsCrossed className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">Dietician</div>
-                      <div className="text-xs text-gray-500">Professional access to manage recipes and diet plans</div>
-                    </div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {/* Certificate upload for Dietician */}
-            {watch("role") === "2" && (
-              <div className="mt-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Dietician Certificate (image or PDF)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={(e) => setCertificate(e.target.files?.[0] || null)}
-                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-gray-200 rounded-xl p-2"
-                />
-                <p className="text-xs text-gray-500 mt-2">Required for dietician accounts. Max 10MB. Accepted: images, PDF.</p>
-              </div>
-            )}
-
-                <div>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="button"
-                    onClick={handleNext}
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? "Creating account..." : (watch("role") === "2" ? "Create Account" : "Continue")}
-                  </motion.button>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* STEP 2: Details - Only for Normal Users */}
-          {step === 2 && watch("role") === "1" && (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Gender Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">Gender</label>
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Male"
-                      checked={gender === 'Male'}
-                      onChange={() => setGender('Male')}
-                      className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
-                    />
-                    <span className="ml-3 text-sm font-medium text-gray-900">Male</span>
-                  </label>
-                  <label className="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Female"
-                      checked={gender === 'Female'}
-                      onChange={() => setGender('Female')}
-                      className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
-                    />
-                    <span className="ml-3 text-sm font-medium text-gray-900">Female</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Age, Height, Weight Pickers */}
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700 mb-3">Age, Height & Weight</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Age */}
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <div className="text-xs text-gray-500 mb-2">Age</div>
-                    <WheelPicker
-                      values={Array.from({ length: 83 }).map((_, i) => i + 18)}
-                      value={age}
-                      onChange={setAge}
-                      itemClass="age-picker"
-                    />
-                    <div className="mt-2 text-center text-sm font-semibold text-gray-900">{age} yrs</div>
-                  </div>
-
-                  {/* Height */}
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-xs text-gray-500">Height</div>
-                      <div className="bg-white rounded-lg p-1 border border-gray-200">
-                        <button
-                          type="button"
-                          onClick={() => setHeightUnit('cm')}
-                          className={`px-2 py-1 text-xs rounded-md ${heightUnit === 'cm' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
-                        >cm</button>
-                        <button
-                          type="button"
-                          onClick={() => setHeightUnit('ftin')}
-                          className={`px-2 py-1 text-xs rounded-md ${heightUnit === 'ftin' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
-                        >ft/in</button>
+            {/* STEP 1: Account */}
+            {step === 1 && (
+              <>
+                {/* Google Sign-In Button */}
+                <div className="mb-6">
+                  <div id="google-signin-button" className="w-full"></div>
+                  {googleLoading && (
+                    <div className="mt-3 text-center">
+                      <div className="inline-flex items-center text-sm text-gray-600">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#F10100] mr-2"></div>
+                        Signing in with Google...
                       </div>
                     </div>
-                    {heightUnit === 'cm' ? (
-                      <>
-                        <WheelPicker
-                          values={Array.from({ length: 141 }).map((_, i) => i + 100)}
-                          value={heightCm}
-                          onChange={setHeightCm}
-                          itemClass="height-cm-picker"
-                        />
-                        <div className="mt-2 text-center text-sm font-semibold text-gray-900">{heightCm} cm</div>
-                      </>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">ft</div>
-                          <WheelPicker
-                            values={Array.from({ length: 4 }).map((_, i) => i + 4)}
-                            value={heightFt}
-                            onChange={setHeightFt}
-                            itemClass="height-ft-picker"
-                          />
+                  )}
+                  {(!import.meta.env.VITE_GOOGLE_CLIENT_ID || import.meta.env.VITE_GOOGLE_CLIENT_ID === 'your-google-client-id') && (
+                    <div className="mt-3 text-center">
+                      <div className="text-xs text-gray-500">
+                        Google Sign-In not configured. Please set up your Google OAuth credentials.
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Divider */}
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-3 bg-white/80 text-gray-400 text-xs uppercase tracking-wider font-medium">Or continue with email</span>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Name Field */}
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Full Name
+                    </label>
+                    <div className="relative group">
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-[#476E00] transition-colors" />
+                      <input
+                        id="name"
+                        type="text"
+                        {...register("name", validationSchema.name)}
+                        onKeyUp={() => trigger("name")}
+                        onBlur={() => trigger("name")}
+                        className={`w-full pl-12 pr-4 py-3.5 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#476E00]/20 focus:border-[#476E00] transition-all duration-300 bg-gray-50/50 hover:bg-white ${errors.name ? 'border-red-300' : 'border-gray-200'
+                          }`}
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    {errors.name && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
+                      >
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="font-medium">{errors.name.message}</span>
+                      </motion.p>
+                    )}
+                  </div>
+
+                  {/* Email Field */}
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email address
+                    </label>
+                    <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-[#476E00] transition-colors" />
+                      <input
+                        id="email"
+                        type="email"
+                        {...register("email", validationSchema.email)}
+                        onKeyUp={() => trigger("email")}
+                        onBlur={() => trigger("email")}
+                        className={`w-full pl-12 pr-4 py-3.5 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#476E00]/20 focus:border-[#476E00] transition-all duration-300 bg-gray-50/50 hover:bg-white ${errors.email ? 'border-red-300' : 'border-gray-200'
+                          }`}
+                        placeholder="you@example.com"
+                      />
+                    </div>
+                    {/* AJAX email check feedback */}
+                    <div className="mt-2">
+                      {emailChecking && (
+                        <div className="text-xs text-gray-500">Checking email availability...</div>
+                      )}
+                      {!errors.email && !emailChecking && emailExists && (
+                        <motion.p
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-red-500 text-sm flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
+                        >
+                          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                          <span className="font-medium">Email already registered. Try logging in or use another email.</span>
+                        </motion.p>
+                      )}
+                    </div>
+                    {errors.email && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
+                      >
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="font-medium">{errors.email.message}</span>
+                      </motion.p>
+                    )}
+                  </div>
+
+                  {/* Password Field */}
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <div className="relative group">
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-[#476E00] transition-colors" />
+                      <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        {...register("password", validationSchema.password)}
+                        onKeyUp={() => trigger("password")}
+                        onBlur={() => trigger("password")}
+                        className={`w-full pl-12 pr-14 py-3.5 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#476E00]/20 focus:border-[#476E00] transition-all duration-300 bg-gray-50/50 hover:bg-white ${errors.password ? 'border-red-300' : 'border-gray-200'
+                          }`}
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+
+                    {/* Password Validation Errors */}
+                    {errors.password && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200"
+                      >
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        <span className="font-medium">{errors.password.message}</span>
+                      </motion.p>
+                    )}
+
+                    {/* Password Strength Indicator */}
+                    {watchedPassword && (
+                      <div className="mt-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          {getStrengthIcon(passwordStrength.score)}
+                          <span className={`text-sm font-medium ${getStrengthColor(passwordStrength.score)}`}>
+                            {getStrengthText(passwordStrength.score)}
+                          </span>
                         </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">in</div>
-                          <WheelPicker
-                            values={Array.from({ length: 12 }).map((_, i) => i)}
-                            value={heightIn}
-                            onChange={setHeightIn}
-                            itemClass="height-in-picker"
-                          />
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.score >= 4 ? 'bg-green-500' :
+                                passwordStrength.score >= 3 ? 'bg-yellow-500' :
+                                  passwordStrength.score >= 2 ? 'bg-orange-500' : 'bg-red-500'
+                              }`}
+                            style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                          ></div>
                         </div>
-                        <div className="col-span-2 mt-2 text-center text-sm font-semibold text-gray-900">{heightFt} ft {heightIn} in</div>
+
+                        {/* Show feedback only when requirements are not met */}
+                        {passwordStrength.score < 5 && (
+                          <div className="mt-2 space-y-1">
+                            {passwordStrength.feedback.map((feedback, index) => {
+                              const isMet = feedback.startsWith('Contains') || feedback.startsWith('At least');
+                              return (
+                                <div key={index} className="flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${isMet ? 'bg-green-500' : 'bg-gray-300'
+                                    }`}></div>
+                                  <span className={`text-xs ${isMet ? 'text-green-600' : 'text-gray-600'}`}>
+                                    {feedback}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Show success message when all criteria are met */}
+                        {passwordStrength.score === 5 && (
+                          <div className="mt-2 flex items-center gap-2 text-green-600 text-xs">
+                            <CheckCircle className="w-3 h-3" />
+                            All password requirements met!
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
 
-                  {/* Weight */}
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-xs text-gray-500">Weight</div>
-                      <div className="bg-white rounded-lg p-1 border border-gray-200">
-                        <button
-                          type="button"
-                          onClick={() => setWeightUnit('kg')}
-                          className={`px-2 py-1 text-xs rounded-md ${weightUnit === 'kg' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
-                        >kg</button>
-                        <button
-                          type="button"
-                          onClick={() => setWeightUnit('lb')}
-                          className={`px-2 py-1 text-xs rounded-md ${weightUnit === 'lb' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
-                        >lb</button>
-                      </div>
+                  {/* Role Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Account Type
+                    </label>
+                    <div className="space-y-3">
+                      <label className="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200 group">
+                        <input
+                          type="radio"
+                          value="1"
+                          {...register("role")}
+                          className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
+                        />
+                        <div className="ml-3 flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors duration-200">
+                            <Users className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">Normal User</div>
+                            <div className="text-xs text-gray-500">Access to food recommendations and mood tracking</div>
+                          </div>
+                        </div>
+                      </label>
+
+                      <label className="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200 group">
+                        <input
+                          type="radio"
+                          value="2"
+                          {...register("role")}
+                          className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
+                        />
+                        <div className="ml-3 flex items-center gap-3">
+                          <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors duration-200">
+                            <UtensilsCrossed className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">Dietician</div>
+                            <div className="text-xs text-gray-500">Professional access to manage recipes and diet plans</div>
+                          </div>
+                        </div>
+                      </label>
                     </div>
-                    <WheelPicker
-                      values={weightUnit === 'kg' ? Array.from({ length: 151 }).map((_, i) => i + 30) : Array.from({ length: 331 }).map((_, i) => i + 66)}
-                      value={weight}
-                      onChange={setWeight}
-                      itemClass="weight-picker"
-                      getLabel={(v) => `${v}`}
-                    />
-                    <div className="mt-2 text-center text-sm font-semibold text-gray-900">{weight} {weightUnit}</div>
+                  </div>
+
+                  {/* Certificate upload for Dietician */}
+                  {watch("role") === "2" && (
+                    <div className="mt-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Upload Dietician Certificate (image or PDF)
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={(e) => setCertificate(e.target.files?.[0] || null)}
+                        className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-gray-200 rounded-xl p-2"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">Required for dietician accounts. Max 10MB. Accepted: images, PDF.</p>
+                    </div>
+                  )}
+
+                  <div>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={handleNext}
+                      disabled={loading}
+                      className="w-full bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white py-3.5 px-4 rounded-xl font-semibold shadow-lg shadow-[#F10100]/20 hover:shadow-xl hover:shadow-[#F10100]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? "Creating account..." : (watch("role") === "2" ? "Create Account" : "Continue")}
+                    </motion.button>
                   </div>
                 </div>
-              </div>
+              </>
+            )}
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-2xl font-semibold hover:bg-gray-50 transition-all duration-300"
+            {/* STEP 2: Details - Only for Normal Users */}
+            {step === 2 && watch("role") === "1" && (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Gender Selection */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Gender</label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="Male"
+                        checked={gender === 'Male'}
+                        onChange={() => setGender('Male')}
+                        className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
+                      />
+                      <span className="ml-3 text-sm font-medium text-gray-900">Male</span>
+                    </label>
+                    <label className="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-[#F10100] hover:bg-red-50 transition-all duration-200">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="Female"
+                        checked={gender === 'Female'}
+                        onChange={() => setGender('Female')}
+                        className="w-4 h-4 text-[#F10100] border-gray-300 focus:ring-[#F10100] focus:ring-2"
+                      />
+                      <span className="ml-3 text-sm font-medium text-gray-900">Female</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Age, Height, Weight Pickers */}
+                <div className="mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Age, Height & Weight</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Age */}
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                      <div className="text-xs text-gray-500 mb-2">Age</div>
+                      <WheelPicker
+                        values={Array.from({ length: 83 }).map((_, i) => i + 18)}
+                        value={age}
+                        onChange={setAge}
+                        itemClass="age-picker"
+                      />
+                      <div className="mt-2 text-center text-sm font-semibold text-gray-900">{age} yrs</div>
+                    </div>
+
+                    {/* Height */}
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-xs text-gray-500">Height</div>
+                        <div className="bg-white rounded-lg p-1 border border-gray-200">
+                          <button
+                            type="button"
+                            onClick={() => setHeightUnit('cm')}
+                            className={`px-2 py-1 text-xs rounded-md ${heightUnit === 'cm' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
+                          >cm</button>
+                          <button
+                            type="button"
+                            onClick={() => setHeightUnit('ftin')}
+                            className={`px-2 py-1 text-xs rounded-md ${heightUnit === 'ftin' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
+                          >ft/in</button>
+                        </div>
+                      </div>
+                      {heightUnit === 'cm' ? (
+                        <>
+                          <WheelPicker
+                            values={Array.from({ length: 141 }).map((_, i) => i + 100)}
+                            value={heightCm}
+                            onChange={setHeightCm}
+                            itemClass="height-cm-picker"
+                          />
+                          <div className="mt-2 text-center text-sm font-semibold text-gray-900">{heightCm} cm</div>
+                        </>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">ft</div>
+                            <WheelPicker
+                              values={Array.from({ length: 4 }).map((_, i) => i + 4)}
+                              value={heightFt}
+                              onChange={setHeightFt}
+                              itemClass="height-ft-picker"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">in</div>
+                            <WheelPicker
+                              values={Array.from({ length: 12 }).map((_, i) => i)}
+                              value={heightIn}
+                              onChange={setHeightIn}
+                              itemClass="height-in-picker"
+                            />
+                          </div>
+                          <div className="col-span-2 mt-2 text-center text-sm font-semibold text-gray-900">{heightFt} ft {heightIn} in</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Weight */}
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-xs text-gray-500">Weight</div>
+                        <div className="bg-white rounded-lg p-1 border border-gray-200">
+                          <button
+                            type="button"
+                            onClick={() => setWeightUnit('kg')}
+                            className={`px-2 py-1 text-xs rounded-md ${weightUnit === 'kg' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
+                          >kg</button>
+                          <button
+                            type="button"
+                            onClick={() => setWeightUnit('lb')}
+                            className={`px-2 py-1 text-xs rounded-md ${weightUnit === 'lb' ? 'bg-[#F10100] text-white' : 'text-gray-600'}`}
+                          >lb</button>
+                        </div>
+                      </div>
+                      <WheelPicker
+                        values={weightUnit === 'kg' ? Array.from({ length: 151 }).map((_, i) => i + 30) : Array.from({ length: 331 }).map((_, i) => i + 66)}
+                        value={weight}
+                        onChange={setWeight}
+                        itemClass="weight-picker"
+                        getLabel={(v) => `${v}`}
+                      />
+                      <div className="mt-2 text-center text-sm font-semibold text-gray-900">{weight} {weightUnit}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-2xl font-semibold hover:bg-gray-50 transition-all duration-300"
+                  >
+                    Back
+                  </button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    disabled={loading || !isFormValid}
+                    className="flex-1 bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white py-3.5 px-4 rounded-2xl font-semibold shadow-lg shadow-[#F10100]/20 hover:shadow-xl hover:shadow-[#F10100]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Creating account..." : "Create account"}
+                  </motion.button>
+                </div>
+              </form>
+            )}
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-semibold text-[#F10100] hover:text-[#D10000] hover:underline"
                 >
-                  Back
-                </button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading || !isFormValid}
-                  className="flex-1 bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white py-3 px-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Creating account..." : "Create account"}
-            </motion.button>
-              </div>
-          </form>
-          )}
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="font-semibold text-[#F10100] hover:text-[#D10000] hover:underline"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 };

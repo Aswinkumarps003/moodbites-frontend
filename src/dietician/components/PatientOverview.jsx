@@ -23,10 +23,10 @@ const PatientOverview = ({ user }) => {
 
         // Fetch patients (role 1)
         const [patientsRes, appointmentsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/user/users/role/1', {
+          fetch('https://user-service-latest-bae8.onrender.com/api/user/users/role/1', {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('http://localhost:5000/api/appointments/dietician', {
+          fetch('https://user-service-latest-bae8.onrender.com/api/appointments/dietician', {
             headers: { 'Authorization': `Bearer ${token}` }
           }).catch(() => null)
         ]);

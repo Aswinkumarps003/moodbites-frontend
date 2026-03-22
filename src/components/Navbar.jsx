@@ -27,13 +27,13 @@ const Navbar = () => {
         setUser(JSON.parse(userData));
       }
     };
-    
+
     checkLoginStatus();
-    
+
     const handleStorage = () => {
       checkLoginStatus();
     };
-    
+
     const handleCustomLogout = () => {
       setIsLoggedIn(false);
       setUser(null);
@@ -42,11 +42,11 @@ const Navbar = () => {
     const handleCustomLogin = () => {
       checkLoginStatus();
     };
-    
+
     window.addEventListener('storage', handleStorage);
     window.addEventListener('moodbites-logout', handleCustomLogout);
     window.addEventListener('moodbites-login', handleCustomLogin);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('moodbites-logout', handleCustomLogout);
@@ -93,27 +93,32 @@ const Navbar = () => {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/95 backdrop-blur-xl shadow-professional"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+          ? "bg-white/80 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.08)] border-b border-white/20"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="flex items-center space-x-2"
-          >
-            <div className="w-10 h-10 bg-gradient-to-r from-[#F10100] to-[#FFD122] rounded-xl flex items-center justify-center shadow-lg">
-              <Utensils className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900 font-display">MoodBites</span>
-          </motion.div>
+          <Link to="/">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="flex items-center space-x-2.5"
+            >
+              <motion.div
+                className="w-10 h-10 bg-gradient-to-br from-[#F10100] to-[#FFD122] rounded-xl flex items-center justify-center shadow-lg shadow-[#F10100]/20"
+                animate={isScrolled ? {} : { boxShadow: ["0 4px 14px rgba(241,1,0,0.2)", "0 4px 20px rgba(241,1,0,0.35)", "0 4px 14px rgba(241,1,0,0.2)"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Utensils className="w-5 h-5 text-white" />
+              </motion.div>
+              <span className="text-xl font-bold text-gray-900 font-display tracking-tight">MoodBites</span>
+            </motion.div>
+          </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-1">
             {navigation.filter((item) => !item.requiresAuth || isLoggedIn).map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
@@ -125,19 +130,19 @@ const Navbar = () => {
                 >
                   <motion.div
                     whileHover={{ y: -2 }}
-                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium ${
-                      isActive
-                        ? "text-[#F10100] bg-[#F10100]/10 shadow-sm"
-                        : "text-gray-700 hover:text-[#F10100] hover:bg-[#F10100]/5"
-                    }`}
+                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium ${isActive
+                        ? "text-[#F10100] bg-[#F10100]/10"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/60"
+                      }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className={`w-4 h-4 ${isActive ? "text-[#F10100]" : ""}`} />
                     <span className="text-sm">{item.name}</span>
                   </motion.div>
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#F10100] rounded-full"
+                      className="absolute -bottom-1 left-2 right-2 h-0.5 bg-gradient-to-r from-[#F10100] to-[#FFD122] rounded-full"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
                 </Link>
@@ -151,15 +156,18 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-sm font-semibold text-[#F10100] rounded-xl hover:bg-[#F10100]/10 transition-colors"
+                  className="px-5 py-2 text-sm font-semibold text-gray-700 rounded-xl hover:bg-gray-100 transition-all duration-200"
                 >
                   Log In
                 </Link>
-                <Link
-                  to="/signup"
-                  className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-[#F10100] to-[#FFD122] rounded-xl hover:shadow-lg transition-all duration-200"
-                >
-                  Sign Up
+                <Link to="/signup">
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-[#F10100] to-[#FF4444] rounded-xl shadow-lg shadow-[#F10100]/20 hover:shadow-xl hover:shadow-[#F10100]/30 transition-all duration-300"
+                  >
+                    Sign Up
+                  </motion.div>
                 </Link>
               </>
             ) : (
@@ -171,33 +179,33 @@ const Navbar = () => {
                     console.log('Dropdown toggle clicked, current state:', userDropdown);
                     setUserDropdown(!userDropdown);
                   }}
-                  className="flex items-center justify-center w-10 h-10 text-xl text-[#F10100] rounded-full hover:bg-[#F10100]/10 transition-colors focus:outline-none"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-[#F10100]/10 to-[#FFD122]/10 hover:from-[#F10100]/20 hover:to-[#FFD122]/20 transition-all duration-300 ring-2 ring-[#F10100]/20"
                   title={`Hi, ${user?.name || 'User'}!`}
                 >
-                  <User className="w-6 h-6" />
+                  <User className="w-5 h-5 text-[#F10100]" />
                 </motion.button>
-                
+
                 {userDropdown && (
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-[100]"
+                    className="absolute right-0 mt-3 w-56 bg-white/90 backdrop-blur-xl rounded-2xl shadow-premium border border-gray-100/50 py-2 z-[100]"
                   >
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">Hi, {user?.name || 'User'}!</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">Hi, {user?.name || 'User'}!</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
                     </div>
-                    
+
                     <Link
                       to="/dashboard"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#F10100]/5 hover:to-transparent transition-all duration-200"
                       onClick={() => {
                         console.log('Dashboard link clicked');
                         setUserDropdown(false);
                       }}
                     >
-                      <BarChart3 className="w-4 h-4 mr-3" />
+                      <BarChart3 className="w-4 h-4 mr-3 text-gray-400" />
                       Dashboard
                     </Link>
                     <button
@@ -205,7 +213,7 @@ const Navbar = () => {
                         console.log('Logout button clicked');
                         handleLogout();
                       }}
-                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200"
                     >
                       <LogOut className="w-4 h-4 mr-3" />
                       Logout
@@ -221,7 +229,7 @@ const Navbar = () => {
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-gray-700 hover:text-[#F10100] hover:bg-gray-100"
+              className="p-2 rounded-xl text-gray-700 hover:text-[#F10100] hover:bg-gray-100/60 transition-all duration-200"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </motion.button>
@@ -236,9 +244,9 @@ const Navbar = () => {
           opacity: isOpen ? 1 : 0,
           height: isOpen ? "auto" : 0,
         }}
-        className="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200 overflow-hidden shadow-professional"
+        className="md:hidden bg-white/95 backdrop-blur-2xl border-t border-gray-200/50 overflow-hidden shadow-premium"
       >
-        <div className="px-4 py-2 space-y-1">
+        <div className="px-4 py-3 space-y-1">
           {navigation.filter((item) => !item.requiresAuth || isLoggedIn).map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.href;
@@ -247,49 +255,55 @@ const Navbar = () => {
                 key={item.name}
                 to={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center space-x-3 px-3 py-3 rounded-xl transition-colors duration-300 font-medium ${
-                  isActive
-                    ? "text-[#F10100] bg-[#F10100]/10"
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium ${isActive
+                    ? "text-[#F10100] bg-gradient-to-r from-[#F10100]/10 to-[#FFD122]/5"
                     : "text-gray-700 hover:text-[#F10100] hover:bg-gray-50"
-                }`}
+                  }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className={`w-5 h-5 ${isActive ? "text-[#F10100]" : "text-gray-400"}`} />
                 <span>{item.name}</span>
+                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#F10100]" />}
               </Link>
             );
           })}
-          
+
           {/* Mobile Auth */}
-          <div className="border-t border-gray-200 pt-2 mt-2">
+          <div className="border-t border-gray-200/50 pt-3 mt-2">
             {!isLoggedIn ? (
               <>
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center space-x-3 px-3 py-3 rounded-xl text-gray-700 hover:text-[#F10100] hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:text-[#F10100] hover:bg-gray-50 transition-colors font-medium"
                 >
                   <span>Log In</span>
                 </Link>
                 <Link
                   to="/signup"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center space-x-3 px-3 py-3 rounded-xl text-[#F10100] bg-[#F10100]/10 transition-colors"
+                  className="flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-white bg-gradient-to-r from-[#F10100] to-[#FF4444] shadow-lg font-semibold mt-1"
                 >
                   <span>Sign Up</span>
                 </Link>
               </>
             ) : (
               <div className="px-3 py-3">
-                <div className="text-sm text-gray-600 mb-2">
-                  Hi, {user?.name || 'User'}!
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F10100]/10 to-[#FFD122]/10 flex items-center justify-center ring-2 ring-[#F10100]/20">
+                    <User className="w-5 h-5 text-[#F10100]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{user?.name || 'User'}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
+                  </div>
                 </div>
-                
+
                 <button
                   onClick={() => { setIsOpen(false); handleLogout(); }}
-                  className="flex items-center space-x-3 px-3 py-2 text-red-600 hover:text-red-700 transition-colors"
+                  className="flex items-center space-x-3 px-3 py-2 text-red-600 hover:text-red-700 transition-colors w-full rounded-lg hover:bg-red-50"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
+                  <span className="font-medium">Logout</span>
                 </button>
               </div>
             )}

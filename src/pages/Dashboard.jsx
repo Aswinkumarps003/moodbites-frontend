@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
-import { 
-  Calendar, TrendingUp, Star, Clock, User, Mail, Phone, MapPin, Target, Award, Heart, BookOpen, 
+import {
+  Calendar, TrendingUp, Star, Clock, User, Mail, Phone, MapPin, Target, Award, Heart, BookOpen,
   Camera, Scale, Activity, Moon, Zap, Brain, Settings, Edit, Save, X,
   Globe, Languages, Users, Lock, Eye, EyeOff, ChefHat, AlertCircle, Shield, ShieldCheck, ShieldX, CheckCircle
 } from "lucide-react";
@@ -14,7 +14,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 const Dashboard = () => {
   // Navigation state
   const [activeTab, setActiveTab] = useState("overview");
-  
+
   // Dashboard state
   const [selectedMood, setSelectedMood] = useState(mockMoods[0]);
 
@@ -64,7 +64,7 @@ const Dashboard = () => {
     language: "English",
     joinDate: "",
     bio: "",
-    
+
     // Health & Diet Preferences
     fitnessGoal: "",
     dietType: "",
@@ -72,24 +72,24 @@ const Dashboard = () => {
     calorieTarget: 0,
     macroRatio: { protein: 25, carbs: 45, fats: 30 },
     waterIntakeGoal: 8,
-    
+
     // Additional preferences
     dietaryRestrictions: [],
     favoriteIngredients: [],
     favoriteCuisines: [],
-    
+
     // Activity & Fitness
     dailySteps: 0,
     sleepDuration: 0,
     workoutDuration: 0,
     workoutType: "",
     activityLevel: "",
-    
+
     // Health Metrics
     bmi: 0,
     bodyFat: 0,
     restingHeartRate: 0,
-    
+
     // Notifications & Settings
     emailNotifications: true,
     pushNotifications: true,
@@ -138,12 +138,12 @@ const Dashboard = () => {
     const checkAuth = () => {
       const token = localStorage.getItem('authToken');
       const userData = localStorage.getItem('user');
-      
+
       if (!token || !userData) {
         navigate('/login');
         return;
       }
-      
+
       try {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
@@ -161,25 +161,25 @@ const Dashboard = () => {
   const fetchUserData = async (userData) => {
     try {
       setLoading(true);
-      
+
       // Fetch user profile from backend
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/profile/${userData._id}`, {
+      const response = await fetch(`https://user-service-latest-bae8.onrender.com/api/user/profile/${userData._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const userProfileData = await response.json();
         setUserProfile(userProfileData);
-        
+
         // Set profile image if available
         if (userProfileData.profileImage) {
           setProfileImage(userProfileData.profileImage);
         }
-        
+
         // Update profile data with fetched user data
         setProfileData(prev => ({
           ...prev,
@@ -208,9 +208,9 @@ const Dashboard = () => {
           bmi: userProfileData.bmi || 0,
           bodyFat: userProfileData.bodyFat || 0,
           restingHeartRate: userProfileData.restingHeartRate || 0,
-          joinDate: new Date(userProfileData.createdAt).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long' 
+          joinDate: new Date(userProfileData.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long'
           }),
         }));
       } else {
@@ -222,7 +222,7 @@ const Dashboard = () => {
           joinDate: "Recently",
         }));
       }
-      
+
       // Fetch user recipes and diet plan
       await Promise.all([
         fetchUserRecipes(userData._id || userData.id),
@@ -276,7 +276,7 @@ const Dashboard = () => {
     try {
       const key = getTodayKey(theUser);
       localStorage.setItem(key, JSON.stringify({ consumed, completed }));
-    } catch (e) {}
+    } catch (e) { }
   };
 
   useEffect(() => {
@@ -343,16 +343,16 @@ const Dashboard = () => {
   const fetchUserRecipes = async (userId) => {
     try {
       console.log('Fetching recipes for user:', userId);
-      
-      const response = await fetch(`http://localhost:5002/api/food/users/${userId}/dishes`);
-      
+
+      const response = await fetch(`https://food-service-latest.onrender.com/api/food/users/${userId}/dishes`);
+
       if (!response.ok) {
         throw new Error('Failed to fetch user recipes');
       }
-      
+
       const recipes = await response.json();
       console.log('Fetched user recipes:', recipes);
-      
+
       // Transform Supabase data to match expected format
       const transformedRecipes = recipes.map(recipe => ({
         id: recipe.id,
@@ -367,7 +367,7 @@ const Dashboard = () => {
         difficulty: recipe.difficulty,
         description: recipe.description
       }));
-      
+
       setUserRecipes(transformedRecipes);
     } catch (error) {
       console.error('Error fetching user recipes:', error);
@@ -377,7 +377,7 @@ const Dashboard = () => {
 
   const fetchSavedRecipes = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:5002/api/food/users/${userId}/saved-recipes`);
+      const response = await fetch(`https://food-service-latest.onrender.com/api/food/users/${userId}/saved-recipes`);
       if (!response.ok) throw new Error('Failed to fetch saved recipes');
       const data = await response.json();
       setSavedRecipes(Array.isArray(data) ? data : []);
@@ -392,7 +392,7 @@ const Dashboard = () => {
     try {
       console.log('Fetching recipe count for user:', userId);
       // Try dedicated count endpoint first
-      const response = await fetch(`http://localhost:5002/api/food/users/${userId}/dishes/count`);
+      const response = await fetch(`https://food-service-latest.onrender.com/api/food/users/${userId}/dishes/count`);
       if (response.ok) {
         const json = await response.json();
         setUserRecipeCount(Number(json.count) || 0);
@@ -401,7 +401,7 @@ const Dashboard = () => {
 
       // If count endpoint is missing (404) or failed, fall back to listing dishes and counting
       console.warn('Count endpoint unavailable, falling back to list length');
-      const listResp = await fetch(`http://localhost:5002/api/food/users/${userId}/dishes`);
+      const listResp = await fetch(`https://food-service-latest.onrender.com/api/food/users/${userId}/dishes`);
       if (listResp.ok) {
         const dishes = await listResp.json();
         setUserRecipeCount(Array.isArray(dishes) ? dishes.length : 0);
@@ -513,7 +513,7 @@ const Dashboard = () => {
   // Profile management functions
   const handleInputChange = (field, value) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
-    
+
     // Live validation for specific fields
     if (field === 'age') {
       const error = validateAge(value);
@@ -529,7 +529,7 @@ const Dashboard = () => {
 
   const handlePasswordChange = (field, value) => {
     setPasswordData(prev => ({ ...prev, [field]: value }));
-    
+
     // Update password strength when new password changes
     if (field === 'newPassword') {
       if (value) {
@@ -550,24 +550,24 @@ const Dashboard = () => {
       const ageError = validateAge(profileData.age);
       const heightError = validateHeight(profileData.heightCm);
       const weightError = validateWeight(profileData.weightKg);
-      
+
       setValidationErrors({
         age: ageError,
         heightCm: heightError,
         weightKg: weightError
       });
-      
+
       // Check if there are any validation errors
       if (ageError || heightError || weightError) {
         setSaveStatus({ type: 'error', message: 'Please fix validation errors before saving' });
         return;
       }
-      
+
       setSaveStatus({ type: 'loading', message: 'Saving changes...' });
-      
+
       // Update user profile in backend
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/profile/${user._id}`, {
+      const response = await fetch(`https://user-service-latest-bae8.onrender.com/api/user/profile/${user._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -580,12 +580,12 @@ const Dashboard = () => {
         const result = await response.json();
         setIsEditing(false);
         setSaveStatus({ type: 'success', message: 'Profile updated successfully!' });
-        
+
         // Update localStorage with new user data
         const updatedUser = { ...user, ...result.user };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => {
           setSaveStatus({ type: '', message: '' });
@@ -621,7 +621,7 @@ const Dashboard = () => {
       setSaveStatus({ type: 'loading', message: 'Updating password...' });
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/change-password`, {
+      const response = await fetch(`https://user-service-latest-bae8.onrender.com/api/user/change-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -638,7 +638,7 @@ const Dashboard = () => {
         setShowPasswordModal(false);
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
         setPasswordStrength({ score: 0, feedback: [] });
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => {
           setSaveStatus({ type: '', message: '' });
@@ -688,7 +688,7 @@ const Dashboard = () => {
       formData.append('profileImage', file);
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/user/upload-profile-image`, {
+      const response = await fetch(`https://user-service-latest-bae8.onrender.com/api/user/upload-profile-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -700,7 +700,7 @@ const Dashboard = () => {
         const result = await response.json();
         setProfileImage(result.profileImage);
         setSaveStatus({ type: 'success', message: 'Image uploaded successfully!' });
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => {
           setSaveStatus({ type: '', message: '' });
@@ -817,12 +817,12 @@ const Dashboard = () => {
                     onChange={handleFileChange}
                     style={{ display: 'none' }}
                   />
-                  
+
                   {/* Profile image display */}
                   <div className="w-32 h-32 rounded-3xl border-4 border-white shadow-2xl bg-gradient-to-r from-[#F10100] to-[#FFD122] flex items-center justify-center text-white text-4xl font-bold overflow-hidden">
                     {profileImage ? (
-                      <img 
-                        src={profileImage} 
+                      <img
+                        src={profileImage}
                         alt="Profile"
                         className="w-full h-full object-cover"
                       />
@@ -830,7 +830,7 @@ const Dashboard = () => {
                       profileData.name ? profileData.name.charAt(0).toUpperCase() : 'U'
                     )}
                   </div>
-                  
+
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
@@ -856,7 +856,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="absolute top-8 right-8">
-                
+
               </div>
             </div>
           </motion.div>
@@ -883,7 +883,7 @@ const Dashboard = () => {
                     >
                       <Icon className="w-6 h-6" style={{ color: stat.color }} />
                     </div>
-              <div className="text-right">
+                    <div className="text-right">
                       <div className="text-2xl font-bold text-gray-900 font-display">
                         {stat.value}
                       </div>
@@ -894,7 +894,7 @@ const Dashboard = () => {
                 </motion.div>
               );
             })}
-              </div>
+          </div>
         </ScrollReveal>
 
         {/* Tab Navigation */}
@@ -907,11 +907,10 @@ const Dashboard = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
-                      activeTab === tab.id
+                    className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${activeTab === tab.id
                         ? "bg-[#F10100] text-white shadow-lg"
                         : "text-gray-600 hover:text-[#F10100] hover:bg-[#F10100]/5"
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     <span className="hidden sm:inline">{tab.label}</span>
@@ -927,113 +926,113 @@ const Dashboard = () => {
           {/* Dashboard Overview Tab */}
           {activeTab === "overview" && (
             <>
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Mood Selection */}
-          <div className="lg:col-span-2">
-            {/* Mood Cards */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="mb-8"
-            >
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                How are you feeling today?
-              </h2>
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {mockMoods.map((mood, index) => (
-                  <MoodCard
-                    key={mood.id}
-                    mood={mood}
-                    isSelected={selectedMood.id === mood.id}
-                    onClick={() => setSelectedMood(mood)}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Food Recommendations */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white rounded-3xl shadow-lg p-6 mb-8"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  Recommended for <span style={{ color: selectedMood.color }}>
-                    {selectedMood.name}
-                  </span> Mood
-                </h3>
-                <div
-                  className="px-4 py-2 rounded-full text-sm font-semibold text-white"
-                  style={{ backgroundColor: selectedMood.color }}
-                >
-                  {filteredRecipes.length} recipes
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                {filteredRecipes.map((recipe, index) => (
+              <div className="grid lg:grid-cols-3 gap-8">
+                {/* Left Column - Mood Selection */}
+                <div className="lg:col-span-2">
+                  {/* Mood Cards */}
                   <motion.div
-                    key={recipe.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ y: -5, boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }}
-                    className="bg-gradient-to-br from-gray-50 to-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 transition-all duration-300 cursor-pointer"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="mb-8"
                   >
-                    <div className="relative h-48">
-                      <img
-                        src={recipe.image}
-                        alt={recipe.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-3 right-3">
-                        <div className="bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs flex items-center space-x-1">
-                          <Star className="w-3 h-3 fill-current text-yellow-400" />
-                          <span>{recipe.rating}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <h4 className="text-lg font-bold text-gray-900 mb-2">
-                        {recipe.title}
-                      </h4>
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{recipe.cookTime}</span>
-                        </div>
-                        <span>Serves {recipe.servings}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {recipe.ingredients.slice(0, 3).map((ingredient, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full"
-                          >
-                            {ingredient}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        by {recipe.author}
-                      </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      How are you feeling today?
+                    </h2>
+                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {mockMoods.map((mood, index) => (
+                        <MoodCard
+                          key={mood.id}
+                          mood={mood}
+                          isSelected={selectedMood.id === mood.id}
+                          onClick={() => setSelectedMood(mood)}
+                          index={index}
+                        />
+                      ))}
                     </div>
                   </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
 
-          {/* Right Column - Stats & Insights */}
-          <div className="space-y-6">
+                  {/* Food Recommendations */}
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="bg-white rounded-3xl shadow-lg p-6 mb-8"
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        Recommended for <span style={{ color: selectedMood.color }}>
+                          {selectedMood.name}
+                        </span> Mood
+                      </h3>
+                      <div
+                        className="px-4 py-2 rounded-full text-sm font-semibold text-white"
+                        style={{ backgroundColor: selectedMood.color }}
+                      >
+                        {filteredRecipes.length} recipes
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {filteredRecipes.map((recipe, index) => (
+                        <motion.div
+                          key={recipe.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ y: -5, boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }}
+                          className="bg-gradient-to-br from-gray-50 to-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 transition-all duration-300 cursor-pointer"
+                        >
+                          <div className="relative h-48">
+                            <img
+                              src={recipe.image}
+                              alt={recipe.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute top-3 right-3">
+                              <div className="bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs flex items-center space-x-1">
+                                <Star className="w-3 h-3 fill-current text-yellow-400" />
+                                <span>{recipe.rating}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <h4 className="text-lg font-bold text-gray-900 mb-2">
+                              {recipe.title}
+                            </h4>
+                            <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                              <div className="flex items-center space-x-1">
+                                <Clock className="w-4 h-4" />
+                                <span>{recipe.cookTime}</span>
+                              </div>
+                              <span>Serves {recipe.servings}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {recipe.ingredients.slice(0, 3).map((ingredient, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full"
+                                >
+                                  {ingredient}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              by {recipe.author}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Right Column - Stats & Insights */}
+                <div className="space-y-6">
                   {/* Quick Actions */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.6 }}
                     className="bg-gradient-to-br from-[#F1E1C8]/30 to-[#D8D86B]/30 rounded-3xl shadow-lg p-6"
                   >
@@ -1061,83 +1060,83 @@ const Dashboard = () => {
                       >
                         Start Video Consultation
                       </button>
-              </div>
-            </motion.div>
+                    </div>
+                  </motion.div>
 
-            {/* Mood Trends Chart */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="bg-white rounded-3xl shadow-lg p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Mood Trends</h3>
-                <TrendingUp className="w-5 h-5 text-[#476E00]" />
-              </div>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={mockMoodTrends}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="day" 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        background: 'white', 
-                        border: 'none', 
-                        borderRadius: '12px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="Happy" 
-                      stroke="#476E00" 
-                      strokeWidth={3}
-                      dot={{ fill: "#476E00", strokeWidth: 0, r: 4 }}
-                      activeDot={{ r: 6, stroke: "#476E00", strokeWidth: 2 }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="Energetic" 
-                      stroke="#FFD122" 
-                      strokeWidth={3}
-                      dot={{ fill: "#FFD122", strokeWidth: 0, r: 4 }}
-                      activeDot={{ r: 6, stroke: "#FFD122", strokeWidth: 2 }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="Stressed" 
-                      stroke="#F10100" 
-                      strokeWidth={3}
-                      dot={{ fill: "#F10100", strokeWidth: 0, r: 4 }}
-                      activeDot={{ r: 6, stroke: "#F10100", strokeWidth: 2 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              
-              {/* Mood Legend */}
-              <div className="flex justify-center space-x-4 mt-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-[#476E00] rounded-full" />
-                  <span className="text-xs text-gray-600">Happy</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-[#FFD122] rounded-full" />
-                  <span className="text-xs text-gray-600">Energetic</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-[#F10100] rounded-full" />
-                  <span className="text-xs text-gray-600">Stressed</span>
-                </div>
-              </div>
-            </motion.div>
+                  {/* Mood Trends Chart */}
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="bg-white rounded-3xl shadow-lg p-6"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-bold text-gray-900">Mood Trends</h3>
+                      <TrendingUp className="w-5 h-5 text-[#476E00]" />
+                    </div>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={mockMoodTrends}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis
+                            dataKey="day"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 12 }}
+                          />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+                          <Tooltip
+                            contentStyle={{
+                              background: 'white',
+                              border: 'none',
+                              borderRadius: '12px',
+                              boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                            }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="Happy"
+                            stroke="#476E00"
+                            strokeWidth={3}
+                            dot={{ fill: "#476E00", strokeWidth: 0, r: 4 }}
+                            activeDot={{ r: 6, stroke: "#476E00", strokeWidth: 2 }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="Energetic"
+                            stroke="#FFD122"
+                            strokeWidth={3}
+                            dot={{ fill: "#FFD122", strokeWidth: 0, r: 4 }}
+                            activeDot={{ r: 6, stroke: "#FFD122", strokeWidth: 2 }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="Stressed"
+                            stroke="#F10100"
+                            strokeWidth={3}
+                            dot={{ fill: "#F10100", strokeWidth: 0, r: 4 }}
+                            activeDot={{ r: 6, stroke: "#F10100", strokeWidth: 2 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    {/* Mood Legend */}
+                    <div className="flex justify-center space-x-4 mt-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-[#476E00] rounded-full" />
+                        <span className="text-xs text-gray-600">Happy</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-[#FFD122] rounded-full" />
+                        <span className="text-xs text-gray-600">Energetic</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-[#F10100] rounded-full" />
+                        <span className="text-xs text-gray-600">Stressed</span>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
             </>
@@ -1179,7 +1178,7 @@ const Dashboard = () => {
                             <span className="text-lg font-bold text-gray-900">
                               {metric.value}{metric.unit}
                             </span>
-                            <div 
+                            <div
                               className="text-xs font-semibold capitalize"
                               style={{ color: metric.color }}
                             >
@@ -1240,7 +1239,7 @@ const Dashboard = () => {
                   <div className="space-y-3 text-sm text-gray-600">
                     <div className="flex justify-between"><span>Gender</span><span className="font-semibold">{profileData.gender || '—'}</span></div>
                     <div className="flex justify-between"><span>Age</span><span className="font-semibold">{profileData.age || '—'}</span></div>
-            
+
                     <div className="flex justify-between"><span>Height</span><span className="font-semibold">{profileData.heightCm || '—'}</span></div>
                     <div className="flex justify-between"><span>Weight</span><span className="font-semibold">{profileData.weightKg || '—'}</span></div>
                   </div>
@@ -1333,9 +1332,9 @@ const Dashboard = () => {
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-2">
                                 <span className="text-lg font-semibold text-emerald-700 capitalize">
-                                  {mealType === 'Snack1' ? 'Morning Snack' : 
-                                   mealType === 'Snack2' ? 'Evening Snack' : 
-                                   mealType}
+                                  {mealType === 'Snack1' ? 'Morning Snack' :
+                                    mealType === 'Snack2' ? 'Evening Snack' :
+                                      mealType}
                                 </span>
                                 <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium">
                                   {typeof mealData.calories === 'number' ? `${Math.round(mealData.calories)} kcal` : mealData.calories}
@@ -1355,7 +1354,7 @@ const Dashboard = () => {
                                     const body = {
                                       user_id: (user && (user._id || user.id)) || null,
                                       name: mealData.recipe,
-                                      calories: typeof mealData.calories === 'number' ? Math.round(mealData.calories) : parseFloat(String(mealData.calories || '').replace(/[^0-9.]/g,'')) || null,
+                                      calories: typeof mealData.calories === 'number' ? Math.round(mealData.calories) : parseFloat(String(mealData.calories || '').replace(/[^0-9.]/g, '')) || null,
                                       servings: 1,
                                       instructions: [],
                                       ingredients: mealData.ingredients || [],
@@ -1364,7 +1363,7 @@ const Dashboard = () => {
                                       ready_in_minutes: null,
                                       nutrition: null
                                     };
-                                    await fetch('http://localhost:5002/api/food/saved-recipes', {
+                                    await fetch('https://food-service-latest.onrender.com/api/food/saved-recipes', {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json' },
                                       body: JSON.stringify(body)
@@ -1403,18 +1402,18 @@ const Dashboard = () => {
                                   handleMarkMealComplete(mealType, mealData.calories);
                                   try {
                                     const token = localStorage.getItem('authToken');
-                                    await fetch('http://localhost:5000/api/user/activity', {
+                                    await fetch('https://user-service-latest-bae8.onrender.com/api/user/activity', {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                                       body: JSON.stringify({
                                         type: 'meal_complete',
                                         mealType,
                                         recipe: mealData.recipe,
-                                        calories: typeof mealData.calories === 'number' ? Math.round(mealData.calories) : parseFloat(String(mealData.calories || '').replace(/[^0-9.]/g,'')) || null,
+                                        calories: typeof mealData.calories === 'number' ? Math.round(mealData.calories) : parseFloat(String(mealData.calories || '').replace(/[^0-9.]/g, '')) || null,
                                         ingredients: mealData.ingredients || []
                                       })
                                     });
-                                  } catch (e) {}
+                                  } catch (e) { }
                                 }}
                                 disabled={!!completedMealsToday[mealType]}
                                 className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 ${completedMealsToday[mealType] ? 'bg-emerald-100 text-emerald-700 cursor-default' : 'bg-[#F10100] text-white hover:shadow-lg'}`}
@@ -1495,66 +1494,66 @@ const Dashboard = () => {
                       >
                         <div className="relative h-48">
                           <img
-                          src={recipe.image_url || recipe.image}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs flex items-center space-x-1">
-                          <Star className="w-3 h-3 fill-current text-yellow-400" />
-                          <span>{recipe.rating || '4.5'}</span>
-                        </div>
-                        {recipeView === 'saved' && (
-                          <div className="absolute top-3 left-3">
-                            <button
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                try {
-                                  await fetch(`http://localhost:5002/api/food/saved-recipes/${recipe.id}` , { method: 'DELETE' });
-                                  setSavedRecipes(prev => prev.filter(r => r.id !== recipe.id));
-                                } catch (err) {
-                                  console.error('Failed to delete saved recipe', err);
-                                }
-                              }}
-                              className="bg-white/90 backdrop-blur-sm text-red-600 px-3 py-1 rounded-lg text-xs font-semibold shadow hover:bg-white"
+                            src={recipe.image_url || recipe.image}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs flex items-center space-x-1">
+                            <Star className="w-3 h-3 fill-current text-yellow-400" />
+                            <span>{recipe.rating || '4.5'}</span>
+                          </div>
+                          {recipeView === 'saved' && (
+                            <div className="absolute top-3 left-3">
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    await fetch(`https://food-service-latest.onrender.com/api/food/saved-recipes/${recipe.id}`, { method: 'DELETE' });
+                                    setSavedRecipes(prev => prev.filter(r => r.id !== recipe.id));
+                                  } catch (err) {
+                                    console.error('Failed to delete saved recipe', err);
+                                  }
+                                }}
+                                className="bg-white/90 backdrop-blur-sm text-red-600 px-3 py-1 rounded-lg text-xs font-semibold shadow hover:bg-white"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          )}
+                          {/* Manage Recipe Button */}
+                          <div className="absolute bottom-3 left-3">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => navigate(`/manage-recipe/${recipe.id}`)}
+                              className="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-2 rounded-xl font-semibold text-sm flex items-center space-x-1 shadow-lg hover:bg-white transition-all duration-300"
                             >
-                              Remove
-                            </button>
-                          </div>
-                        )}
-                        {/* Manage Recipe Button */}
-                        <div className="absolute bottom-3 left-3">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => navigate(`/manage-recipe/${recipe.id}`)}
-                            className="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-2 rounded-xl font-semibold text-sm flex items-center space-x-1 shadow-lg hover:bg-white transition-all duration-300"
-                          >
-                            <Edit className="w-3 h-3" />
-                            <span>Manage</span>
-                          </motion.button>
-                        </div>
-                      </div>
-                      <div className="p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2 font-display">
-                          {recipe.title}
-                        </h3>
-                        <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{recipe.cook_time || recipe.cookTime}</span>
-                          </div>
-                          <span>Serves {recipe.servings}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">
-                            Mood: <span className="font-medium text-[#F10100]">{recipe.mood}</span>
-                          </span>
-                          <div className="text-sm font-bold text-[#F10100]">
-                            {recipe.difficulty}
+                              <Edit className="w-3 h-3" />
+                              <span>Manage</span>
+                            </motion.button>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
+                        <div className="p-6">
+                          <h3 className="text-xl font-bold text-gray-900 mb-2 font-display">
+                            {recipe.title}
+                          </h3>
+                          <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                            <div className="flex items-center space-x-1">
+                              <Clock className="w-4 h-4" />
+                              <span>{recipe.cook_time || recipe.cookTime}</span>
+                            </div>
+                            <span>Serves {recipe.servings}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">
+                              Mood: <span className="font-medium text-[#F10100]">{recipe.mood}</span>
+                            </span>
+                            <div className="text-sm font-bold text-[#F10100]">
+                              {recipe.difficulty}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
                     ))
                   ) : (
                     <div className="col-span-full text-center py-16 bg-white rounded-3xl shadow-professional">
@@ -1592,11 +1591,10 @@ const Dashboard = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setIsEditing(!isEditing)}
-                      className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 flex items-center space-x-2 ${
-                        isEditing 
-                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
+                      className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 flex items-center space-x-2 ${isEditing
+                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           : 'bg-[#F10100] text-white hover:bg-[#FF4444] shadow-lg hover:shadow-xl'
-                      }`}
+                        }`}
                     >
                       <Edit className="w-4 h-4" />
                       <span>{isEditing ? 'Cancel Edit' : 'Edit Profile'}</span>
@@ -1631,11 +1629,10 @@ const Dashboard = () => {
                         value={profileData.name}
                         onChange={(e) => handleInputChange("name", e.target.value)}
                         readOnly={!isEditing}
-                        className={`w-full px-4 py-3 border border-gray-200 rounded-2xl transition-all duration-300 font-medium ${
-                          isEditing 
-                            ? 'focus:outline-none focus:ring-2 focus:ring-[#F10100]/20 focus:border-[#F10100]' 
+                        className={`w-full px-4 py-3 border border-gray-200 rounded-2xl transition-all duration-300 font-medium ${isEditing
+                            ? 'focus:outline-none focus:ring-2 focus:ring-[#F10100]/20 focus:border-[#F10100]'
                             : 'bg-gray-50 cursor-not-allowed'
-                        }`}
+                          }`}
                       />
                     </div>
 
@@ -1650,13 +1647,12 @@ const Dashboard = () => {
                         onChange={(e) => handleInputChange("age", e.target.value)}
                         onKeyUp={(e) => handleInputChange("age", e.target.value)}
                         readOnly={!isEditing}
-                        className={`w-full px-4 py-3 border rounded-2xl transition-all duration-300 font-medium ${
-                          isEditing 
+                        className={`w-full px-4 py-3 border rounded-2xl transition-all duration-300 font-medium ${isEditing
                             ? validationErrors.age
                               ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500'
                               : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#F10100]/20 focus:border-[#F10100]'
                             : 'bg-gray-50 cursor-not-allowed border-gray-200'
-                        }`}
+                          }`}
                         placeholder="Enter your age (15-85)"
                         min="15"
                         max="85"
@@ -1680,13 +1676,12 @@ const Dashboard = () => {
                         onChange={(e) => handleInputChange("heightCm", e.target.value)}
                         onKeyUp={(e) => handleInputChange("heightCm", e.target.value)}
                         readOnly={!isEditing}
-                        className={`w-full px-4 py-3 border rounded-2xl transition-all duration-300 font-medium ${
-                          isEditing 
+                        className={`w-full px-4 py-3 border rounded-2xl transition-all duration-300 font-medium ${isEditing
                             ? validationErrors.heightCm
                               ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500'
                               : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#F10100]/20 focus:border-[#F10100]'
                             : 'bg-gray-50 cursor-not-allowed border-gray-200'
-                        }`}
+                          }`}
                         placeholder="Enter your height in cm (100-210)"
                         min="100"
                         max="210"
@@ -1710,13 +1705,12 @@ const Dashboard = () => {
                         onChange={(e) => handleInputChange("weightKg", e.target.value)}
                         onKeyUp={(e) => handleInputChange("weightKg", e.target.value)}
                         readOnly={!isEditing}
-                        className={`w-full px-4 py-3 border rounded-2xl transition-all duration-300 font-medium ${
-                          isEditing 
+                        className={`w-full px-4 py-3 border rounded-2xl transition-all duration-300 font-medium ${isEditing
                             ? validationErrors.weightKg
                               ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500'
                               : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#F10100]/20 focus:border-[#F10100]'
                             : 'bg-gray-50 cursor-not-allowed border-gray-200'
-                        }`}
+                          }`}
                         placeholder="Enter your weight in kg (30-180)"
                         min="30"
                         max="180"
@@ -1761,9 +1755,8 @@ const Dashboard = () => {
                         <motion.button
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleInputChange(setting.key, !profileData[setting.key])}
-                          className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
-                            profileData[setting.key] ? "bg-[#F10100]" : "bg-gray-300"
-                          }`}
+                          className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${profileData[setting.key] ? "bg-[#F10100]" : "bg-gray-300"
+                            }`}
                         >
                           <motion.div
                             animate={{
@@ -1789,11 +1782,10 @@ const Dashboard = () => {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSave}
                   disabled={saveStatus.type === 'loading' || validationErrors.age || validationErrors.heightCm || validationErrors.weightKg}
-                  className={`px-12 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl transition-all duration-300 mx-auto ${
-                    saveStatus.type === 'loading' || validationErrors.age || validationErrors.heightCm || validationErrors.weightKg
+                  className={`px-12 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl transition-all duration-300 mx-auto ${saveStatus.type === 'loading' || validationErrors.age || validationErrors.heightCm || validationErrors.weightKg
                       ? 'bg-gray-400 cursor-not-allowed opacity-50'
                       : 'bg-gradient-to-r from-[#F10100] to-[#FF4444] hover:shadow-2xl'
-                  }`}
+                    }`}
                 >
                   <Save className="w-6 h-6" />
                   <span>{saveStatus.type === 'loading' ? 'Saving...' : 'Save All Changes'}</span>
@@ -1813,13 +1805,12 @@ const Dashboard = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-xl shadow-lg ${
-                saveStatus.type === 'success' 
+              className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-xl shadow-lg ${saveStatus.type === 'success'
                   ? 'bg-green-100 border border-green-300 text-green-800'
                   : saveStatus.type === 'error'
-                  ? 'bg-red-100 border border-red-300 text-red-800'
-                  : 'bg-blue-100 border border-blue-300 text-blue-800'
-              }`}
+                    ? 'bg-red-100 border border-red-300 text-red-800'
+                    : 'bg-blue-100 border border-blue-300 text-blue-800'
+                }`}
             >
               {saveStatus.message}
             </motion.div>
@@ -1886,7 +1877,7 @@ const Dashboard = () => {
                         {showPassword.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
-                    
+
                     {/* Password Strength Indicator */}
                     {passwordData.newPassword && (
                       <div className="mt-2">
@@ -1897,16 +1888,15 @@ const Dashboard = () => {
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              passwordStrength.score >= 4 ? 'bg-green-500' :
-                              passwordStrength.score >= 3 ? 'bg-yellow-500' :
-                              passwordStrength.score >= 2 ? 'bg-orange-500' : 'bg-red-500'
-                            }`}
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.score >= 4 ? 'bg-green-500' :
+                                passwordStrength.score >= 3 ? 'bg-yellow-500' :
+                                  passwordStrength.score >= 2 ? 'bg-orange-500' : 'bg-red-500'
+                              }`}
                             style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
                           ></div>
                         </div>
-                        
+
                         {/* Show feedback only when requirements are not met */}
                         {passwordStrength.score < 5 && (
                           <div className="mt-2 space-y-1">
@@ -1914,9 +1904,8 @@ const Dashboard = () => {
                               const isMet = feedback.startsWith('Contains') || feedback.startsWith('At least');
                               return (
                                 <div key={index} className="flex items-center gap-2">
-                                  <div className={`w-2 h-2 rounded-full ${
-                                    isMet ? 'bg-green-500' : 'bg-gray-300'
-                                  }`}></div>
+                                  <div className={`w-2 h-2 rounded-full ${isMet ? 'bg-green-500' : 'bg-gray-300'
+                                    }`}></div>
                                   <span className={`text-xs ${isMet ? 'text-green-600' : 'text-gray-600'}`}>
                                     {feedback}
                                   </span>
@@ -1925,7 +1914,7 @@ const Dashboard = () => {
                             })}
                           </div>
                         )}
-                        
+
                         {/* Show success message when all criteria are met */}
                         {passwordStrength.score === 5 && (
                           <div className="mt-2 flex items-center gap-2 text-green-600 text-xs">
@@ -1955,7 +1944,7 @@ const Dashboard = () => {
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
                         {showPassword.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+                      </button>
                     </div>
                   </div>
 
@@ -1965,18 +1954,18 @@ const Dashboard = () => {
                       className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-2xl font-semibold hover:bg-gray-50 transition-all duration-300"
                     >
                       Cancel
-                </button>
+                    </button>
                     <button
                       onClick={handlePasswordUpdate}
                       disabled={saveStatus.type === 'loading' || passwordStrength.score < 3}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white rounded-2xl font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50"
                     >
                       {saveStatus.type === 'loading' ? 'Updating...' : 'Update Password'}
-                </button>
+                    </button>
                   </div>
-              </div>
-            </motion.div>
-          </div>
+                </div>
+              </motion.div>
+            </div>
           )}
         </div>
       </div>

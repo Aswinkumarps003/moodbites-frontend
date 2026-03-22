@@ -90,12 +90,12 @@ const DietPlannerSetup = () => {
       if (!genResp.ok) throw new Error('Failed to generate diet plan');
       const genData = await genResp.json();
       setGeneratedPlan(genData.plan || null);
-      
+
       // Store the diet plan ID for future reference
       if (genData.dietPlanId) {
         localStorage.setItem('currentDietPlanId', genData.dietPlanId);
       }
-      
+
       alert(`Your personalized diet plan is ready! Plan ID: ${genData.dietPlanId || 'N/A'}`);
     } catch (e) {
       console.error(e);
@@ -150,10 +150,10 @@ const DietPlannerSetup = () => {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-200/30 to-indigo-200/30 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-200/20 to-pink-200/20 rounded-full blur-3xl"></div>
       </div>
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 relative z-10">
         {/* Header Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
@@ -167,7 +167,7 @@ const DietPlannerSetup = () => {
         </motion.div>
 
         {/* Enhanced Progress */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
@@ -184,18 +184,18 @@ const DietPlannerSetup = () => {
               ) : biomarkers ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {[
-                    { key: 'glucose', label: 'Glucose (mg/dL)', value: biomarkers.glucose, high: (v)=> v>=125, borderline:(v)=> v>=100 },
-                    { key: 'totalCholesterol', label: 'Total Chol (mg/dL)', value: biomarkers.totalCholesterol, high:(v)=> v>=240, borderline:(v)=> v>=200 },
-                    { key: 'ldl', label: 'LDL (mg/dL)', value: biomarkers.ldl, high:(v)=> v>=160, borderline:(v)=> v>=130 },
-                    { key: 'triglycerides', label: 'Triglycerides (mg/dL)', value: biomarkers.triglycerides, high:(v)=> v>=200, borderline:(v)=> v>=150 },
+                    { key: 'glucose', label: 'Glucose (mg/dL)', value: biomarkers.glucose, high: (v) => v >= 125, borderline: (v) => v >= 100 },
+                    { key: 'totalCholesterol', label: 'Total Chol (mg/dL)', value: biomarkers.totalCholesterol, high: (v) => v >= 240, borderline: (v) => v >= 200 },
+                    { key: 'ldl', label: 'LDL (mg/dL)', value: biomarkers.ldl, high: (v) => v >= 160, borderline: (v) => v >= 130 },
+                    { key: 'triglycerides', label: 'Triglycerides (mg/dL)', value: biomarkers.triglycerides, high: (v) => v >= 200, borderline: (v) => v >= 150 },
                   ].map((m) => {
                     const v = m.value;
-                    const status = v==null ? 'N/A' : m.high(v) ? 'High' : m.borderline(v) ? 'Borderline' : 'Normal';
-                    const color = status==='High' ? 'text-red-700 bg-red-50 border-red-200' : status==='Borderline' ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200';
+                    const status = v == null ? 'N/A' : m.high(v) ? 'High' : m.borderline(v) ? 'Borderline' : 'Normal';
+                    const color = status === 'High' ? 'text-red-700 bg-red-50 border-red-200' : status === 'Borderline' ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200';
                     return (
                       <div key={m.key} className={`p-4 rounded-2xl border ${color}`}>
                         <div className="text-xs text-gray-500 mb-1">{m.label}</div>
-                        <div className="text-xl font-bold">{v==null ? '—' : Math.round(v)}</div>
+                        <div className="text-xl font-bold">{v == null ? '—' : Math.round(v)}</div>
                         <div className="text-xs mt-1">Status: {status}</div>
                       </div>
                     );
@@ -228,36 +228,34 @@ const DietPlannerSetup = () => {
               )}
             </div>
             <div className="flex items-center justify-between mb-4">
-            {steps.map((label, idx) => (
-              <div key={label} className="flex-1 flex items-center">
-                  <motion.div 
-                    className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shadow-lg transition-all duration-500 ${
-                      idx <= step 
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-emerald-200' 
+              {steps.map((label, idx) => (
+                <div key={label} className="flex-1 flex items-center">
+                  <motion.div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shadow-lg transition-all duration-500 ${idx <= step
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-emerald-200'
                         : 'bg-white text-gray-400 border-2 border-gray-200'
-                    }`}
+                      }`}
                     whileHover={{ scale: 1.1 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     {idx < step ? <Check className="w-5 h-5" /> : idx + 1}
                   </motion.div>
-                {idx < steps.length - 1 && (
-                    <motion.div 
-                      className={`flex-1 h-2 mx-3 rounded-full transition-all duration-500 ${
-                        idx < step 
-                          ? 'bg-gradient-to-r from-emerald-400 to-teal-400' 
+                  {idx < steps.length - 1 && (
+                    <motion.div
+                      className={`flex-1 h-2 mx-3 rounded-full transition-all duration-500 ${idx < step
+                          ? 'bg-gradient-to-r from-emerald-400 to-teal-400'
                           : 'bg-gray-200'
-                      }`}
+                        }`}
                       initial={{ scaleX: 0 }}
                       animate={{ scaleX: idx < step ? 1 : 0 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
                     />
-                )}
-              </div>
-            ))}
-          </div>
+                  )}
+                </div>
+              ))}
+            </div>
             <div className="text-center">
-              <motion.div 
+              <motion.div
                 key={step}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -269,20 +267,20 @@ const DietPlannerSetup = () => {
                 {Math.round(((step + 1) / steps.length) * 100)}% Complete
               </div>
             </div>
-        </div>
+          </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8"
         >
           <AnimatePresence mode="wait">
             {step === 0 && (
-              <motion.div 
-                key="activity" 
-                initial={{ opacity: 0, x: 20 }} 
-                animate={{ opacity: 1, x: 0 }} 
+              <motion.div
+                key="activity"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
@@ -307,16 +305,14 @@ const DietPlannerSetup = () => {
                       onClick={() => setForm((p) => ({ ...p, activity: opt }))}
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`group p-6 rounded-2xl border-2 text-left transition-all duration-300 ${
-                        form.activity === opt 
-                          ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg shadow-emerald-100' 
+                      className={`group p-6 rounded-2xl border-2 text-left transition-all duration-300 ${form.activity === opt
+                          ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg shadow-emerald-100'
                           : 'border-gray-200 hover:border-emerald-300 hover:shadow-md bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <div className={`w-3 h-3 rounded-full transition-all ${
-                          form.activity === opt ? 'bg-emerald-500' : 'bg-gray-300 group-hover:bg-emerald-400'
-                        }`}></div>
+                        <div className={`w-3 h-3 rounded-full transition-all ${form.activity === opt ? 'bg-emerald-500' : 'bg-gray-300 group-hover:bg-emerald-400'
+                          }`}></div>
                         <div className="font-bold text-gray-900 text-lg">{opt}</div>
                       </div>
                       <div className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">
@@ -329,10 +325,10 @@ const DietPlannerSetup = () => {
             )}
 
             {step === 1 && (
-              <motion.div 
-                key="goals" 
-                initial={{ opacity: 0, x: 20 }} 
-                animate={{ opacity: 1, x: 0 }} 
+              <motion.div
+                key="goals"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
@@ -348,7 +344,7 @@ const DietPlannerSetup = () => {
                   </p>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {["Diet Plan","Weight Loss","Count Calories","Healthy Foods"].map((g, index) => (
+                  {["Diet Plan", "Weight Loss", "Count Calories", "Healthy Foods"].map((g, index) => (
                     <motion.button
                       key={g}
                       initial={{ opacity: 0, y: 20 }}
@@ -357,16 +353,14 @@ const DietPlannerSetup = () => {
                       onClick={() => toggleArray('goals', g)}
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`group p-6 rounded-2xl border-2 text-center transition-all duration-300 ${
-                        form.goals.includes(g) 
-                          ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg shadow-emerald-100' 
+                      className={`group p-6 rounded-2xl border-2 text-center transition-all duration-300 ${form.goals.includes(g)
+                          ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg shadow-emerald-100'
                           : 'border-gray-200 hover:border-emerald-300 hover:shadow-md bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex flex-col items-center">
-                        <div className={`w-4 h-4 rounded-full mb-3 transition-all ${
-                          form.goals.includes(g) ? 'bg-emerald-500' : 'bg-gray-300 group-hover:bg-emerald-400'
-                        }`}></div>
+                        <div className={`w-4 h-4 rounded-full mb-3 transition-all ${form.goals.includes(g) ? 'bg-emerald-500' : 'bg-gray-300 group-hover:bg-emerald-400'
+                          }`}></div>
                         <div className="font-bold text-gray-900 text-lg mb-1">{g}</div>
                         <div className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors">
                           {form.goals.includes(g) ? '✓ Selected' : 'Click to select'}
@@ -379,10 +373,10 @@ const DietPlannerSetup = () => {
             )}
 
             {step === 2 && form.goals[0] === 'Diet Plan' && (
-              <motion.div 
-                key="preferences" 
-                initial={{ opacity: 0, x: 20 }} 
-                animate={{ opacity: 1, x: 0 }} 
+              <motion.div
+                key="preferences"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
@@ -397,55 +391,52 @@ const DietPlannerSetup = () => {
                     These preferences will be applied across your entire personalized diet plan.
                   </p>
                 </div>
-                
+
                 <div className="mb-8">
                   <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">Diet Type</h3>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {["Veg","Non-Veg","Vegan","Eggetarian"].map((opt, index) => (
-                      <motion.button 
-                        key={opt} 
+                    {["Veg", "Non-Veg", "Vegan", "Eggetarian"].map((opt, index) => (
+                      <motion.button
+                        key={opt}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        onClick={() => setForm(p => ({...p, dietPreference: opt}))}
+                        onClick={() => setForm(p => ({ ...p, dietPreference: opt }))}
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`group p-4 rounded-2xl border-2 text-center transition-all duration-300 ${
-                          form.dietPreference===opt 
-                            ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg shadow-emerald-100' 
+                        className={`group p-4 rounded-2xl border-2 text-center transition-all duration-300 ${form.dietPreference === opt
+                            ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg shadow-emerald-100'
                             : 'border-gray-200 hover:border-emerald-300 hover:shadow-md bg-white'
-                        }`}
+                          }`}
                       >
                         <div className="flex flex-col items-center">
-                          <div className={`w-3 h-3 rounded-full mb-2 transition-all ${
-                            form.dietPreference === opt ? 'bg-emerald-500' : 'bg-gray-300 group-hover:bg-emerald-400'
-                          }`}></div>
+                          <div className={`w-3 h-3 rounded-full mb-2 transition-all ${form.dietPreference === opt ? 'bg-emerald-500' : 'bg-gray-300 group-hover:bg-emerald-400'
+                            }`}></div>
                           <div className="font-bold text-gray-900">{opt}</div>
                         </div>
                       </motion.button>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-                </div>
-                
+
                 <div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">Preferred Cuisine</h3>
                   <div className="flex flex-wrap justify-center gap-3">
-                    {["Indian","Mediterranean","Keto","Continental","Japanese","Thai","Mexican"].map((c, index) => {
+                    {["Indian", "Mediterranean", "Japanese", "Mexican"].map((c, index) => {
                       const selected = form.cuisine.includes(c);
                       return (
-                        <motion.button 
-                          key={c} 
+                        <motion.button
+                          key={c}
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: index * 0.05 }}
-                          onClick={() => setForm(p => ({...p, cuisine: selected ? p.cuisine.filter(x=>x!==c) : [...p.cuisine, c]}))}
+                          onClick={() => setForm(p => ({ ...p, cuisine: selected ? p.cuisine.filter(x => x !== c) : [...p.cuisine, c] }))}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className={`px-6 py-3 rounded-full text-sm font-semibold border-2 transition-all duration-300 ${
-                            selected 
-                              ? 'border-emerald-500 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-200' 
+                          className={`px-6 py-3 rounded-full text-sm font-semibold border-2 transition-all duration-300 ${selected
+                              ? 'border-emerald-500 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-200'
                               : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 text-gray-700'
-                          }`}
+                            }`}
                         >
                           {c}
                         </motion.button>
@@ -482,14 +473,14 @@ const DietPlannerSetup = () => {
                       <div className="grid sm:grid-cols-3 gap-3">
                         <input type="number" placeholder="Current Weight (kg)" className="w-full border rounded-xl px-3 py-2"
                           value={form.weightLoss.currentWeightKg ?? ''}
-                          onChange={e=>setForm(p=>({...p, weightLoss:{...p.weightLoss, currentWeightKg: Number(e.target.value)||null}}))} />
+                          onChange={e => setForm(p => ({ ...p, weightLoss: { ...p.weightLoss, currentWeightKg: Number(e.target.value) || null } }))} />
                         <input type="number" placeholder="Target Weight (kg)" className="w-full border rounded-xl px-3 py-2"
                           value={form.weightLoss.targetWeightKg ?? ''}
-                          onChange={e=>setForm(p=>({...p, weightLoss:{...p.weightLoss, targetWeightKg: Number(e.target.value)||null}}))} />
-                        <select className="w-full border rounded-xl px-3 py-2" value={form.weightLoss.idealWeightCategory||''}
-                          onChange={e=>setForm(p=>({...p, weightLoss:{...p.weightLoss, idealWeightCategory: e.target.value || null}}))}>
+                          onChange={e => setForm(p => ({ ...p, weightLoss: { ...p.weightLoss, targetWeightKg: Number(e.target.value) || null } }))} />
+                        <select className="w-full border rounded-xl px-3 py-2" value={form.weightLoss.idealWeightCategory || ''}
+                          onChange={e => setForm(p => ({ ...p, weightLoss: { ...p.weightLoss, idealWeightCategory: e.target.value || null } }))}>
                           <option value="">Ideal Weight Category</option>
-                          {['Underweight','Normal','Overweight','Obese'].map(x=> <option key={x} value={x}>{x}</option>)}
+                          {['Underweight', 'Normal', 'Overweight', 'Obese'].map(x => <option key={x} value={x}>{x}</option>)}
                         </select>
                       </div>
                     </div>
@@ -501,11 +492,11 @@ const DietPlannerSetup = () => {
                       <div className="grid sm:grid-cols-2 gap-3">
                         <input type="number" placeholder="Calorie Target (kcal/day)" className="w-full border rounded-xl px-3 py-2"
                           value={form.countCalories.calorieTarget ?? ''}
-                          onChange={e=>setForm(p=>({...p, countCalories:{...p.countCalories, calorieTarget: Number(e.target.value)||null}}))} />
-                        <select className="w-full border rounded-xl px-3 py-2" value={form.countCalories.approach||''}
-                          onChange={e=>setForm(p=>({...p, countCalories:{...p.countCalories, approach: e.target.value || null}}))}>
+                          onChange={e => setForm(p => ({ ...p, countCalories: { ...p.countCalories, calorieTarget: Number(e.target.value) || null } }))} />
+                        <select className="w-full border rounded-xl px-3 py-2" value={form.countCalories.approach || ''}
+                          onChange={e => setForm(p => ({ ...p, countCalories: { ...p.countCalories, approach: e.target.value || null } }))}>
                           <option value="">Approach</option>
-                          {['Balanced Diet','Low Carb','Intermittent Fasting'].map(x=> <option key={x} value={x}>{x}</option>)}
+                          {['Balanced Diet', 'Low Carb', 'Intermittent Fasting'].map(x => <option key={x} value={x}>{x}</option>)}
                         </select>
                       </div>
                     </div>
@@ -517,15 +508,15 @@ const DietPlannerSetup = () => {
                       <div className="grid sm:grid-cols-3 gap-3">
                         <input type="number" placeholder="Protein Target (g/day)" className="w-full border rounded-xl px-3 py-2"
                           value={form.muscleGain.proteinTargetGrams ?? ''}
-                          onChange={e=>setForm(p=>({...p, muscleGain:{...p.muscleGain, proteinTargetGrams: Number(e.target.value)||null}}))} />
-                        <select className="w-full border rounded-xl px-3 py-2" value={form.muscleGain.workoutType||''}
-                          onChange={e=>setForm(p=>({...p, muscleGain:{...p.muscleGain, workoutType: e.target.value || null}}))}>
+                          onChange={e => setForm(p => ({ ...p, muscleGain: { ...p.muscleGain, proteinTargetGrams: Number(e.target.value) || null } }))} />
+                        <select className="w-full border rounded-xl px-3 py-2" value={form.muscleGain.workoutType || ''}
+                          onChange={e => setForm(p => ({ ...p, muscleGain: { ...p.muscleGain, workoutType: e.target.value || null } }))}>
                           <option value="">Workout Type</option>
-                          {['Strength Training','Bodyweight','CrossFit'].map(x=> <option key={x} value={x}>{x}</option>)}
+                          {['Strength Training', 'Bodyweight', 'CrossFit'].map(x => <option key={x} value={x}>{x}</option>)}
                         </select>
                         <input type="text" placeholder="Supplements (comma separated)" className="w-full border rounded-xl px-3 py-2"
-                          value={(form.muscleGain.supplements||[]).join(', ')}
-                          onChange={e=>setForm(p=>({...p, muscleGain:{...p.muscleGain, supplements: e.target.value.split(',').map(s=>s.trim()).filter(Boolean)}}))} />
+                          value={(form.muscleGain.supplements || []).join(', ')}
+                          onChange={e => setForm(p => ({ ...p, muscleGain: { ...p.muscleGain, supplements: e.target.value.split(',').map(s => s.trim()).filter(Boolean) } }))} />
                       </div>
                     </div>
                   )}
@@ -534,19 +525,19 @@ const DietPlannerSetup = () => {
                     <div className="p-4 rounded-2xl border border-gray-200">
                       <div className="font-semibold mb-3">Workout & Yoga</div>
                       <div className="grid sm:grid-cols-3 gap-3">
-                        <select className="w-full border rounded-xl px-3 py-2" value={form.workoutYoga.workoutFrequency||''}
-                          onChange={e=>setForm(p=>({...p, workoutYoga:{...p.workoutYoga, workoutFrequency: e.target.value || null}}))}>
+                        <select className="w-full border rounded-xl px-3 py-2" value={form.workoutYoga.workoutFrequency || ''}
+                          onChange={e => setForm(p => ({ ...p, workoutYoga: { ...p.workoutYoga, workoutFrequency: e.target.value || null } }))}>
                           <option value="">Workout Frequency</option>
-                          {['Daily','3x per week','Custom'].map(x=> <option key={x} value={x}>{x}</option>)}
+                          {['Daily', '3x per week', 'Custom'].map(x => <option key={x} value={x}>{x}</option>)}
                         </select>
-                        <select className="w-full border rounded-xl px-3 py-2" value={form.workoutYoga.yogaType||''}
-                          onChange={e=>setForm(p=>({...p, workoutYoga:{...p.workoutYoga, yogaType: e.target.value || null}}))}>
+                        <select className="w-full border rounded-xl px-3 py-2" value={form.workoutYoga.yogaType || ''}
+                          onChange={e => setForm(p => ({ ...p, workoutYoga: { ...p.workoutYoga, yogaType: e.target.value || null } }))}>
                           <option value="">Yoga Type</option>
-                          {['Hatha','Vinyasa','Power Yoga'].map(x=> <option key={x} value={x}>{x}</option>)}
+                          {['Hatha', 'Vinyasa', 'Power Yoga'].map(x => <option key={x} value={x}>{x}</option>)}
                         </select>
                         <input type="text" placeholder="Diet Support (e.g., High Protein)" className="w-full border rounded-xl px-3 py-2"
-                          value={form.workoutYoga.dietSupport||''}
-                          onChange={e=>setForm(p=>({...p, workoutYoga:{...p.workoutYoga, dietSupport: e.target.value || null}}))} />
+                          value={form.workoutYoga.dietSupport || ''}
+                          onChange={e => setForm(p => ({ ...p, workoutYoga: { ...p.workoutYoga, dietSupport: e.target.value || null } }))} />
                       </div>
                     </div>
                   )}
@@ -555,14 +546,14 @@ const DietPlannerSetup = () => {
                     <div className="p-4 rounded-2xl border border-gray-200">
                       <div className="font-semibold mb-3">Healthy Foods</div>
                       <div className="grid sm:grid-cols-2 gap-3">
-                        <select className="w-full border rounded-xl px-3 py-2" value={form.healthyFoods.healthFocus||''}
-                          onChange={e=>setForm(p=>({...p, healthyFoods:{...p.healthyFoods, healthFocus: e.target.value || null}}))}>
+                        <select className="w-full border rounded-xl px-3 py-2" value={form.healthyFoods.healthFocus || ''}
+                          onChange={e => setForm(p => ({ ...p, healthyFoods: { ...p.healthyFoods, healthFocus: e.target.value || null } }))}>
                           <option value="">Health Focus</option>
-                          {['Diabetes-friendly','Heart-healthy','Low sodium','High fiber'].map(x=> <option key={x} value={x}>{x}</option>)}
+                          {['Diabetes-friendly', 'Heart-healthy', 'Low sodium', 'High fiber'].map(x => <option key={x} value={x}>{x}</option>)}
                         </select>
                         <input type="text" placeholder="Restricted Foods (comma separated)" className="w-full border rounded-xl px-3 py-2"
-                          value={(form.healthyFoods.restrictedFoods||[]).join(', ')}
-                          onChange={e=>setForm(p=>({...p, healthyFoods:{...p.healthyFoods, restrictedFoods: e.target.value.split(',').map(s=>s.trim()).filter(Boolean)}}))} />
+                          value={(form.healthyFoods.restrictedFoods || []).join(', ')}
+                          onChange={e => setForm(p => ({ ...p, healthyFoods: { ...p.healthyFoods, restrictedFoods: e.target.value.split(',').map(s => s.trim()).filter(Boolean) } }))} />
                       </div>
                     </div>
                   )}
@@ -574,13 +565,12 @@ const DietPlannerSetup = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Any Medical Condition we should be aware of?</h2>
                 <p className="text-gray-600 mb-6">This helps us guide you safely towards your goals.</p>
                 <div className="flex flex-wrap gap-2">
-                  {["None","Diabetes","Pre-Diabetes","Cholesterol","Hypertension","Thyroid","Physical Injury","Excessive Stress/Anxiety","Sleep Issues","Depression"].map((c) => (
+                  {["None", "Diabetes", "Pre-Diabetes", "Cholesterol", "Hypertension", "Thyroid"].map((c) => (
                     <button
                       key={c}
                       onClick={() => toggleArray('conditions', c)}
-                      className={`px-4 py-2 rounded-full text-sm border transition ${
-                        form.conditions.includes(c) ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      className={`px-4 py-2 rounded-full text-sm border transition ${form.conditions.includes(c) ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'
+                        }`}
                     >{c}</button>
                   ))}
                 </div>
@@ -603,7 +593,7 @@ const DietPlannerSetup = () => {
           </AnimatePresence>
 
           {/* Enhanced Footer Nav */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mt-8 flex items-center justify-between"
@@ -613,39 +603,36 @@ const DietPlannerSetup = () => {
               disabled={step === 0}
               whileHover={{ scale: step === 0 ? 1 : 1.02 }}
               whileTap={{ scale: step === 0 ? 1 : 0.98 }}
-              className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold border-2 transition-all duration-300 ${
-                step === 0 
-                  ? 'border-gray-200 text-gray-400 cursor-not-allowed' 
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold border-2 transition-all duration-300 ${step === 0
+                  ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                   : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-              }`}
+                }`}
             >
               <ChevronLeft className="w-5 h-5" /> Back
             </motion.button>
-            
+
             {step < steps.length - 1 ? (
               <motion.button
                 whileHover={{ scale: canNext() ? 1.05 : 1 }}
                 whileTap={{ scale: canNext() ? 0.95 : 1 }}
                 onClick={goNext}
-                className={`inline-flex items-center gap-2 px-8 py-3 rounded-2xl font-bold text-lg shadow-lg transition-all duration-300 ${
-                  canNext() 
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-xl hover:shadow-emerald-200' 
+                className={`inline-flex items-center gap-2 px-8 py-3 rounded-2xl font-bold text-lg shadow-lg transition-all duration-300 ${canNext()
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-xl hover:shadow-emerald-200'
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 Next <ChevronRight className="w-5 h-5" />
               </motion.button>
             ) : (
-                <motion.button
+              <motion.button
                 whileHover={{ scale: generating ? 1 : 1.05 }}
                 whileTap={{ scale: generating ? 1 : 0.95 }}
-                  onClick={submit}
-                  disabled={generating}
-                className={`inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg shadow-xl transition-all duration-300 ${
-                  generating 
-                    ? 'bg-gray-400 cursor-not-allowed' 
+                onClick={submit}
+                disabled={generating}
+                className={`inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg shadow-xl transition-all duration-300 ${generating
+                    ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white hover:shadow-2xl hover:shadow-emerald-300'
-                }`}
+                  }`}
               >
                 {generating ? (
                   <>
@@ -658,13 +645,13 @@ const DietPlannerSetup = () => {
                     Generate My Diet Plan
                   </>
                 )}
-                </motion.button>
+              </motion.button>
             )}
           </motion.div>
 
           {/* Enhanced Generated Plan Display */}
           {generatedPlan && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
@@ -682,7 +669,7 @@ const DietPlannerSetup = () => {
                   <span className="text-emerald-600 text-sm">Daily Calories</span>
                 </div>
               </div>
-              
+
               <div className="grid gap-6">
                 {Object.entries(generatedPlan).filter(([key]) => key !== 'TotalCalories').map(([mealType, mealData], index) => (
                   <motion.div
@@ -698,21 +685,21 @@ const DietPlannerSetup = () => {
                         <div className="flex items-center gap-4 mb-3">
                           <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
                             <span className="text-white font-bold text-lg">
-                              {mealType === 'Breakfast' ? '🌅' : 
-                               mealType === 'Lunch' ? '☀️' : 
-                               mealType === 'Dinner' ? '🌙' : 
-                               mealType === 'Snack1' ? '🍎' : 
-                               mealType === 'Snack2' ? '🥜' : '🍽️'}
+                              {mealType === 'Breakfast' ? '🌅' :
+                                mealType === 'Lunch' ? '☀️' :
+                                  mealType === 'Dinner' ? '🌙' :
+                                    mealType === 'Snack1' ? '🍎' :
+                                      mealType === 'Snack2' ? '🥜' : '🍽️'}
                             </span>
                           </div>
                           <div>
                             <span className="text-xl font-bold text-emerald-700 capitalize">
-                            {mealType === 'Snack1' ? 'Morning Snack' : 
-                             mealType === 'Snack2' ? 'Evening Snack' : 
-                             mealType}
-                          </span>
+                              {mealType === 'Snack1' ? 'Morning Snack' :
+                                mealType === 'Snack2' ? 'Evening Snack' :
+                                  mealType}
+                            </span>
                             <div className="px-4 py-1 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 rounded-full text-sm font-semibold inline-block mt-1">
-                            {typeof mealData.calories === 'number' ? `${Math.round(mealData.calories)} kcal` : mealData.calories}
+                              {typeof mealData.calories === 'number' ? `${Math.round(mealData.calories)} kcal` : mealData.calories}
                             </div>
                           </div>
                         </div>
@@ -748,8 +735,8 @@ const DietPlannerSetup = () => {
                   </motion.div>
                 ))}
               </div>
-              
-              <motion.div 
+
+              <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 }}
@@ -757,13 +744,13 @@ const DietPlannerSetup = () => {
               >
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">🎯</span>
+                    <span className="text-2xl">🎯</span>
                   </div>
                   <div className="text-center">
                     <div className="text-xl font-bold text-emerald-800">Daily Calorie Goal</div>
                     <div className="text-2xl font-bold text-emerald-700">{generatedPlan.TotalCalories}</div>
+                  </div>
                 </div>
-              </div>
               </motion.div>
             </motion.div>
           )}

@@ -7,10 +7,13 @@ import { mockFridgeScans } from "../mock.jsx";
 
 const FridgeScanner = () => {
   const [scanMode, setScanMode] = useState("camera"); // camera, upload, results, manage
+  const [activeCategory, setActiveCategory] = useState("All");
   const [isScanning, setIsScanning] = useState(false);
   const [isFetchingRecipes, setIsFetchingRecipes] = useState(false);
   const [scanResults, setScanResults] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
+  const [expandedRecipe, setExpandedRecipe] = useState(null);
+  const [isLoadingRecipeDetails, setIsLoadingRecipeDetails] = useState(false);
   const [error, setError] = useState(null);
   const [manualIngredients, setManualIngredients] = useState([]);
   const [newIngredient, setNewIngredient] = useState("");
@@ -21,7 +24,7 @@ const FridgeScanner = () => {
   // Food validation keywords (imported from SubmitRecipe validation)
   const FOOD_KEYWORDS = new Set([
     // staple foods (grains, breads, pasta, noodles)
-    'strong' ,'brew','brewed','steep','rolled','chamomile','ada', 'adai', 'akki roti', 'amaranth', 'appam', 'arborio', 'atta', 'bagel', 'baguette', 'bajra', 'bajra roti', 'barley', 'basmati', 'besan', 'bhakri', 'bhatura', 'bread', 'brioche', 'brown rice', 'buckwheat', 'bulgur', 'carnaroli', 'cellophane noodles', 'chapati', 'cheela', 'chawal', 'ciabatta', 'cornbread', 'cornmeal', 'couscous', 'cracker', 'croissant', 'dosa', 'egg noodles', 'farro', 'fettuccine', 'flour', 'focaccia', 'freekeh', 'fusilli', 'gehun', 'gnocchi', 'gram flour', 'grits', 'idiyappam', 'idli', 'jau', 'jowar', 'jowar roti', 'kamut', 'khamiri roti', 'kulcha', 'kuttu', 'lachha paratha', 'lasagna', 'linguine', 'lobia', 'luchi', 'macaroni', 'maida', 'makki', 'makki di roti', 'malabar parotta', 'masala dosa', 'millet', 'missi roti', 'murmura', 'naan', 'neer dosa', 'noodles', 'oats', 'orzo', 'paratha', 'parotta', 'pasta', 'penne', 'pesarattu', 'pita', 'poha', 'polenta', 'pongal', 'puri', 'pumpernickel', 'puttu', 'quinoa', 'ragi', 'ragi roti', 'ramen', 'rava', 'rava dosa', 'ravioli', 'rice', 'rice flour', 'rice noodles', 'rigatoni', 'risotto', 'roti', 'rumali roti', 'rye', 'sago', 'sabudana', 'sattu', 'semolina', 'set dosa', 'sheermal', 'soba', 'sooji', 'sorghum', 'sourdough', 'spaghetti', 'spelt', 'sticky rice', 'suji', 'sushi rice', 'taftan', 'tagliatelle', 'tapioca', 'teff', 'thalipeeth', 'thepla', 'tortellini', 'tortilla', 'udon', 'upma', 'uttapam', 'valencia', 'vermicelli', 'wheat', 'wild rice',
+    'strong', 'brew', 'brewed', 'steep', 'rolled', 'chamomile', 'ada', 'adai', 'akki roti', 'amaranth', 'appam', 'arborio', 'atta', 'bagel', 'baguette', 'bajra', 'bajra roti', 'barley', 'basmati', 'besan', 'bhakri', 'bhatura', 'bread', 'brioche', 'brown rice', 'buckwheat', 'bulgur', 'carnaroli', 'cellophane noodles', 'chapati', 'cheela', 'chawal', 'ciabatta', 'cornbread', 'cornmeal', 'couscous', 'cracker', 'croissant', 'dosa', 'egg noodles', 'farro', 'fettuccine', 'flour', 'focaccia', 'freekeh', 'fusilli', 'gehun', 'gnocchi', 'gram flour', 'grits', 'idiyappam', 'idli', 'jau', 'jowar', 'jowar roti', 'kamut', 'khamiri roti', 'kulcha', 'kuttu', 'lachha paratha', 'lasagna', 'linguine', 'lobia', 'luchi', 'macaroni', 'maida', 'makki', 'makki di roti', 'malabar parotta', 'masala dosa', 'millet', 'missi roti', 'murmura', 'naan', 'neer dosa', 'noodles', 'oats', 'orzo', 'paratha', 'parotta', 'pasta', 'penne', 'pesarattu', 'pita', 'poha', 'polenta', 'pongal', 'puri', 'pumpernickel', 'puttu', 'quinoa', 'ragi', 'ragi roti', 'ramen', 'rava', 'rava dosa', 'ravioli', 'rice', 'rice flour', 'rice noodles', 'rigatoni', 'risotto', 'roti', 'rumali roti', 'rye', 'sago', 'sabudana', 'sattu', 'semolina', 'set dosa', 'sheermal', 'soba', 'sooji', 'sorghum', 'sourdough', 'spaghetti', 'spelt', 'sticky rice', 'suji', 'sushi rice', 'taftan', 'tagliatelle', 'tapioca', 'teff', 'thalipeeth', 'thepla', 'tortellini', 'tortilla', 'udon', 'upma', 'uttapam', 'valencia', 'vermicelli', 'wheat', 'wild rice',
 
     // proteins (meat, poultry, seafood, dairy, legumes, nuts, seeds)
     'abalone', 'albacore', 'almond', 'anchovy', 'arhar dal', 'bacon', 'bass', 'bean', 'beans', 'beef', 'black bean', 'black chana', 'brie', 'camembert', 'carp', 'cashew', 'catfish', 'chana', 'chana dal', 'cheddar', 'cheese', 'chenna', 'cherrystone', 'chia', 'chickpea', 'chickpeas', 'chicken', 'clam', 'cod', 'conch', 'cottage cheese', 'crab', 'crayfish', 'cream cheese', 'curd', 'dahi', 'dal', 'doodh', 'duck', 'edamame', 'eel', 'egg', 'eggs', 'emmental', 'escargot', 'fava bean', 'feta', 'fish', 'flax', 'gorgonzola', 'gosht', 'gouda', 'gram', 'grouper', 'gruyere', 'haddock', 'halibut', 'halloumi', 'ham', 'hazelnut', 'hemp', 'herring', 'jerky', 'kabuli chana', 'kala chana', 'kefir', 'khoya', 'kidney', 'kulthi', 'lamb', 'langoustine', 'lentil', 'lentils', 'lima bean', 'liver', 'lobster', 'lobia', 'macadamia', 'mackerel', 'mahi-mahi', 'malai', 'manchego', 'mascarpone', 'masoor', 'masoor dal', 'matar', 'matki', 'mawa', 'milk', 'monkfish', 'moong', 'moong dal', 'mortadella', 'moth bean', 'mozzarella', 'mung', 'mussel', 'mutton', 'natto', 'nut', 'nuts', 'octopus', 'offal', 'oyster', 'pancetta', 'paneer', 'parmesan', 'pea', 'peanut', 'peas', 'pecan', 'pecorino', 'pepperoni', 'perch', 'pike', 'pine nut', 'pinto bean', 'pistachio', 'pollock', 'pork', 'prawn', 'prosciutto', 'provolone', 'pumpkin seed', 'quail', 'rabbit', 'rajma', 'red snapper', 'ricotta', 'roquefort', 'salami', 'salmon', 'sardine', 'sausage', 'scallop', 'sea urchin', 'seed', 'seeds', 'seitan', 'sesame seed', 'shrimp', 'snapper', 'soy', 'squid', 'steak', 'stilton', 'sunflower seed', 'swordfish', 'tempeh', 'tilapia', 'tofu', 'toor dal', 'tripe', 'trout', 'tuna', 'turbot', 'turkey', 'uni', 'urad', 'urad dal', 'veal', 'venison', 'walnut', 'white bean', 'yogurt',
@@ -44,33 +47,52 @@ const FridgeScanner = () => {
     if (!ingredientName.trim()) return "Ingredient name is required";
     if (ingredientName.trim().length < 2) return "Ingredient name must be at least 2 characters";
     if (ingredientName.trim().length > 50) return "Ingredient name must be less than 50 characters";
-    
+
     const name = ingredientName.toLowerCase().trim();
     const tokens = name.split(/\s+/);
-    
+
     // Check if any token matches food keywords
     const hasFoodKeyword = tokens.some(token => FOOD_KEYWORDS.has(token));
     if (!hasFoodKeyword) return "Please enter a valid food ingredient";
-    
+
     return null;
   };
 
   // Categorize ingredients based on their names
   const categorizeIngredient = (ingredientName) => {
     const name = ingredientName.toLowerCase();
-    
+
     // Fruits
     if (['apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberry', 'lemon', 'lime', 'pear', 'peach', 'plum', 'cherry', 'watermelon', 'pineapple', 'mango', 'kiwi', 'avocado'].some(fruit => name.includes(fruit))) {
       return 'Fruits';
     }
-    
+
     // Vegetables
     if (['tomato', 'potato', 'onion', 'garlic', 'carrot', 'broccoli', 'spinach', 'lettuce', 'cabbage', 'pepper', 'cucumber', 'zucchini', 'eggplant', 'corn', 'peas', 'beans', 'celery', 'mushroom', 'radish', 'beet'].some(veg => name.includes(veg))) {
       return 'Vegetables';
     }
-    
+
     // Default category
     return 'Produce';
+  };
+
+  // Categorize recipe based on its name (simple heuristic)
+  const categorizeRecipe = (recipeName) => {
+    if (!recipeName) return 'Veg';
+    const name = recipeName.toLowerCase();
+
+    // Check for desserts
+    if (['cake', 'cookie', 'brownie', 'ice cream', 'dessert', 'pie', 'sweet', 'chocolate', 'pudding', 'tart', 'pastry', 'muffin', 'cupcake', 'smoothie bowl', 'smoothie', 'pancake', 'waffle', 'crepe'].some(w => name.includes(w))) {
+      return 'Dessert';
+    }
+
+    // Check for non-vegetarian
+    if (['chicken', 'beef', 'pork', 'meat', 'fish', 'salmon', 'shrimp', 'prawn', 'lamb', 'mutton', 'turkey', 'bacon', 'sausage', 'tuna', 'steak', 'crab', 'egg', 'prosciutto', 'salami', 'meatball', 'burger'].some(w => name.includes(w))) {
+      return 'Non-Veg';
+    }
+
+    // Default to Veg
+    return 'Veg';
   };
 
   // Manual ingredient management functions
@@ -101,7 +123,7 @@ const FridgeScanner = () => {
         manualIngredients: updatedManualIngredients,
         allIngredients: allIngredients
       }));
-      
+
       // Automatically refresh recipes with new ingredients
       refreshRecipesWithIngredients(allIngredients);
     }
@@ -110,7 +132,7 @@ const FridgeScanner = () => {
   const removeManualIngredient = (index) => {
     const updatedManualIngredients = manualIngredients.filter((_, i) => i !== index);
     setManualIngredients(updatedManualIngredients);
-    
+
     // Update scanResults if it exists
     if (scanResults) {
       const allIngredients = [...scanResults.detectedIngredients, ...updatedManualIngredients];
@@ -134,13 +156,13 @@ const FridgeScanner = () => {
     }
   };
 
-  // Refresh recipes when ingredients change
-  const refreshRecipes = async () => {
+  // Refresh recipes when ingredients change or category changes
+  const refreshRecipes = async (categoryToFetch = activeCategory) => {
     if (!scanResults) return;
-    
+
     setIsFetchingRecipes(true);
     try {
-      const updatedRecipes = await fetchRecipesFromAPI(scanResults.allIngredients);
+      const updatedRecipes = await fetchRecipesFromAPI(scanResults.allIngredients, categoryToFetch);
       setScanResults(prev => ({
         ...prev,
         suggestedRecipes: updatedRecipes
@@ -191,29 +213,29 @@ const FridgeScanner = () => {
     }
     setIsScanning(true);
     setScanMode("scanning");
-    
+
     try {
       // Convert base64 image to blob for upload
       const response = await fetch(imageData);
       const blob = await response.blob();
-      
+
       // Create FormData for API call
       const formData = new FormData();
       formData.append('file', blob, 'fridge_scan.jpg');
-      
+
       // Call YOLO model API
       const apiResponse = await fetch('http://localhost:4010/api/predict', {
         method: 'POST',
         body: formData
       });
-      
+
       if (!apiResponse.ok) {
         throw new Error(`API Error: ${apiResponse.status}`);
       }
-      
+
       const predictions = await apiResponse.json();
       console.log('Raw predictions from backend:', predictions);
-      
+
       // Transform YOLO predictions to our format
       const detectedIngredients = predictions.predictions.map(pred => ({
         name: pred.className,
@@ -222,9 +244,9 @@ const FridgeScanner = () => {
         bbox: pred.bbox
       })).filter(item => item.confidence > 0.1) // Filter low confidence detections (10% threshold)
         .sort((a, b) => b.confidence - a.confidence); // Sort by confidence
-      
+
       console.log('Processed detected ingredients:', detectedIngredients);
-      
+
       // If no ingredients detected, show fallback message
       if (detectedIngredients.length === 0) {
         setError("No ingredients detected. Try taking a clearer photo with better lighting.");
@@ -235,11 +257,11 @@ const FridgeScanner = () => {
 
       // Combine detected and manual ingredients
       const allIngredients = [...detectedIngredients, ...manualIngredients];
-      
+
       // Fetch real recipes from food service
       setIsFetchingRecipes(true);
-      const suggestedRecipes = await fetchRecipesFromAPI(allIngredients);
-      
+      const suggestedRecipes = await fetchRecipesFromAPI(allIngredients, activeCategory);
+
       // Create nutrition summary
       const nutritionSummary = {
         estimatedMeals: Math.min(allIngredients.length, 5),
@@ -254,13 +276,13 @@ const FridgeScanner = () => {
         suggestedRecipes,
         nutritionSummary
       };
-      
+
       setScanResults(results);
       setError(null);
-      
+
       // Tell the component to switch to the results view
       setScanMode("results");
-      
+
     } catch (error) {
       console.error('Scan error:', error);
       setError(`Scanning failed: ${error.message}. Make sure the YOLO model server is running on port 4010.`);
@@ -272,26 +294,88 @@ const FridgeScanner = () => {
   };
 
   // Fetch real recipes from Spoonacular API
-  const fetchRecipesFromAPI = async (ingredients) => {
+  const fetchRecipesFromAPI = async (ingredients, category = "All") => {
     try {
       const ingredientNames = ingredients.map(ing => ing.name).join(',');
-      
+
+      // Grab user profile for ML personalization
+      let mlDiet = '';
+      let mlMaxCalories = '';
+
+      try {
+        const u = JSON.parse(localStorage.getItem('user') || '{}');
+        const userActivity = u.activity || '';
+        const userGoal = u.goals?.[0] || '';
+        const userDiet = u.dietPreference || '';
+        const userCuisine = u.cuisine?.length ? 1 : 0;
+        const userConditions = u.conditions?.length || 0;
+
+        // Map user profile fields to ML feature encoding
+        const activityMap = { 'Mostly Sitting': 0, 'Often Standing': 1, 'Regularly Walking': 2, 'Physically Intense Work': 3 };
+        const goalMap = { 'Weight Loss': 0, 'Muscle Gain': 1, 'Count Calories': 2, 'Healthy Foods': 3, 'Diet Plan': 4 };
+        const dietMap2 = { 'Veg': 0, 'Non-Veg': 1, 'Vegan': 2, 'Eggetarian': 3 };
+
+        const mlFeatures = {
+          activity: activityMap[userActivity] ?? 1, // default Light
+          goal: goalMap[userGoal] ?? 3,         // default Healthy Foods
+          diet: dietMap2[userDiet] ?? 0,        // default Veg
+          cuisine: userCuisine,
+          condition: userConditions,
+          emotion: 0, // neutral in fridge scanner context
+          protein: 1, // assume fridge has protein
+          veg: 1, // assume fridge has veg
+          fruit: 0,
+          carb: 0
+        };
+
+        console.log("Calling ML model directly from FridgeScanner...", mlFeatures);
+        const mlResp = await fetch('http://localhost:5010/predict_diet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(mlFeatures),
+          signal: AbortSignal.timeout(2000)
+        });
+
+        if (mlResp.ok) {
+          const mlData = await mlResp.json();
+          console.log('🤖 [ML-Fridge] Prediction received on Frontend:', mlData);
+
+          if (mlData.diet_strategy && mlData.diet_strategy !== 'balanced') {
+            mlDiet = mlData.diet_strategy;
+          }
+          if (mlData.calorie_level === 'low') mlMaxCalories = 400;
+          if (mlData.calorie_level === 'high') mlMaxCalories = 800;
+        }
+
+      } catch (e) {
+        console.warn('Failed to fetch ML Prediction from Frontend for FridgeScanner:', e.message);
+      }
+
       // First try Spoonacular API via mood-analysis service
-      console.log('Fetching recipes from Spoonacular API for ingredients:', ingredientNames);
-      
-      const spoonacularResponse = await fetch(`http://localhost:3001/api/spoonacular/recipes/by-ingredients?ingredients=${encodeURIComponent(ingredientNames)}&number=6`, {
+      console.log(`Fetching recipes from Spoonacular API for ingredients: ${ingredientNames} (Category: ${category})`);
+
+      const queryParams = new URLSearchParams({
+        ingredients: ingredientNames,
+        category,
+        number: 6,
+        mlDiet: mlDiet || '',
+        mlMaxCalories: mlMaxCalories || ''
+      }).toString();
+
+      const spoonacularResponse = await fetch(`http://localhost:5005/api/spoonacular/recipes/by-ingredients?${queryParams}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
+
       if (spoonacularResponse.ok) {
         const spoonacularRecipes = await spoonacularResponse.json();
-        
+
         if (spoonacularRecipes && spoonacularRecipes.length > 0) {
           console.log('Successfully fetched recipes from Spoonacular:', spoonacularRecipes.length);
-          
+
           // Transform Spoonacular recipes to match our format
           return spoonacularRecipes.map(recipe => ({
             id: recipe.id,
@@ -305,15 +389,17 @@ const FridgeScanner = () => {
             totalIngredients: recipe.totalIngredients || Math.floor(Math.random() * 3) + 4,
             description: recipe.summary ? recipe.summary.replace(/<[^>]*>/g, '') : "",
             instructions: recipe.instructions || [],
+            ingredientsList: recipe.extendedIngredients || [],
             missedIngredients: recipe.missedIngredientCount || 0,
-            spoonacularId: recipe.id
+            spoonacularId: recipe.id,
+            dietCategory: categorizeRecipe(recipe.title || "")
           }));
         }
       }
 
       // Fallback to local food service API
       console.log('Mood-analysis service failed, trying local food service...');
-      const foodServiceResponse = await fetch(`http://localhost:5002/api/food/recipes/by-ingredients?ingredients=${encodeURIComponent(ingredientNames)}`, {
+      const foodServiceResponse = await fetch(`https://food-service-latest.onrender.com/api/food/recipes/by-ingredients?ingredients=${encodeURIComponent(ingredientNames)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -322,10 +408,10 @@ const FridgeScanner = () => {
 
       if (foodServiceResponse.ok) {
         const localRecipes = await foodServiceResponse.json();
-        
+
         if (localRecipes && localRecipes.length > 0) {
           console.log('Successfully fetched recipes from local food service:', localRecipes.length);
-          
+
           return localRecipes.map(recipe => ({
             id: recipe._id || recipe.id,
             name: recipe.title || recipe.name,
@@ -337,7 +423,9 @@ const FridgeScanner = () => {
             matchedIngredients: Math.min(ingredients.length, Math.floor(Math.random() * 4) + 2),
             totalIngredients: recipe.ingredients ? recipe.ingredients.length : Math.floor(Math.random() * 3) + 4,
             description: recipe.description || "",
-            instructions: recipe.instructions || []
+            instructions: recipe.instructions || [],
+            ingredients: recipe.ingredients || [],
+            dietCategory: categorizeRecipe(recipe.title || recipe.name || "")
           }));
         }
       }
@@ -355,6 +443,7 @@ const FridgeScanner = () => {
 
   // Generate recipe suggestions based on detected ingredients
   const generateRecipeSuggestions = (ingredients) => {
+    const mockInstr = ["Prepare all ingredients.", "Mix everything together properly.", "Cook for required time.", "Serve hot and enjoy!"];
     const recipes = [
       {
         id: 1,
@@ -363,7 +452,9 @@ const FridgeScanner = () => {
         calories: 150,
         difficulty: "Easy",
         image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        mood: "Fresh"
+        mood: "Fresh",
+        ingredients: ingredients,
+        instructions: ["Wash all fresh greens.", "Toss together in a large bowl.", "Add your favorite dressing.", "Serve immediately."]
       },
       {
         id: 2,
@@ -372,7 +463,9 @@ const FridgeScanner = () => {
         calories: 220,
         difficulty: "Easy",
         image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        mood: "Comforting"
+        mood: "Comforting",
+        ingredients: ingredients,
+        instructions: ["Preheat oven to 400°F (200°C).", "Chop all vegetables into even pieces.", "Toss with olive oil, salt, and pepper.", "Roast for 20-25 minutes until golden brown."]
       },
       {
         id: 3,
@@ -381,14 +474,17 @@ const FridgeScanner = () => {
         calories: 280,
         difficulty: "Easy",
         image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-        mood: "Energetic"
+        mood: "Energetic",
+        ingredients: ingredients,
+        instructions: ["Blend all ingredients until smooth.", "Pour into a serving bowl.", "Top with extra fruits, nuts, and seeds.", "Enjoy chilled."]
       }
     ];
 
     return recipes.map(recipe => ({
       ...recipe,
       matchedIngredients: Math.min(ingredients.length, Math.floor(Math.random() * 4) + 2),
-      totalIngredients: Math.floor(Math.random() * 3) + 4
+      totalIngredients: Math.floor(Math.random() * 3) + 4,
+      dietCategory: categorizeRecipe(recipe.name)
     }));
   };
 
@@ -398,12 +494,35 @@ const FridgeScanner = () => {
     ingredients.forEach(ingredient => {
       categories.add(ingredient.category);
     });
-    
+
     const categoryList = Array.from(categories);
     if (categoryList.includes('Fruits')) categoryList.push('High Vitamin C');
     if (categoryList.includes('Vegetables')) categoryList.push('High Fiber');
-    
+
     return categoryList.slice(0, 3);
+  };
+
+  const handleCookNow = async (recipe) => {
+    setIsLoadingRecipeDetails(true);
+    try {
+      if (recipe.spoonacularId) {
+        const response = await fetch(`http://localhost:5005/api/spoonacular/recipes/${recipe.spoonacularId}`);
+        if (response.ok) {
+          const responseData = await response.json();
+          const detailData = responseData.recipe || responseData;
+          setExpandedRecipe({ ...recipe, ...detailData });
+        } else {
+          setExpandedRecipe(recipe);
+        }
+      } else {
+        setExpandedRecipe(recipe);
+      }
+    } catch (err) {
+      console.error("Failed to load full recipe details:", err);
+      setExpandedRecipe(recipe);
+    } finally {
+      setIsLoadingRecipeDetails(false);
+    }
   };
 
   const resetScanner = () => {
@@ -416,16 +535,18 @@ const FridgeScanner = () => {
     setManualIngredients([]);
     setNewIngredient("");
     setIngredientError("");
+    setActiveCategory("All");
+    setExpandedRecipe(null); // Reset expanded recipe on scanner reset
   };
 
   if (scanMode === "scanning") {
     return (
-      <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 to-stone-100 flex items-center justify-center">
+      <div className="pt-16 min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 flex items-center justify-center">
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-20 h-20 bg-gradient-to-r from-[#F10100] to-[#FFD122] rounded-full flex items-center justify-center mx-auto mb-8"
+            className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-8"
           >
             <Scan className="w-10 h-10 text-white" />
           </motion.div>
@@ -433,7 +554,7 @@ const FridgeScanner = () => {
             {isFetchingRecipes ? "Finding Perfect Recipes" : "Analyzing Your Fridge"}
           </h2>
           <p className="text-xl text-gray-600 mb-8 max-w-md mx-auto">
-            {isFetchingRecipes 
+            {isFetchingRecipes
               ? "Searching our recipe database for dishes you can make with your ingredients..."
               : "Our YOLO AI model is detecting fruits and vegetables to suggest perfect recipes..."
             }
@@ -444,7 +565,7 @@ const FridgeScanner = () => {
               transition={{ duration: 1.5, repeat: Infinity }}
               className="flex items-center space-x-2"
             >
-              <div className="w-2 h-2 bg-[#F10100] rounded-full"></div>
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
               <span>{isFetchingRecipes ? "Searching recipes" : "Detecting ingredients"}</span>
             </motion.div>
             <motion.div
@@ -452,7 +573,7 @@ const FridgeScanner = () => {
               transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
               className="flex items-center space-x-2"
             >
-              <div className="w-2 h-2 bg-[#FFD122] rounded-full"></div>
+              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
               <span>{isFetchingRecipes ? "Filtering matches" : "Matching recipes"}</span>
             </motion.div>
             <motion.div
@@ -460,7 +581,7 @@ const FridgeScanner = () => {
               transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
               className="flex items-center space-x-2"
             >
-              <div className="w-2 h-2 bg-[#476E00] rounded-full"></div>
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
               <span>{isFetchingRecipes ? "Preparing suggestions" : "Calculating nutrition"}</span>
             </motion.div>
           </div>
@@ -474,29 +595,28 @@ const FridgeScanner = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 to-stone-100"
+        className="pt-16 min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <ScrollReveal>
             <div className="text-center mb-12">
               <div className="flex items-center justify-center mb-4">
-                <CheckCircle className="w-8 h-8 text-green-500 mr-3" />
+                <CheckCircle className="w-8 h-8 text-orange-500 mr-3" />
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 font-display">
                   Scan Complete!
                 </h1>
               </div>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
-                We found <span className="font-bold text-green-600">{scanResults.allIngredients.length} ingredient{scanResults.allIngredients.length !== 1 ? 's' : ''}</span> and discovered amazing recipes using your available items
+                We found <span className="font-bold text-orange-600">{scanResults.allIngredients.length} ingredient{scanResults.allIngredients.length !== 1 ? 's' : ''}</span> and discovered amazing recipes using your available items
               </p>
               <div className="flex justify-center items-center space-x-2 text-sm text-gray-500 mb-4">
                 <span>Ingredients:</span>
                 {scanResults.allIngredients.slice(0, 3).map((ingredient, index) => (
-                  <span key={index} className={`px-2 py-1 rounded-full font-medium ${
-                    ingredient.isManual 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'bg-green-100 text-green-700'
-                  }`}>
+                  <span key={index} className={`px-2 py-1 rounded-full font-medium ${ingredient.isManual
+                    ? 'bg-orange-100 text-orange-700'
+                    : 'bg-yellow-100 text-yellow-700'
+                    }`}>
                     {ingredient.name}
                   </span>
                 ))}
@@ -540,30 +660,27 @@ const FridgeScanner = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`flex items-center justify-between p-4 rounded-2xl border hover:shadow-md transition-all duration-200 ${
-                          ingredient.isManual 
-                            ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100' 
-                            : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-100'
-                        }`}
+                        className={`flex items-center justify-between p-4 rounded-2xl border hover:shadow-md transition-all duration-200 ${ingredient.isManual
+                          ? 'bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-100'
+                          : 'bg-gradient-to-r from-yellow-50 to-red-50 border-yellow-100'
+                          }`}
                       >
                         <div className="flex items-center space-x-3">
-                          <div className={`w-3 h-3 rounded-full ${
-                            ingredient.isManual ? 'bg-blue-500' : 'bg-green-500'
-                          }`}></div>
+                          <div className={`w-3 h-3 rounded-full ${ingredient.isManual ? 'bg-orange-500' : 'bg-red-500'
+                            }`}></div>
                           <div>
                             <span className="font-bold text-lg text-gray-900 capitalize">
                               {ingredient.name}
                             </span>
                             <div className="text-sm text-gray-600">
                               Category: <span className="font-medium">{ingredient.category}</span>
-                              {ingredient.isManual && <span className="ml-2 text-blue-600 font-medium">(Manual)</span>}
+                              {ingredient.isManual && <span className="ml-2 text-orange-600 font-medium">(Manual)</span>}
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className={`text-lg font-bold ${
-                            ingredient.isManual ? 'text-blue-600' : 'text-green-600'
-                          }`}>
+                          <div className={`text-lg font-bold ${ingredient.isManual ? 'text-orange-600' : 'text-red-600'
+                            }`}>
                             {ingredient.confidence}%
                           </div>
                           <div className="text-xs text-gray-500">confidence</div>
@@ -582,13 +699,13 @@ const FridgeScanner = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Estimated Meals</span>
-                      <span className="font-bold text-[#F10100]">
+                      <span className="font-bold text-orange-600">
                         {scanResults.nutritionSummary.estimatedMeals}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Avg Calories</span>
-                      <span className="font-bold text-[#FFD122]">
+                      <span className="font-bold text-yellow-600">
                         {scanResults.nutritionSummary.avgCalories}
                       </span>
                     </div>
@@ -598,7 +715,7 @@ const FridgeScanner = () => {
                         {scanResults.nutritionSummary.categories.map((category) => (
                           <span
                             key={category}
-                            className="px-3 py-1 bg-[#476E00]/10 text-[#476E00] rounded-full text-sm font-medium"
+                            className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium"
                           >
                             {category}
                           </span>
@@ -625,6 +742,32 @@ const FridgeScanner = () => {
                     <span>Scan Again</span>
                   </button>
                 </div>
+
+                {/* Categories Filter Tabs */}
+                {!isFetchingRecipes && scanResults.suggestedRecipes && scanResults.suggestedRecipes.length > 0 && (
+                  <div className="flex space-x-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+                    {["All", "Veg", "Non-Veg", "Dessert"].map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => {
+                          if (activeCategory !== category) {
+                            setActiveCategory(category);
+                            // If switching to/from Dessert, we need to refetch from backend
+                            if (category === "Dessert" || activeCategory === "Dessert") {
+                              refreshRecipes(category);
+                            }
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all duration-300 ${activeCategory === category
+                          ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md"
+                          : "bg-white text-gray-600 hover:bg-orange-50 border border-gray-200"
+                          }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </ScrollReveal>
 
               <div className="space-y-6">
@@ -633,89 +776,206 @@ const FridgeScanner = () => {
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="w-12 h-12 bg-gradient-to-r from-[#F10100] to-[#FFD122] rounded-full flex items-center justify-center mx-auto mb-4"
+                      className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4"
                     >
                       <ChefHat className="w-6 h-6 text-white" />
                     </motion.div>
                     <p className="text-gray-600 font-medium">Updating recipe suggestions...</p>
                   </div>
                 )}
-                {!isFetchingRecipes && scanResults.suggestedRecipes.map((recipe, index) => (
-                  <ScrollReveal key={recipe.id} direction="up" delay={0.3 + index * 0.1}>
-                    <motion.div
-                      whileHover={{ y: -5 }}
-                      className="bg-white rounded-3xl shadow-professional hover:shadow-professional-hover overflow-hidden transition-all duration-500"
-                    >
-                      <div className="md:flex">
-                        <div className="md:w-1/3">
-                          <img
-                            src={recipe.image}
-                            alt={recipe.name}
-                            className="w-full h-48 md:h-full object-cover"
-                          />
-                        </div>
-                        <div className="md:w-2/3 p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <div>
-                              <h3 className="text-2xl font-bold text-gray-900 mb-2 font-display">
-                                {recipe.name}
-                              </h3>
-                              <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                                <div className="flex items-center space-x-1">
-                                  <Clock className="w-4 h-4" />
-                                  <span>{recipe.cookTime}</span>
-                                </div>
-                                <div className="flex items-center space-x-1">
-                                  <Zap className="w-4 h-4" />
-                                  <span>{recipe.calories} cal</span>
-                                </div>
-                                <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
-                                  {recipe.difficulty}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-2xl font-bold text-[#476E00]">
-                                {Math.round((recipe.matchedIngredients / recipe.totalIngredients) * 100)}%
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {recipe.matchedIngredients}/{recipe.totalIngredients} ingredients
-                              </div>
-                              {recipe.missedIngredients > 0 && (
-                                <div className="text-xs text-orange-600 mt-1">
-                                  {recipe.missedIngredients} missing
-                                </div>
-                              )}
-                            </div>
+                {!isFetchingRecipes && scanResults.suggestedRecipes
+                  .filter((recipe) => activeCategory === "All" || recipe.dietCategory === activeCategory)
+                  .map((recipe, index) => (
+                    <ScrollReveal key={recipe.id} direction="up" delay={0.3 + index * 0.1}>
+                      <motion.div
+                        whileHover={{ y: -2 }}
+                        className="bg-white rounded-3xl shadow-professional hover:shadow-professional-hover overflow-hidden transition-all duration-500"
+                      >
+                        <div className="md:flex">
+                          <div className="md:w-1/3">
+                            <img
+                              src={recipe.image}
+                              alt={recipe.name}
+                              className="w-full h-48 md:h-full object-cover"
+                            />
                           </div>
+                          <div className="md:w-2/3 p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2 font-display">
+                                  {recipe.name}
+                                </h3>
+                                <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                                  <div className="flex items-center space-x-1">
+                                    <Clock className="w-4 h-4" />
+                                    <span>{recipe.cookTime}</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <Zap className="w-4 h-4" />
+                                    <span>{recipe.calories} cal</span>
+                                  </div>
+                                  <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                                    {recipe.difficulty}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-red-600">
+                                  {Math.round((recipe.matchedIngredients / recipe.totalIngredients) * 100)}%
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {recipe.matchedIngredients}/{recipe.totalIngredients} ingredients
+                                </div>
+                                {recipe.missedIngredients > 0 && (
+                                  <div className="text-xs text-orange-600 mt-1">
+                                    {recipe.missedIngredients} missing
+                                  </div>
+                                )}
+                              </div>
+                            </div>
 
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <span
-                                className="px-3 py-1 rounded-full text-sm font-medium text-white"
-                                style={{ backgroundColor: recipe.mood === "Energetic" ? "#FFD122" : recipe.mood === "Happy" ? "#476E00" : "#F1E1C8" }}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <span
+                                  className="px-3 py-1 rounded-full text-sm font-medium text-white"
+                                  style={{ backgroundColor: recipe.mood === "Energetic" ? "#F59E0B" : recipe.mood === "Happy" ? "#EF4444" : "#FBBF24" }}
+                                >
+                                  {recipe.mood} Mood
+                                </span>
+                                {recipe.dietCategory && (
+                                  <span
+                                    className={`px-3 py-1 rounded-full text-sm font-medium ${recipe.dietCategory === "Veg"
+                                      ? "bg-green-100 text-green-700"
+                                      : recipe.dietCategory === "Non-Veg"
+                                        ? "bg-red-100 text-red-700"
+                                        : "bg-purple-100 text-purple-700"
+                                      }`}
+                                  >
+                                    {recipe.dietCategory}
+                                  </span>
+                                )}
+                              </div>
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleCookNow(recipe)}
+                                disabled={isLoadingRecipeDetails}
+                                className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-2xl font-semibold flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
                               >
-                                {recipe.mood} Mood
-                              </span>
+                                <ChefHat className="w-4 h-4" />
+                                <span>Cook Now</span>
+                              </motion.button>
                             </div>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white px-6 py-3 rounded-2xl font-semibold flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300"
-                            >
-                              <ChefHat className="w-4 h-4" />
-                              <span>Cook Now</span>
-                            </motion.button>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  </ScrollReveal>
-                ))}
+                      </motion.div>
+                    </ScrollReveal>
+                  ))}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Expanded Recipe Modal */}
+        {expandedRecipe && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            >
+              <div className="relative h-64 sm:h-80 w-full shrink-0">
+                <img src={expandedRecipe.image} alt={expandedRecipe.name} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                <button
+                  onClick={() => setExpandedRecipe(null)}
+                  className="absolute top-4 right-4 bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-white/40 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+                <div className="absolute bottom-6 left-6 right-6">
+                  <h2 className="text-3xl font-display font-bold text-white mb-2">{expandedRecipe.name}</h2>
+                  <div className="flex flex-wrap gap-4 text-white/90 text-sm">
+                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {expandedRecipe.cookTime}</span>
+                    <span className="flex items-center gap-1"><Zap className="w-4 h-4" /> {expandedRecipe.calories} cal</span>
+                    <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full">{expandedRecipe.difficulty}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 sm:p-8 overflow-y-auto space-y-8 flex-1">
+                <div>
+                  <h3 className="text-2xl font-display font-bold text-gray-900 mb-4">Description</h3>
+                  <p className="text-gray-600 leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: expandedRecipe.description || expandedRecipe.summary || "A delicious recipe ready to be made." }}></p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div>
+                    <h3 className="text-2xl font-display font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      Ingredients
+                      <span className="bg-orange-100 text-orange-700 text-sm px-3 py-1 rounded-full font-medium">
+                        {expandedRecipe.ingredients?.length || expandedRecipe.ingredientsList?.length || expandedRecipe.extendedIngredients?.length || 0} items
+                      </span>
+                    </h3>
+                    <ul className="space-y-3 p-6 bg-orange-50/50 rounded-2xl border border-orange-100">
+                      {(expandedRecipe.ingredients || expandedRecipe.ingredientsList || expandedRecipe.extendedIngredients || []).length > 0 ?
+                        (expandedRecipe.ingredients || expandedRecipe.ingredientsList || expandedRecipe.extendedIngredients).map((ing, idx) => (
+                          <li key={idx} className="flex items-center gap-3 text-gray-700">
+                            <div className="w-2 h-2 rounded-full bg-orange-400" />
+                            <span className="font-medium capitalize">{ing.name || ing}</span>
+                            {ing.amount && ing.unit && <span className="text-gray-400 text-sm ml-auto">{ing.amount} {ing.unit}</span>}
+                          </li>
+                        ))
+                        : (
+                          <li className="text-gray-500 italic">Ingredient details unavailable for this recipe.</li>
+                        )}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-display font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      Instructions
+                    </h3>
+                    <div className="space-y-6">
+                      {(expandedRecipe.analyzedInstructions?.[0]?.steps || expandedRecipe.instructions || expandedRecipe.steps || []).length > 0 ? (
+                        <ol className="relative border-l-2 border-orange-100 ml-3 space-y-8">
+                          {(() => {
+                            let steps = [];
+                            if (expandedRecipe.analyzedInstructions?.[0]?.steps) {
+                              steps = expandedRecipe.analyzedInstructions[0].steps;
+                            } else if (Array.isArray(expandedRecipe.instructions)) {
+                              steps = expandedRecipe.instructions;
+                            } else if (typeof expandedRecipe.instructions === 'string') {
+                              steps = expandedRecipe.instructions.split('\n').filter(s => s.trim().length > 3);
+                            } else if (Array.isArray(expandedRecipe.steps)) {
+                              steps = expandedRecipe.steps;
+                            }
+
+                            return steps.map((step, idx) => {
+                              const text = step.step || step.instruction || step;
+                              return (
+                                <li key={idx} className="ml-6 flex items-start group">
+                                  <span className="absolute flex items-center justify-center w-8 h-8 rounded-full -left-4 ring-4 ring-white bg-gradient-to-br from-orange-400 to-red-500 text-white font-bold text-sm shadow-md group-hover:scale-110 transition-transform">
+                                    {idx + 1}
+                                  </span>
+                                  <p className="text-gray-600 leading-relaxed pt-1 w-full" dangerouslySetInnerHTML={{ __html: text }}></p>
+                                </li>
+                              )
+                            });
+                          })()}
+                        </ol>
+                      ) : (
+                        <p className="text-gray-500 p-6 bg-gray-50 rounded-2xl text-center italic">Instructions coming soon.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
       </motion.div>
     );
   }
@@ -726,14 +986,14 @@ const FridgeScanner = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 to-stone-100"
+        className="pt-16 min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50"
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <ScrollReveal>
             <div className="text-center mb-12">
               <div className="flex items-center justify-center mb-4">
-                <Edit3 className="w-8 h-8 text-blue-500 mr-3" />
+                <Edit3 className="w-8 h-8 text-orange-500 mr-3" />
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 font-display">
                   Manage Ingredients
                 </h1>
@@ -760,7 +1020,7 @@ const FridgeScanner = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 font-display">
                   Add Ingredient
                 </h2>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-bold text-gray-800 mb-3">
@@ -779,16 +1039,16 @@ const FridgeScanner = () => {
                         className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 text-lg font-medium bg-white/70 backdrop-blur-sm hover:border-gray-300"
                       />
                       <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={addManualIngredient}
-                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold text-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                       >
                         <Plus className="w-5 h-5" />
                       </motion.button>
                     </div>
                     {ingredientError && (
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-red-500 text-sm font-semibold mt-2 flex items-center space-x-1"
@@ -798,8 +1058,8 @@ const FridgeScanner = () => {
                       </motion.p>
                     )}
                   </div>
-                  
-                  <div className="text-sm text-gray-500 bg-blue-50 p-4 rounded-2xl">
+
+                  <div className="text-sm text-gray-500 bg-orange-50 p-4 rounded-2xl">
                     <strong>Tip:</strong> Enter common food ingredients like vegetables, fruits, grains, proteins, or spices. The system will validate that it's a real food item.
                   </div>
                 </div>
@@ -812,7 +1072,7 @@ const FridgeScanner = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 font-display">
                   Current Ingredients ({scanResults.allIngredients.length})
                 </h2>
-                
+
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {scanResults.allIngredients.map((ingredient, index) => (
                     <motion.div
@@ -820,29 +1080,27 @@ const FridgeScanner = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className={`flex items-center justify-between p-4 rounded-2xl border hover:shadow-md transition-all duration-200 ${
-                        ingredient.isManual 
-                          ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100' 
-                          : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-100'
-                      }`}
+                      className={`flex items-center justify-between p-4 rounded-2xl border hover:shadow-md transition-all duration-200 ${ingredient.isManual
+                        ? 'bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-100'
+                        : 'bg-gradient-to-r from-yellow-50 to-red-50 border-yellow-100'
+                        }`}
                     >
                       <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${
-                          ingredient.isManual ? 'bg-blue-500' : 'bg-green-500'
-                        }`}></div>
+                        <div className={`w-3 h-3 rounded-full ${ingredient.isManual ? 'bg-orange-500' : 'bg-red-500'
+                          }`}></div>
                         <div>
                           <span className="font-bold text-lg text-gray-900 capitalize">
                             {ingredient.name}
                           </span>
                           <div className="text-sm text-gray-600">
                             {ingredient.category}
-                            {ingredient.isManual && <span className="ml-2 text-blue-600 font-medium">(Manual)</span>}
+                            {ingredient.isManual && <span className="ml-2 text-orange-600 font-medium">(Manual)</span>}
                           </div>
                         </div>
                       </div>
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => {
                           if (ingredient.isManual) {
                             const manualIndex = manualIngredients.findIndex(ing => ing.name === ingredient.name);
@@ -859,7 +1117,7 @@ const FridgeScanner = () => {
                     </motion.div>
                   ))}
                 </div>
-                
+
                 {scanResults.allIngredients.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <p>No ingredients available. Add some ingredients to get started!</p>
@@ -873,11 +1131,11 @@ const FridgeScanner = () => {
           <ScrollReveal delay={0.4}>
             <div className="text-center mt-8">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={refreshRecipes}
                 disabled={isFetchingRecipes}
-                className="bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl hover:shadow-2xl transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl hover:shadow-2xl transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChefHat className="w-6 h-6" />
                 <span>{isFetchingRecipes ? "Updating..." : "Update Recipe Suggestions"}</span>
@@ -894,14 +1152,14 @@ const FridgeScanner = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 to-stone-100"
+      className="pt-16 min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50"
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <ScrollReveal>
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-display">
-              Smart Fridge <span className="text-[#F10100]">Scanner</span>
+              Smart Fridge <span className="text-orange-600">Scanner</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Scan your fridge and get personalized recipe recommendations based on available ingredients
@@ -916,22 +1174,20 @@ const FridgeScanner = () => {
               <div className="flex items-center justify-center space-x-4">
                 <button
                   onClick={() => setScanMode("camera")}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
-                    scanMode === "camera"
-                      ? "bg-[#F10100] text-white shadow-lg"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${scanMode === "camera"
+                    ? "bg-orange-500 text-white shadow-lg"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   <Camera className="w-4 h-4" />
                   <span>Use Camera</span>
                 </button>
                 <button
                   onClick={() => setScanMode("upload")}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
-                    scanMode === "upload"
-                      ? "bg-[#F10100] text-white shadow-lg"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${scanMode === "upload"
+                    ? "bg-orange-500 text-white shadow-lg"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   <Upload className="w-4 h-4" />
                   <span>Upload Photo</span>
@@ -971,11 +1227,11 @@ const FridgeScanner = () => {
                   </div>
                   <div className="text-center">
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={capture}
                       disabled={isScanning}
-                      className="bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl hover:shadow-2xl transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl hover:shadow-2xl transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Scan className="w-6 h-6" />
                       <span>{isScanning ? 'Scanning...' : 'Scan Fridge'}</span>
@@ -986,7 +1242,7 @@ const FridgeScanner = () => {
                 <div className="space-y-6">
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-gray-300 hover:border-[#F10100] rounded-2xl p-12 text-center cursor-pointer transition-colors duration-300"
+                    className="border-2 border-dashed border-gray-300 hover:border-orange-500 rounded-2xl p-12 text-center cursor-pointer transition-colors duration-300"
                   >
                     <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-lg font-medium text-gray-700 mb-2">

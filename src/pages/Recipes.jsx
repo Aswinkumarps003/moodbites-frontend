@@ -24,20 +24,20 @@ const Recipes = () => {
       const token = localStorage.getItem('authToken');
       setIsLoggedIn(!!token);
     };
-    
+
     checkLoginStatus();
-    
+
     const handleStorage = () => {
       checkLoginStatus();
     };
-    
+
     const handleCustomLogout = () => {
       setIsLoggedIn(false);
     };
-    
+
     window.addEventListener('storage', handleStorage);
     window.addEventListener('moodbites-logout', handleCustomLogout);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('moodbites-logout', handleCustomLogout);
@@ -55,7 +55,7 @@ const Recipes = () => {
   const fetchAllUsers = async () => {
     try {
       // Fetch all users from MongoDB API endpoint
-      const response = await fetch('http://localhost:5000/api/user/users', {
+      const response = await fetch('https://user-service-latest-bae8.onrender.com/api/user/users', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -67,11 +67,11 @@ const Recipes = () => {
       }
 
       const userData = await response.json();
-      
+
       // Create maps for quick lookup using the users array
       const nameMap = {};
       const imageMap = {};
-      
+
       userData.users.forEach(user => {
         nameMap[user._id] = user.name;
         imageMap[user._id] = user.profileImage;
@@ -116,7 +116,7 @@ const Recipes = () => {
       if (/(veg|vegetarian)/.test(e)) return 'Vegetarian';
       if (/(non[- ]?veg|meat|chicken|fish)/.test(e)) return 'Non-Veg';
     }
-    const ingredients = Array.isArray(raw.ingredients) ? raw.ingredients : (raw.ingredients ? String(raw.ingredients).split(',').map(s=>s.trim()) : []);
+    const ingredients = Array.isArray(raw.ingredients) ? raw.ingredients : (raw.ingredients ? String(raw.ingredients).split(',').map(s => s.trim()) : []);
     const title = raw.title || '';
     if (inferIsDessert(title, ingredients)) return 'Dessert';
     if (inferIsNonVeg(title, ingredients)) return 'Non-Veg';
@@ -155,7 +155,7 @@ const Recipes = () => {
           author: "Loading...", // Will be updated after fetching user data
           userId: r.user_id,
           category: inferCategory(r),
-          glutenFree: inferIsGlutenFree(r.title, Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s=>s.trim()) : []))
+          glutenFree: inferIsGlutenFree(r.title, Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s => s.trim()) : []))
         }));
 
         if (!isMounted) return;
@@ -171,7 +171,7 @@ const Recipes = () => {
         }));
 
         setRecipes(enrichedRecipes);
-        
+
         // We no longer use moods for filtering UI; keep state if needed elsewhere
         const uniqueMoods = Array.from(new Set(enrichedRecipes.map(r => r.mood))).filter(Boolean);
         setMoods(uniqueMoods.map(name => ({ name, color: "#F10100" })));
@@ -184,7 +184,7 @@ const Recipes = () => {
     }
     fetchActiveRecipes();
     return () => { isMounted = false; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabaseUrl, supabaseAnonKey]);
 
   // Fetch saved recipes for the logged-in user from food-service (Supabase saved_recipes)
@@ -199,7 +199,7 @@ const Recipes = () => {
           setSavedRecipes([]);
           return;
         }
-        const resp = await fetch(`http://localhost:5002/api/food/users/${user._id}/saved-recipes`);
+        const resp = await fetch(`https://food-service-latest.onrender.com/api/food/users/${user._id}/saved-recipes`);
         if (!resp.ok) throw new Error('Failed to fetch saved recipes');
         const data = await resp.json();
         if (!isMounted) return;
@@ -208,14 +208,14 @@ const Recipes = () => {
           title: r.title || 'Untitled Recipe',
           image: r.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
           mood: r.mood || 'Personal',
-          ingredients: Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s=>s.trim()) : []),
+          ingredients: Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s => s.trim()) : []),
           rating: 4.7,
           cookTime: r.cook_time || (r.ready_in_minutes ? `${r.ready_in_minutes} mins` : '30 mins'),
           servings: r.servings || 1,
           author: 'You',
           userId: r.user_id,
           category: inferCategory(r),
-          glutenFree: inferIsGlutenFree(r.title, Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s=>s.trim()) : []))
+          glutenFree: inferIsGlutenFree(r.title, Array.isArray(r.ingredients) ? r.ingredients : (r.ingredients ? String(r.ingredients).split(',').map(s => s.trim()) : []))
         }));
         setSavedRecipes(normalized);
       } catch (e) {
@@ -251,7 +251,7 @@ const Recipes = () => {
       }
     }
     const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         recipe.ingredients.some(ing => ing.toLowerCase().includes(searchTerm.toLowerCase()));
+      recipe.ingredients.some(ing => ing.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesFilter && matchesSearch;
   });
 
@@ -273,7 +273,7 @@ const Recipes = () => {
     // 2. Select date
     // 3. Call API to save to diet plan
     // 4. Show success message
-    
+
     // For now, let's show a simple alert
     alert(`Added "${recipe.title}" to your diet plan!`);
   };
@@ -283,29 +283,34 @@ const Recipes = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 to-stone-100"
+      className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-white to-stone-100"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+      {/* Hero Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#F10100]/5 via-[#FFD122]/5 to-[#476E00]/5 py-16">
+        <div className="absolute inset-0 dots-pattern opacity-30" />
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-center mb-12"
+          className="text-center relative z-10 max-w-4xl mx-auto px-4"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Recipe <span className="text-[#F10100]">Collection</span>
+          <span className="inline-block px-4 py-2 rounded-full bg-[#F10100]/10 text-[#F10100] font-semibold text-sm mb-6 tracking-wide uppercase">Community Recipes</span>
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4 font-display">
+            Recipe <span className="gradient-text">Collection</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Discover mood-based recipes shared by our community of wellness enthusiasts
           </p>
         </motion.div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Search, Source Toggle and Filters */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-3xl shadow-lg p-6 mb-8"
+          className="glass-card rounded-3xl p-6 mb-8 -mt-8 relative z-20"
         >
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             {/* Search Bar */}
@@ -324,13 +329,13 @@ const Recipes = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setSource('all')}
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${source === 'all' ? 'bg-[#F10100] text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${source === 'all' ? 'bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white shadow-lg shadow-[#F10100]/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
                 All Recipes
               </button>
               <button
                 onClick={() => setSource('saved')}
-                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${source === 'saved' ? 'bg-[#F10100] text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${source === 'saved' ? 'bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white shadow-lg shadow-[#F10100]/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
                 Saved Recipes
               </button>
@@ -345,11 +350,10 @@ const Recipes = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedFilter(filter)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                    selectedFilter === filter
-                      ? "bg-[#F10100] text-white shadow-lg"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${selectedFilter === filter
+                      ? "bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white shadow-lg shadow-[#F10100]/20"
+                      : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
+                    }`}
                 >
                   {filter}
                 </motion.button>
@@ -384,13 +388,28 @@ const Recipes = () => {
 
         {/* Loading / Error */}
         {loading && (
-          <div className="text-center py-16">
-            <div className="text-2xl text-gray-600">Loading active recipes...</div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 py-8">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-lg animate-pulse">
+                <div className="h-48 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" style={{ backgroundSize: '200% 100%' }} />
+                <div className="p-6 space-y-3">
+                  <div className="h-5 bg-gray-200 rounded-full w-3/4" />
+                  <div className="h-4 bg-gray-100 rounded-full w-1/2" />
+                  <div className="flex gap-2 pt-2">
+                    <div className="h-6 bg-gray-100 rounded-full w-16" />
+                    <div className="h-6 bg-gray-100 rounded-full w-20" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
         {error && !loading && (
           <div className="text-center py-16">
-            <div className="text-red-600 font-semibold">{error}</div>
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <div className="text-red-600 font-semibold text-lg">{error}</div>
             <div className="text-gray-500 text-sm mt-2">Ensure Supabase env vars are set and table/columns exist.</div>
           </div>
         )}
@@ -405,18 +424,18 @@ const Recipes = () => {
           {filteredRecipes.map((recipe, index) => {
             const moodColor = moods.find(mood => mood.name === recipe.mood)?.color || "#F10100";
             const isLiked = likedRecipes.has(recipe.id);
-            
+
             return (
               <motion.div
                 key={recipe.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ 
-                  y: -10, 
-                  boxShadow: "0 25px 50px rgba(0,0,0,0.15)" 
+                whileHover={{
+                  y: -10,
+                  boxShadow: "0 25px 50px rgba(0,0,0,0.15)"
                 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group"
+                className="bg-white rounded-3xl overflow-hidden shadow-elevated hover:shadow-elevated-hover transition-all duration-500 cursor-pointer group border border-gray-100/50"
               >
                 {/* Recipe Image */}
                 <div className="relative h-48 overflow-hidden">
@@ -425,7 +444,7 @@ const Recipes = () => {
                     alt={recipe.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  
+
                   {/* Like Button */}
                   <motion.button
                     whileHover={{ scale: 1.1 }}
@@ -433,15 +452,14 @@ const Recipes = () => {
                     onClick={() => toggleLike(recipe.id)}
                     className="absolute top-3 right-3 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
                   >
-                    <Heart 
-                      className={`w-5 h-5 transition-colors duration-300 ${
-                        isLiked ? "fill-red-500 text-red-500" : "text-gray-600"
-                      }`} 
+                    <Heart
+                      className={`w-5 h-5 transition-colors duration-300 ${isLiked ? "fill-red-500 text-red-500" : "text-gray-600"
+                        }`}
                     />
                   </motion.button>
 
                   {/* Mood Badge */}
-                  <div 
+                  <div
                     className="absolute bottom-3 left-3 px-3 py-1 rounded-full text-white text-xs font-semibold backdrop-blur-sm"
                     style={{ backgroundColor: `${moodColor}CC` }}
                   >
@@ -510,7 +528,7 @@ const Recipes = () => {
                         </div>
                       )}
                       <span>
-                      by <span className="font-medium">{recipe.author}</span>
+                        by <span className="font-medium">{recipe.author}</span>
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -527,13 +545,13 @@ const Recipes = () => {
                           <span>Add to Plan</span>
                         </motion.button>
                       )}
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-4 py-2 bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white rounded-xl text-xs font-semibold hover:shadow-lg transition-all duration-300"
-                    >
-                      View Recipe
-                    </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-4 py-2 bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white rounded-xl text-xs font-semibold hover:shadow-lg transition-all duration-300"
+                      >
+                        View Recipe
+                      </motion.button>
                     </div>
                   </div>
                 </div>
@@ -543,15 +561,27 @@ const Recipes = () => {
         </motion.div>
 
         {/* Empty State */}
-        {filteredRecipes.length === 0 && (
+        {filteredRecipes.length === 0 && !loading && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-16"
+            className="text-center py-20"
           >
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No recipes found</h3>
-            <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="text-7xl mb-6"
+            >🔍</motion.div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 font-display">No recipes found</h3>
+            <p className="text-gray-500 mb-6">Try adjusting your search or filter criteria</p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => { setSearchTerm(''); setSelectedFilter('All'); }}
+              className="px-6 py-3 bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white rounded-2xl font-semibold shadow-lg shadow-[#F10100]/20"
+            >
+              Clear Filters
+            </motion.button>
           </motion.div>
         )}
       </div>

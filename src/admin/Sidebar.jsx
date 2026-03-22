@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Users, BookOpen, Brain, Salad, MessageCircle, Settings, LogOut } from "lucide-react";
+import { Home, Users, BookOpen, Brain, Salad, MessageCircle, Settings, LogOut, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
 
 const iconMap = {
@@ -8,6 +8,7 @@ const iconMap = {
   Recipes: BookOpen,
   "AI Insights": Brain,
   "Diet Plans": Salad,
+  Payments: CreditCard,
   Feedback: MessageCircle,
   Settings: Settings,
 };
@@ -23,7 +24,7 @@ const Sidebar = ({ activePage, setActivePage, navOrder }) => (
       <div className="text-2xl font-extrabold text-orange-600 mb-10 tracking-tight select-none">MoodBites</div>
       <nav className="flex flex-col gap-2">
         {navOrder.map((label) => {
-          const Icon = iconMap[label];
+          const Icon = iconMap[label] || Home; // Fallback to Home icon if icon not found
           const isActive = activePage === label;
           return (
             <motion.button

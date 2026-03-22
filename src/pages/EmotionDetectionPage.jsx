@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Heart, 
-  Brain, 
-  Utensils, 
-  Clock, 
-  Flame, 
-  Plus, 
-  RefreshCw, 
-  Share2, 
+import {
+  Heart,
+  Brain,
+  Utensils,
+  Clock,
+  Flame,
+  Plus,
+  RefreshCw,
+  Share2,
   TrendingUp,
   Zap,
   Coffee,
@@ -60,7 +60,33 @@ const EmotionDetectionPage = () => {
   const fetchRecipesByMood = async (mood, preferences = {}) => {
     setIsLoadingRecipes(true);
     setRecipeError(null);
-    
+
+    // Grab user profile for ML personalization
+    let activityLevel = 1; // Default: Often Standing (or similar)
+    let goalLevel = 3;     // Default: Healthy Foods
+    let dietLevel = 0;     // Default: Veg
+    let cuisineLevel = 0;
+    let conditionLevel = 0;
+
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      const userActivity = u.activity || '';
+      const userGoal = u.goals?.[0] || '';
+      const userDiet = u.dietPreference || '';
+
+      const activityMap = { 'Mostly Sitting': 0, 'Often Standing': 1, 'Regularly Walking': 2, 'Physically Intense Work': 3 };
+      const goalMap = { 'Weight Loss': 0, 'Muscle Gain': 1, 'Count Calories': 2, 'Healthy Foods': 3, 'Diet Plan': 4 };
+      const dietMap2 = { 'Veg': 0, 'Non-Veg': 1, 'Vegan': 2, 'Eggetarian': 3 };
+
+      activityLevel = activityMap[userActivity] ?? 1;
+      goalLevel = goalMap[userGoal] ?? 3;
+      dietLevel = dietMap2[userDiet] ?? 0;
+      cuisineLevel = u.cuisine?.length ? 1 : 0;
+      conditionLevel = u.conditions?.length || 0;
+    } catch (e) {
+      console.warn('Failed to parse user from local storage:', e);
+    }
+
     try {
       const response = await fetch('http://localhost:3001/api/recipes/mood', {
         method: 'POST',
@@ -74,11 +100,17 @@ const EmotionDetectionPage = () => {
             diet: preferences.diet || 'all',
             maxReadyTime: selectedTime !== 'all' ? parseInt(selectedTime) : undefined,
             maxCalories: selectedCalories !== 'all' ? parseInt(selectedCalories) : undefined,
-            number: 6
+            number: 6,
+            // ML Features
+            activity: activityLevel,
+            goal: goalLevel,
+            dietType: dietLevel,
+            cuisineType: cuisineLevel,
+            condition: conditionLevel
           }
         }),
       });
-      
+
       if (response.ok) {
         const result = await response.json();
         console.log('🍽️ Recipes fetched:', result);
@@ -205,7 +237,7 @@ const EmotionDetectionPage = () => {
   // Function to detect mood from text using the API
   const detectMoodFromText = async () => {
     if (!textInput.trim()) return;
-    
+
     setIsTextAnalyzing(true);
     try {
       const response = await fetch('http://localhost:8000/detect-mood', {
@@ -215,13 +247,13 @@ const EmotionDetectionPage = () => {
         },
         body: JSON.stringify({ text: textInput }),
       });
-      
+
       if (response.ok) {
         const result = await response.json();
         const detectedMood = moods.find(mood => mood.id === result.mood) || moods[0];
         setCurrentMood(detectedMood);
         setDetectionMethod('text');
-        
+
         // Fetch real recipes based on detected mood
         await fetchRecipesByMood(result.mood);
       } else {
@@ -244,7 +276,7 @@ const EmotionDetectionPage = () => {
       setCurrentMood(randomMood);
       setDetectionMethod('auto');
       setIsDetecting(false);
-      
+
       // Fetch real recipes based on detected mood
       fetchRecipesByMood(randomMood.id);
     }, 3000);
@@ -254,7 +286,7 @@ const EmotionDetectionPage = () => {
   const selectMood = (mood) => {
     setCurrentMood(mood);
     setDetectionMethod('manual');
-    
+
     // Fetch real recipes based on selected mood
     fetchRecipesByMood(mood.id);
   };
@@ -285,7 +317,7 @@ const EmotionDetectionPage = () => {
       default:
         break;
     }
-    
+
     // Refetch recipes with new preferences if mood is set
     if (currentMood) {
       fetchRecipesByMood(currentMood.id);
@@ -350,15 +382,15 @@ const EmotionDetectionPage = () => {
               </span>{" "}
               Today?
             </motion.h1>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto mb-8 leading-relaxed"
             >
-              Discover the perfect culinary experience tailored to your emotions. 
-              <span className="font-semibold text-gray-800"> Our AI analyzes your mood</span> and recommends 
+              Discover the perfect culinary experience tailored to your emotions.
+              <span className="font-semibold text-gray-800"> Our AI analyzes your mood</span> and recommends
               <span className="font-semibold text-gray-800"> personalized recipes</span> that match your energy and feelings.
             </motion.p>
 
@@ -427,40 +459,40 @@ const EmotionDetectionPage = () => {
                       <Brain className="w-6 h-6 text-white" />
                     </div>
                     AI Detection
-              </h3>
+                  </h3>
                   <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
                     Recommended
                   </div>
                 </div>
-              
-              {currentMood && detectionMethod === 'auto' ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center"
-                >
+
+                {currentMood && detectionMethod === 'auto' ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center"
+                  >
                     <div className="relative mb-6">
                       <div className="text-8xl mb-4 animate-bounce">{currentMood.emoji}</div>
                       <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
                     </div>
-                  <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                    {currentMood.name}
-                  </h4>
-                  <p className="text-gray-600 mb-6">{currentMood.description}</p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={detectMood}
+                    <h4 className="text-2xl font-bold text-gray-900 mb-2">
+                      {currentMood.name}
+                    </h4>
+                    <p className="text-gray-600 mb-6">{currentMood.description}</p>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={detectMood}
                       className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center gap-2 mx-auto"
-                  >
+                    >
                       <RefreshCw className="w-4 h-4" />
-                    Re-scan Mood
-                  </motion.button>
-                </motion.div>
-              ) : (
-                <div className="text-center">
+                      Re-scan Mood
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  <div className="text-center">
                     <div className="mb-6">
                       <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Heart className="w-8 h-8 text-white" />
@@ -468,34 +500,34 @@ const EmotionDetectionPage = () => {
                       <h4 className="text-lg font-semibold text-gray-900 mb-2">AI-Powered Analysis</h4>
                       <p className="text-sm text-gray-600">Our advanced AI will analyze your current emotional state</p>
                     </div>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={detectMood}
-                    disabled={isDetecting}
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={detectMood}
+                      disabled={isDetecting}
                       className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-3"
-                  >
-                    {isDetecting ? (
+                    >
+                      {isDetecting ? (
                         <>
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Heart className="w-6 h-6" />
-                        </motion.div>
-                        Detecting Mood...
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          >
+                            <Heart className="w-6 h-6" />
+                          </motion.div>
+                          Detecting Mood...
                         </>
-                    ) : (
-                      <>
+                      ) : (
+                        <>
                           <Heart className="w-6 h-6" />
-                        Detect My Mood
+                          Detect My Mood
                           <ArrowRight className="w-5 h-5" />
-                      </>
-                    )}
-                  </motion.button>
-                </div>
-              )}
-            </div>
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+                )}
+              </div>
             </motion.div>
 
             {/* Text-based Mood Detection */}
@@ -513,43 +545,43 @@ const EmotionDetectionPage = () => {
                       <Type className="w-6 h-6 text-white" />
                     </div>
                     Text Analysis
-              </h3>
+                  </h3>
                   <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
                     Advanced
                   </div>
                 </div>
-              
-              {currentMood && detectionMethod === 'text' ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center"
-                >
+
+                {currentMood && detectionMethod === 'text' ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center"
+                  >
                     <div className="relative mb-6">
                       <div className="text-8xl mb-4 animate-bounce">{currentMood.emoji}</div>
                       <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
                     </div>
-                  <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                    {currentMood.name}
-                  </h4>
-                  <p className="text-gray-600 mb-6">{currentMood.description}</p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setTextInput('');
-                      setCurrentMood(null);
-                      setDetectionMethod('manual');
-                    }}
+                    <h4 className="text-2xl font-bold text-gray-900 mb-2">
+                      {currentMood.name}
+                    </h4>
+                    <p className="text-gray-600 mb-6">{currentMood.description}</p>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setTextInput('');
+                        setCurrentMood(null);
+                        setDetectionMethod('manual');
+                      }}
                       className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center gap-2 mx-auto"
-                  >
+                    >
                       <RefreshCw className="w-4 h-4" />
-                    Try Again
-                  </motion.button>
-                </motion.div>
-              ) : (
+                      Try Again
+                    </motion.button>
+                  </motion.div>
+                ) : (
                   <div>
                     <div className="mb-6">
                       <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -560,47 +592,47 @@ const EmotionDetectionPage = () => {
                     </div>
                     <form onSubmit={handleTextSubmit} className="space-y-4">
                       <div className="relative">
-                    <textarea
-                      value={textInput}
-                      onChange={handleTextChange}
-                      placeholder="Describe how you're feeling today... (e.g., 'I'm feeling really stressed about work and need something comforting')"
+                        <textarea
+                          value={textInput}
+                          onChange={handleTextChange}
+                          placeholder="Describe how you're feeling today... (e.g., 'I'm feeling really stressed about work and need something comforting')"
                           className="w-full p-4 border-2 border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white"
-                      rows={4}
-                      disabled={isTextAnalyzing}
-                    />
+                          rows={4}
+                          disabled={isTextAnalyzing}
+                        />
                         <div className="absolute bottom-3 right-3 text-xs text-gray-400">
                           {textInput.length}/500
                         </div>
-                  </div>
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    disabled={!textInput.trim() || isTextAnalyzing}
+                      </div>
+                      <motion.button
+                        type="submit"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        disabled={!textInput.trim() || isTextAnalyzing}
                         className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-                  >
-                    {isTextAnalyzing ? (
+                      >
+                        {isTextAnalyzing ? (
                           <>
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Brain className="w-5 h-5" />
-                        </motion.div>
-                        Analyzing...
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            >
+                              <Brain className="w-5 h-5" />
+                            </motion.div>
+                            Analyzing...
                           </>
-                    ) : (
-                      <>
+                        ) : (
+                          <>
                             <Send className="w-5 h-5" />
-                        Analyze My Text
+                            Analyze My Text
                             <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </motion.button>
-                </form>
+                          </>
+                        )}
+                      </motion.button>
+                    </form>
                   </div>
-              )}
-            </div>
+                )}
+              </div>
             </motion.div>
 
             {/* Manual Mood Selection */}
@@ -618,12 +650,12 @@ const EmotionDetectionPage = () => {
                       <Zap className="w-6 h-6 text-white" />
                     </div>
                     Quick Select
-              </h3>
+                  </h3>
                   <div className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
                     Instant
                   </div>
                 </div>
-                
+
                 <div className="mb-6">
                   <div className="w-20 h-20 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Zap className="w-8 h-8 text-white" />
@@ -634,31 +666,30 @@ const EmotionDetectionPage = () => {
 
                 <div className="grid grid-cols-2 gap-3">
                   {moods.map((mood, index) => (
-                  <motion.button
-                    key={mood.id}
+                    <motion.button
+                      key={mood.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.7 + index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => selectMood(mood)}
-                      className={`p-4 rounded-xl border-2 transition-all duration-300 group ${
-                      currentMood?.id === mood.id
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => selectMood(mood)}
+                      className={`p-4 rounded-xl border-2 transition-all duration-300 group ${currentMood?.id === mood.id
                           ? 'border-[#F10100] bg-gradient-to-r ' + mood.color + ' text-white shadow-lg'
                           : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 hover:shadow-md'
-                    }`}
-                  >
+                        }`}
+                    >
                       <div className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-200">{mood.emoji}</div>
-                    <div className="text-sm font-medium">{mood.name}</div>
+                      <div className="text-sm font-medium">{mood.name}</div>
                       {currentMood?.id === mood.id && (
                         <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                           <CheckCircle className="w-3 h-3 text-white" />
                         </div>
                       )}
-                  </motion.button>
-                ))}
+                    </motion.button>
+                  ))}
+                </div>
               </div>
-            </div>
             </motion.div>
           </div>
         </motion.div>
@@ -683,7 +714,7 @@ const EmotionDetectionPage = () => {
                   <p className="text-sm opacity-90">Personalized recommendations just for you</p>
                 </div>
               </motion.div>
-              
+
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Your Personalized Recommendations
               </h2>
@@ -703,16 +734,16 @@ const EmotionDetectionPage = () => {
                 <Filter className="w-5 h-5 text-gray-600" />
                 <h4 className="text-lg font-semibold text-gray-900">Filter Your Results</h4>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     <Globe className="w-4 h-4" />
                     Cuisine Type
                   </label>
-                <select
-                  value={selectedCuisine}
-                  onChange={(e) => handlePreferenceChange('cuisine', e.target.value)}
+                  <select
+                    value={selectedCuisine}
+                    onChange={(e) => handlePreferenceChange('cuisine', e.target.value)}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#F10100] focus:border-[#F10100] transition-all duration-200 bg-white"
                   >
                     <option value="all">🌍 All Cuisines</option>
@@ -723,17 +754,17 @@ const EmotionDetectionPage = () => {
                     <option value="thai">🌶️ Thai</option>
                     <option value="indian">🍛 Indian</option>
                     <option value="mediterranean">🫒 Mediterranean</option>
-                </select>
+                  </select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     <Timer className="w-4 h-4" />
                     Cooking Time
                   </label>
-                <select
-                  value={selectedTime}
-                  onChange={(e) => handlePreferenceChange('time', e.target.value)}
+                  <select
+                    value={selectedTime}
+                    onChange={(e) => handlePreferenceChange('time', e.target.value)}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#F10100] focus:border-[#F10100] transition-all duration-200 bg-white"
                   >
                     <option value="all">⏰ Any Time</option>
@@ -741,17 +772,17 @@ const EmotionDetectionPage = () => {
                     <option value="30">🚀 Fast (≤30 min)</option>
                     <option value="45">⏱️ Medium (≤45 min)</option>
                     <option value="60">☕ Relaxed (≤60 min)</option>
-                </select>
+                  </select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     <Target className="w-4 h-4" />
                     Calories
                   </label>
-                <select
-                  value={selectedCalories}
-                  onChange={(e) => handlePreferenceChange('calories', e.target.value)}
+                  <select
+                    value={selectedCalories}
+                    onChange={(e) => handlePreferenceChange('calories', e.target.value)}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#F10100] focus:border-[#F10100] transition-all duration-200 bg-white"
                   >
                     <option value="all">🔥 Any Calories</option>
@@ -759,9 +790,9 @@ const EmotionDetectionPage = () => {
                     <option value="500">⚖️ Moderate (≤500 cal)</option>
                     <option value="700">🍽️ Hearty (≤700 cal)</option>
                     <option value="1000">🎉 Indulgent (≤1000 cal)</option>
-                </select>
+                  </select>
+                </div>
               </div>
-            </div>
             </motion.div>
 
             {/* Loading State */}
@@ -772,13 +803,13 @@ const EmotionDetectionPage = () => {
                 className="text-center py-16"
               >
                 <div className="relative">
-                <motion.div
-                  animate={{ rotate: 360 }}
+                  <motion.div
+                    animate={{ rotate: 360 }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                     className="w-20 h-20 bg-gradient-to-r from-[#F10100] to-[#FFD122] rounded-full flex items-center justify-center mx-auto mb-6"
-                >
+                  >
                     <ChefHat className="w-10 h-10 text-white" />
-                </motion.div>
+                  </motion.div>
                   <div className="absolute inset-0 bg-gradient-to-r from-[#F10100] to-[#FFD122] rounded-full blur-lg opacity-30 animate-pulse"></div>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Crafting Your Perfect Menu</h3>
@@ -789,7 +820,7 @@ const EmotionDetectionPage = () => {
                     <div className="w-2 h-2 bg-[#FFD122] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                     <div className="w-2 h-2 bg-[#F10100] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
-              </div>
+                </div>
               </motion.div>
             )}
 
@@ -814,102 +845,102 @@ const EmotionDetectionPage = () => {
 
             {/* Recipes Grid */}
             {!isLoadingRecipes && recommendations.length > 0 && (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recommendations.map((dish, index) => (
-                <motion.div
-                  key={dish.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index }}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className="group relative bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100"
-                >
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#F10100]/5 to-[#FFD122]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
-                  <div className="relative">
-                    <img
-                      src={dish.image}
-                      alt={dish.name}
-                      className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    
-                    {/* Floating Badges */}
-                    <div className="absolute top-4 right-4 flex flex-col gap-2">
-                      <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                      <Flame className="w-4 h-4 text-orange-500" />
-                      </div>
-                      {dish.spoonacularScore && (
-                        <div className="bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white rounded-full px-3 py-1 text-xs font-bold flex items-center gap-1">
-                          <Star className="w-3 h-3" />
-                          {Math.round(dish.spoonacularScore)}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {recommendations.map((dish, index) => (
+                  <motion.div
+                    key={dish.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    className="group relative bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100"
+                  >
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#F10100]/5 to-[#FFD122]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                    <div className="relative">
+                      <img
+                        src={dish.image}
+                        alt={dish.name}
+                        className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+
+                      {/* Floating Badges */}
+                      <div className="absolute top-4 right-4 flex flex-col gap-2">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                          <Flame className="w-4 h-4 text-orange-500" />
                         </div>
-                      )}
-                    </div>
-                      
+                        {dish.spoonacularScore && (
+                          <div className="bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white rounded-full px-3 py-1 text-xs font-bold flex items-center gap-1">
+                            <Star className="w-3 h-3" />
+                            {Math.round(dish.spoonacularScore)}
+                          </div>
+                        )}
+                      </div>
+
                       {/* Recipe Info Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                      <div className="flex items-center gap-4 text-white text-sm mb-2">
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+                        <div className="flex items-center gap-4 text-white text-sm mb-2">
                           {dish.readyInMinutes && (
-                          <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-                            <Timer className="w-3 h-3" />
+                            <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                              <Timer className="w-3 h-3" />
                               {dish.readyInMinutes}m
                             </div>
                           )}
                           {dish.servings && (
-                          <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-                            <Users className="w-3 h-3" />
+                            <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                              <Users className="w-3 h-3" />
                               {dish.servings}
                             </div>
                           )}
-                            </div>
-                      <h4 className="text-xl font-bold text-white mb-1 group-hover:text-yellow-300 transition-colors duration-300">
-                        {dish.name}
-                      </h4>
-                    </div>
-                  </div>
-                    
-                  <div className="p-6 relative z-10">
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed">{dish.moodBenefit}</p>
-                    
-                    {/* Enhanced Nutrition Info */}
-                    <div className="grid grid-cols-3 gap-3 mb-6">
-                      <div className="text-center p-3 bg-gray-50 rounded-xl group-hover:bg-[#F10100]/5 transition-colors duration-300">
-                        <div className="text-lg font-bold text-gray-900">{dish.calories}</div>
-                        <div className="text-xs text-gray-500 font-medium">calories</div>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-xl group-hover:bg-[#FFD122]/5 transition-colors duration-300">
-                        <div className="text-lg font-bold text-gray-900">{dish.protein}</div>
-                        <div className="text-xs text-gray-500 font-medium">protein</div>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-xl group-hover:bg-green-500/5 transition-colors duration-300">
-                        <div className="text-lg font-bold text-gray-900">{dish.carbs}</div>
-                        <div className="text-xs text-gray-500 font-medium">carbs</div>
+                        </div>
+                        <h4 className="text-xl font-bold text-white mb-1 group-hover:text-yellow-300 transition-colors duration-300">
+                          {dish.name}
+                        </h4>
                       </div>
                     </div>
-                    
-                    {/* Enhanced Action Buttons */}
-                    <div className="flex gap-3">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex-1 bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white py-3 px-4 rounded-xl font-semibold text-sm hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 group/btn"
-                      >
-                        <Plus className="w-4 h-4 group-hover/btn:rotate-90 transition-transform duration-300" />
-                        Add to Plan
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-[#F10100] hover:bg-[#F10100]/5 transition-all duration-300 group/btn"
-                      >
-                        <Share2 className="w-4 h-4 text-gray-600 group-hover/btn:text-[#F10100] transition-colors duration-300" />
-                      </motion.button>
+
+                    <div className="p-6 relative z-10">
+                      <p className="text-gray-600 text-sm mb-4 leading-relaxed">{dish.moodBenefit}</p>
+
+                      {/* Enhanced Nutrition Info */}
+                      <div className="grid grid-cols-3 gap-3 mb-6">
+                        <div className="text-center p-3 bg-gray-50 rounded-xl group-hover:bg-[#F10100]/5 transition-colors duration-300">
+                          <div className="text-lg font-bold text-gray-900">{dish.calories}</div>
+                          <div className="text-xs text-gray-500 font-medium">calories</div>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 rounded-xl group-hover:bg-[#FFD122]/5 transition-colors duration-300">
+                          <div className="text-lg font-bold text-gray-900">{dish.protein}</div>
+                          <div className="text-xs text-gray-500 font-medium">protein</div>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 rounded-xl group-hover:bg-green-500/5 transition-colors duration-300">
+                          <div className="text-lg font-bold text-gray-900">{dish.carbs}</div>
+                          <div className="text-xs text-gray-500 font-medium">carbs</div>
+                        </div>
+                      </div>
+
+                      {/* Enhanced Action Buttons */}
+                      <div className="flex gap-3">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="flex-1 bg-gradient-to-r from-[#F10100] to-[#FFD122] text-white py-3 px-4 rounded-xl font-semibold text-sm hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                        >
+                          <Plus className="w-4 h-4 group-hover/btn:rotate-90 transition-transform duration-300" />
+                          Add to Plan
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-[#F10100] hover:bg-[#F10100]/5 transition-all duration-300 group/btn"
+                        >
+                          <Share2 className="w-4 h-4 text-gray-600 group-hover/btn:text-[#F10100] transition-colors duration-300" />
+                        </motion.button>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                  </motion.div>
+                ))}
+              </div>
             )}
           </motion.div>
         )}
@@ -929,7 +960,7 @@ const EmotionDetectionPage = () => {
                 <div className="absolute -bottom-20 -left-20 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-white/5 rounded-full blur-xl animate-pulse" style={{ animationDelay: '4s' }}></div>
               </div>
-              
+
               <div className="relative z-10">
                 <motion.div
                   initial={{ scale: 0.8 }}
@@ -940,33 +971,33 @@ const EmotionDetectionPage = () => {
                   <Sparkles className="w-5 h-5" />
                   <span className="text-sm font-semibold">Ready to Transform Your Eating?</span>
                 </motion.div>
-                
+
                 <h3 className="text-3xl md:text-4xl font-bold mb-4">Take Your Mood-Based Nutrition to the Next Level</h3>
                 <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto leading-relaxed">
                   Save your personalized recommendations and create a comprehensive diet plan that adapts to your emotional patterns and nutritional needs.
                 </p>
-                
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <motion.button
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <motion.button
                     whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
+                    whileTap={{ scale: 0.95 }}
                     className="bg-white text-[#F10100] px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 flex items-center gap-3 group"
-                >
+                  >
                     <Award className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-                  Save My Recommendations
+                    Save My Recommendations
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-                </motion.button>
-                <motion.button
+                  </motion.button>
+                  <motion.button
                     whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
+                    whileTap={{ scale: 0.95 }}
                     className="border-2 border-white text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white hover:text-[#F10100] transition-all duration-300 flex items-center gap-3 group"
-                >
+                  >
                     <ChefHat className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-                  Generate Diet Plan
+                    Generate Diet Plan
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-                </motion.button>
+                  </motion.button>
                 </div>
-                
+
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm opacity-80">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" />

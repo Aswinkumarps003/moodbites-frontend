@@ -227,7 +227,12 @@ const RedirectVideoCall = () => {
 function App() {
   return (
     <div className="App min-h-screen bg-gradient-to-br from-slate-50 to-stone-100">
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
         <AppContent />
       </BrowserRouter>
     </div>

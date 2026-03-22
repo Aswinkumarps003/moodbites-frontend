@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
 import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/user';
+const API_URL = 'https://user-service-latest-bae8.onrender.com/api/user';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Send, 
-  Paperclip, 
-  Smile, 
-  Phone, 
-  Video, 
+import {
+  Send,
+  Paperclip,
+  Smile,
+  Phone,
+  Video,
   MoreVertical,
   Search,
   ArrowLeft,
@@ -146,7 +146,7 @@ const Chat = () => {
       console.log('Connected to chat service');
       setIsConnected(true);
       setConnectionStatus('connected');
-      
+
       // Join user's personal room
       newSocket.emit('join-room', user._id);
     });
@@ -166,10 +166,10 @@ const Chat = () => {
         id: data.messageId || Date.now() + Math.random(),
         text: data.message,
         sender: 'dietician',
-        time: new Date().toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
+        time: new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
           minute: '2-digit',
-          hour12: true 
+          hour12: true
         }),
         isRead: data.isRead || false,
         messageType: data.messageType || 'text',
@@ -185,9 +185,9 @@ const Chat = () => {
         audioPublicId: data.audioPublicId,
         audioDuration: data.audioDuration
       };
-      
+
       setMessages(prev => [...prev, newMessage]);
-      
+
       // Add notification
       setNotifications(prev => [...prev, {
         id: Date.now(),
@@ -196,7 +196,7 @@ const Chat = () => {
         time: new Date(),
         read: false
       }]);
-      
+
       // Mark message as read
       if (data.messageId) {
         newSocket.emit('mark-as-read', {
@@ -212,10 +212,10 @@ const Chat = () => {
         id: data.messageId || Date.now() + Math.random(),
         text: data.message,
         sender: 'user',
-        time: new Date().toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
+        time: new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
           minute: '2-digit',
-          hour12: true 
+          hour12: true
         }),
         isRead: true,
         messageType: data.messageType || 'text',
@@ -231,30 +231,30 @@ const Chat = () => {
         audioPublicId: data.audioPublicId,
         audioDuration: data.audioDuration
       };
-      
+
       setMessages(prev => [...prev, newMessage]);
     });
 
     newSocket.on('user-typing', (data) => {
       if (data.senderId === dieticianId) {
         setIsTyping(data.isTyping);
-        
+
         // Clear existing timeout
         if (typingTimeout) {
           clearTimeout(typingTimeout);
         }
-        
+
         // Set new timeout to stop typing indicator
         const timeout = setTimeout(() => {
           setIsTyping(false);
         }, 3000);
-        
+
         setTypingTimeout(timeout);
       }
     });
 
     newSocket.on('message-read', (data) => {
-      setMessages(prev => prev.map(msg => 
+      setMessages(prev => prev.map(msg =>
         msg.id === data.messageId ? { ...msg, isRead: true } : msg
       ));
     });
@@ -327,10 +327,10 @@ const Chat = () => {
     const fetchDietician = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/user/profile/${dieticianId}`, {
+        const response = await fetch(`https://user-service-latest-bae8.onrender.com/api/user/profile/${dieticianId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         if (response.ok) {
           const dieticianData = await response.json();
           // Ensure dietician has profile image from Cloudinary
@@ -361,23 +361,23 @@ const Chat = () => {
         const response = await fetch(`http://localhost:3006/api/conversations/${user._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         if (response.ok) {
           const conversations = await response.json();
-          const currentConversation = conversations.find(conv => 
+          const currentConversation = conversations.find(conv =>
             conv.participants.some(p => p._id === dieticianId)
           );
-          
+
           if (currentConversation) {
             setConversationId(currentConversation._id);
             setMessages(currentConversation.messages.map(msg => ({
               id: msg._id,
               text: msg.message,
               sender: msg.senderId === user._id ? 'user' : 'dietician',
-              time: new Date(msg.createdAt).toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
+              time: new Date(msg.createdAt).toLocaleTimeString('en-US', {
+                hour: '2-digit',
                 minute: '2-digit',
-                hour12: true 
+                hour12: true
               }),
               isRead: msg.isRead,
               messageType: msg.messageType || 'text',
@@ -419,13 +419,14 @@ const Chat = () => {
       try {
         const subjectUserId = isDietician ? chatPartnerId : user._id;
         if (!subjectUserId) return;
-        const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/68bd5ae01da5747f7cfe432d`, {
+        const response = await fetch(`http://localhost:5005/api/diet-plans/${subjectUserId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log(`https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`)
+        console.log(`Fetching diet plans for: http://localhost:5005/api/diet-plans/${subjectUserId}`);
         if (response.ok) {
           const data = await response.json();
-          const allPlans = (data.dietPlans || []).slice();
+          // Backend returns { count, diets: [...] }
+          const allPlans = (data.diets || []).slice();
           allPlans.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
           setDietPlans(allPlans.slice(0, 2));
         }
@@ -476,10 +477,10 @@ const Chat = () => {
         message: message.trim(),
         messageType: 'text'
       };
-      
+
       socket.emit('send-message', messageData);
       setMessage('');
-      
+
       // Add to recent activity
       setRecentActivity(prev => [{
         id: Date.now(),
@@ -503,15 +504,58 @@ const Chat = () => {
       // 2) Send structured message through chat-service
       if (socket && dieticianId) {
         const formatPlanMessage = (p) => {
-          const header = `Diet Plan: ${p.planName || 'My Plan'}\nTotal: ${p.totalCalories || '—'}`;
-          const prefs = p.preferences ? `\nPreferences: ${[p.preferences.dietPreference, (p.preferences.cuisine||[]).join(', '), (p.preferences.healthConditions||[]).join(', ')].filter(Boolean).join(' | ')}` : '';
-          const mealsText = (p.meals || []).map(m => {
-            const ing = Array.isArray(m.ingredients) ? m.ingredients.slice(0, 6).join(', ') + (m.ingredients.length > 6 ? '…' : '') : '';
-            const meta = [m.calories ? `${m.calories} kcal` : null, m.readyInMinutes ? `${m.readyInMinutes} min` : null, m.servings ? `serves ${m.servings}` : null].filter(Boolean).join(' • ');
-            return `\n- ${m.mealType}: ${m.recipe}${meta ? ` (${meta})` : ''}${ing ? `\n  ingredients: ${ing}` : ''}`;
-          }).join('');
-          return `${header}${prefs}\nMeals:${mealsText}`;
+          const divider = '─────────────────────────────';
+          const lines = [];
+
+          lines.push(`📋 DIET PLAN: ${p.planName || 'My Plan'}`);
+          lines.push(divider);
+
+          if (p.totalCalories) lines.push(`🔥 Total Calories: ${p.totalCalories} kcal`);
+
+          if (p.preferences) {
+            const prefParts = [];
+            if (p.preferences.dietPreference) prefParts.push(`Diet: ${p.preferences.dietPreference}`);
+            if ((p.preferences.cuisine || []).length) prefParts.push(`Cuisine: ${p.preferences.cuisine.join(', ')}`);
+            if ((p.preferences.healthConditions || []).length) prefParts.push(`Health: ${p.preferences.healthConditions.join(', ')}`);
+            if (prefParts.length) lines.push(`⚙️ Preferences: ${prefParts.join(' | ')}`);
+          }
+
+          lines.push('');
+          lines.push('🍽️ MEALS:');
+
+          (p.meals || []).forEach((m, i) => {
+            lines.push('');
+            lines.push(`${i + 1}. ${m.mealType?.toUpperCase() || 'MEAL'}: ${m.recipe}`);
+
+            const meta = [];
+            if (m.calories) meta.push(`${m.calories} kcal`);
+            if (m.readyInMinutes) meta.push(`${m.readyInMinutes} min prep`);
+            if (m.servings) meta.push(`serves ${m.servings}`);
+            if (meta.length) lines.push(`   ⏱️ ${meta.join(' • ')}`);
+
+            if (m.nutrition) {
+              const n = m.nutrition;
+              const macros = [];
+              if (n.protein) macros.push(`Protein: ${n.protein}g`);
+              if (n.carbs || n.carbohydrates) macros.push(`Carbs: ${n.carbs || n.carbohydrates}g`);
+              if (n.fat) macros.push(`Fat: ${n.fat}g`);
+              if (n.fiber) macros.push(`Fiber: ${n.fiber}g`);
+              if (macros.length) lines.push(`   💊 ${macros.join(' | ')}`);
+            }
+
+            if (Array.isArray(m.ingredients) && m.ingredients.length > 0) {
+              lines.push(`   🥗 Ingredients:`);
+              m.ingredients.forEach(ing => lines.push(`      • ${ing}`));
+            }
+          });
+
+          lines.push('');
+          lines.push(divider);
+          lines.push(`📅 Generated on: ${p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString()}`);
+
+          return lines.join('\n');
         };
+
         const fullText = formatPlanMessage(plan);
         const fullMeals = (plan.meals || []).map(m => ({
           mealType: m.mealType,
@@ -558,7 +602,7 @@ const Chat = () => {
 
   const handleTyping = (e) => {
     setMessage(e.target.value);
-    
+
     if (socket && dieticianId) {
       socket.emit('typing', {
         receiverId: dieticianId,
@@ -595,7 +639,7 @@ const Chat = () => {
       // Create FormData for file upload
       const formData = new FormData();
       formData.append('audio', audioBlob, 'voice-message.webm');
-      
+
       // Upload audio file to server (you'll need to implement this endpoint)
       const uploadResponse = await fetch('http://localhost:3006/api/upload/audio', {
         method: 'POST',
@@ -604,10 +648,10 @@ const Chat = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (uploadResponse.ok) {
         const { audioUrl, audioPublicId, duration } = await uploadResponse.json();
-        
+
         // Send audio message
         const messageData = {
           senderId: user._id,
@@ -618,9 +662,9 @@ const Chat = () => {
           audioPublicId: audioPublicId,
           audioDuration: duration
         };
-        
+
         socket.emit('send-message', messageData);
-        
+
         setNotifications(prev => [...prev, {
           id: Date.now(),
           type: 'success',
@@ -649,7 +693,7 @@ const Chat = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('fileType', fileType);
-      
+
       // Upload file to server (you'll need to implement this endpoint)
       const uploadResponse = await fetch('http://localhost:3006/api/upload/file', {
         method: 'POST',
@@ -658,10 +702,10 @@ const Chat = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (uploadResponse.ok) {
         const { fileUrl, filePublicId, fileName, fileSize } = await uploadResponse.json();
-        
+
         // Send file message
         const messageData = {
           senderId: user._id,
@@ -674,9 +718,9 @@ const Chat = () => {
           fileUrl: fileUrl,
           filePublicId: filePublicId
         };
-        
+
         socket.emit('send-message', messageData);
-        
+
         setNotifications(prev => [...prev, {
           id: Date.now(),
           type: 'success',
@@ -710,24 +754,24 @@ const Chat = () => {
 
   const generateDietPlan = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/diet-planner/generate/${user._id}`, {
+      const response = await fetch(`http://localhost:5005/api/diet-planner/generate/${user._id}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setSelectedDietPlan(data.plan);
-        
-        // Refresh diet plans
+
+        // Refresh diet plans — backend returns { count, diets: [...] }
         const plansResponse = await fetch(`http://localhost:5005/api/diet-plans/${user._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (plansResponse.ok) {
           const plansData = await plansResponse.json();
-          setDietPlans(plansData.dietPlans || []);
+          setDietPlans(plansData.diets || []);
         }
-        
+
         setNotifications(prev => [...prev, {
           id: Date.now(),
           type: 'success',
@@ -749,7 +793,7 @@ const Chat = () => {
   };
 
   const markNotificationAsRead = (notificationId) => {
-    setNotifications(prev => prev.map(notif => 
+    setNotifications(prev => prev.map(notif =>
       notif.id === notificationId ? { ...notif, read: true } : notif
     ));
   };
@@ -859,8 +903,8 @@ const Chat = () => {
                   </button>
                   <div className="relative">
                     {dietician?.profileImage ? (
-                      <img 
-                        src={dietician.profileImage} 
+                      <img
+                        src={dietician.profileImage}
                         alt={dietician.name}
                         className="w-12 h-12 rounded-2xl object-cover shadow-lg border-2 border-white/20"
                         onError={(e) => {
@@ -869,14 +913,13 @@ const Chat = () => {
                         }}
                       />
                     ) : null}
-                    <div 
+                    <div
                       className={`w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg ${dietician?.profileImage ? 'hidden' : ''}`}
                     >
                       {dietician?.name?.charAt(0) || 'D'}
                     </div>
-                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
-                      isConnected ? 'bg-green-400' : 'bg-red-400'
-                    }`} />
+                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${isConnected ? 'bg-green-400' : 'bg-red-400'
+                      }`} />
                   </div>
                   <div>
                     <h3 className="font-bold text-lg">{dietician?.name || 'Dietician'}</h3>
@@ -893,7 +936,7 @@ const Chat = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button 
+                  <button
                     onClick={() => setShowNotifications(!showNotifications)}
                     className="p-3 rounded-xl hover:bg-white/20 transition-all duration-200 relative"
                     title="Notifications"
@@ -905,23 +948,23 @@ const Chat = () => {
                       </div>
                     )}
                   </button>
-                  <button 
+                  <button
                     onClick={handleStartAudioCall}
-                    className="p-3 rounded-xl hover:bg-white/20 transition-all duration-200" 
+                    className="p-3 rounded-xl hover:bg-white/20 transition-all duration-200"
                     title="Voice Call"
                   >
                     <Phone className="w-5 h-5" />
                   </button>
-                  <button 
+                  <button
                     onClick={handleStartVideoCall}
-                    className="p-3 rounded-xl hover:bg-white/20 transition-all duration-200" 
+                    className="p-3 rounded-xl hover:bg-white/20 transition-all duration-200"
                     title="Video Call"
                   >
                     <Video className="w-5 h-5" />
                   </button>
-                  <button 
+                  <button
                     onClick={() => setShowSidePanel(!showSidePanel)}
-                    className="p-3 rounded-xl hover:bg-white/20 transition-all duration-200" 
+                    className="p-3 rounded-xl hover:bg-white/20 transition-all duration-200"
                     title="Toggle Side Panel"
                   >
                     <Utensils className="w-5 h-5" />
@@ -943,32 +986,32 @@ const Chat = () => {
                     onFileDownload={handleFileDownload}
                   />
                 ))}
-                
+
                 {isTyping && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="flex justify-start"
                   >
-                        <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 rounded-full overflow-hidden">
-                            {dietician?.profileImage ? (
-                              <img 
-                                src={dietician.profileImage} 
-                                alt={dietician.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.nextSibling.style.display = 'flex';
-                                }}
-                              />
-                            ) : null}
-                            <div 
-                              className={`w-full h-full bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold ${dietician?.profileImage ? 'hidden' : ''}`}
-                            >
-                              {dietician?.name?.charAt(0) || 'D'}
-                            </div>
-                          </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 rounded-full overflow-hidden">
+                        {dietician?.profileImage ? (
+                          <img
+                            src={dietician.profileImage}
+                            alt={dietician.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className={`w-full h-full bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold ${dietician?.profileImage ? 'hidden' : ''}`}
+                        >
+                          {dietician?.name?.charAt(0) || 'D'}
+                        </div>
+                      </div>
                       <div className="bg-white text-gray-800 px-4 py-3 rounded-2xl shadow-lg border border-gray-200">
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -987,46 +1030,46 @@ const Chat = () => {
             <div className="p-6 border-t border-gray-200/30 bg-white/80 backdrop-blur-sm">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
                     className="p-3 rounded-xl hover:bg-gray-100 transition-all duration-200 text-gray-600"
                     title="Attach File"
                   >
                     <Paperclip className="w-5 h-5" />
                   </button>
-                  
-                      {/* Attachment Menu */}
-                      <AnimatePresence>
-                        {showAttachmentMenu && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            className="absolute bottom-14 left-0 bg-white rounded-xl shadow-lg border border-gray-200 p-2 z-10"
-                          >
-                            <button 
-                              onClick={() => {
-                                setShowFileUploader(true);
-                                setShowAttachmentMenu(false);
-                              }}
-                              className="flex items-center space-x-2 w-full px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors"
-                            >
-                              <ImageIcon className="w-4 h-4 text-blue-500" />
-                              <span className="text-sm">Files</span>
-                            </button>
-                            <button 
-                              onClick={() => {
-                                setShowAudioRecorder(true);
-                                setShowAttachmentMenu(false);
-                              }}
-                              className="flex items-center space-x-2 w-full px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors"
-                            >
-                              <Mic className="w-4 h-4 text-red-500" />
-                              <span className="text-sm">Voice Message</span>
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+
+                  {/* Attachment Menu */}
+                  <AnimatePresence>
+                    {showAttachmentMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute bottom-14 left-0 bg-white rounded-xl shadow-lg border border-gray-200 p-2 z-10"
+                      >
+                        <button
+                          onClick={() => {
+                            setShowFileUploader(true);
+                            setShowAttachmentMenu(false);
+                          }}
+                          className="flex items-center space-x-2 w-full px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <ImageIcon className="w-4 h-4 text-blue-500" />
+                          <span className="text-sm">Files</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowAudioRecorder(true);
+                            setShowAttachmentMenu(false);
+                          }}
+                          className="flex items-center space-x-2 w-full px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <Mic className="w-4 h-4 text-red-500" />
+                          <span className="text-sm">Voice Message</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div className="flex-1 relative">
@@ -1039,13 +1082,13 @@ const Chat = () => {
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                     disabled={!isConnected}
                   />
-                  <button 
+                  <button
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-lg hover:bg-gray-100 transition-colors"
                   >
                     <Smile className="w-5 h-5 text-gray-600" />
                   </button>
-                  
+
                   {/* Enhanced Emoji Picker */}
                   <AnimatePresence>
                     {showEmojiPicker && (
@@ -1082,7 +1125,7 @@ const Chat = () => {
                   <Send className="w-5 h-5" />
                 </button>
               </div>
-              
+
               {/* Hidden file input */}
               <input
                 ref={fileInputRef}
@@ -1114,7 +1157,7 @@ const Chat = () => {
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                  
+
                   {/* Quick Stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white/20 rounded-lg p-3">
@@ -1153,7 +1196,7 @@ const Chat = () => {
                         </button>
                       )}
                     </div>
-                    
+
                     {dietPlans.length > 0 ? (
                       <div className="space-y-3">
                         {dietPlans.slice(0, 3).map((plan, index) => (
@@ -1171,7 +1214,7 @@ const Chat = () => {
                                 <span className="text-xs text-gray-600">Active</span>
                               </div>
                             </div>
-                            
+
                             <div className="space-y-1">
                               <div className="flex items-center space-x-2 text-xs text-gray-600">
                                 <Target className="w-3 h-3" />
@@ -1206,7 +1249,7 @@ const Chat = () => {
                               >
                                 Send to Dietician
                               </button>
-                              <button
+                              {/* <button
                                 onClick={() => {
                                   // Quick message preview
                                   if (socket && dieticianId) {
@@ -1222,7 +1265,7 @@ const Chat = () => {
                                 className="px-3 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg text-xs font-semibold"
                               >
                                 Ask Feedback
-                              </button>
+                              </button> */}
                             </div>
                           </motion.div>
                         ))}
@@ -1255,7 +1298,7 @@ const Chat = () => {
                         <BarChart3 className="w-5 h-5 text-indigo-500" />
                         <span>Your Progress</span>
                       </h4>
-                      
+
                       <div className="space-y-3">
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
                           <div className="flex items-center justify-between mb-2">
@@ -1263,7 +1306,7 @@ const Chat = () => {
                             <span className="text-sm font-bold text-indigo-600">{userStats.weeklyProgress}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
+                            <div
                               className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500"
                               style={{ width: `${userStats.weeklyProgress}%` }}
                             ></div>
@@ -1276,7 +1319,7 @@ const Chat = () => {
                             <span className="text-sm font-bold text-emerald-600">{userStats.monthlyProgress}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
+                            <div
                               className="bg-gradient-to-r from-emerald-500 to-teal-600 h-2 rounded-full transition-all duration-500"
                               style={{ width: `${userStats.monthlyProgress}%` }}
                             ></div>
@@ -1303,7 +1346,7 @@ const Chat = () => {
                       <Clock3 className="w-5 h-5 text-purple-500" />
                       <span>Recent Activity</span>
                     </h4>
-                    
+
                     <div className="space-y-2">
                       {recentActivity.map((activity, index) => (
                         <motion.div
@@ -1349,23 +1392,21 @@ const Chat = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.length > 0 ? (
                     notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-                          !notification.read ? 'bg-indigo-50' : ''
-                        }`}
+                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-indigo-50' : ''
+                          }`}
                         onClick={() => markNotificationAsRead(notification.id)}
                       >
                         <div className="flex items-start space-x-3">
-                          <div className={`w-2 h-2 rounded-full mt-2 ${
-                            notification.type === 'error' ? 'bg-red-500' :
+                          <div className={`w-2 h-2 rounded-full mt-2 ${notification.type === 'error' ? 'bg-red-500' :
                             notification.type === 'success' ? 'bg-green-500' :
-                            notification.type === 'info' ? 'bg-blue-500' : 'bg-indigo-500'
-                          }`} />
+                              notification.type === 'info' ? 'bg-blue-500' : 'bg-indigo-500'
+                            }`} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-gray-800">{notification.message}</p>
                             <p className="text-xs text-gray-500 mt-1">

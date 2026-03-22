@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, Loader, Mail } from "lucide-react";
 import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/user';
+const API_URL = 'https://user-service-latest-bae8.onrender.com/api/user';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();

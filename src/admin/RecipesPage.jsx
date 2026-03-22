@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 
-const API_URL = "http://localhost:5002/api/food";
+const API_URL = "https://food-service-latest.onrender.com/api/food";
 
 const RecipesPage = () => {
   const [search, setSearch] = useState("");
