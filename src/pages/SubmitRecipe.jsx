@@ -34,7 +34,7 @@ const SubmitRecipe = () => {
   // --- Food-related validation helpers ---
   const FOOD_KEYWORDS = new Set([
     // staple foods (grains, breads, pasta, noodles)
-    'strong' ,'brew','brewed','steep','rolled','chamomile','ada', 'adai', 'akki roti', 'amaranth', 'appam', 'arborio', 'atta', 'bagel', 'baguette', 'bajra', 'bajra roti', 'barley', 'basmati', 'besan', 'bhakri', 'bhatura', 'bread', 'brioche', 'brown rice', 'buckwheat', 'bulgur', 'carnaroli', 'cellophane noodles', 'chapati', 'cheela', 'chawal', 'ciabatta', 'cornbread', 'cornmeal', 'couscous', 'cracker', 'croissant', 'dosa', 'egg noodles', 'farro', 'fettuccine', 'flour', 'focaccia', 'freekeh', 'fusilli', 'gehun', 'gnocchi', 'gram flour', 'grits', 'idiyappam', 'idli', 'jau', 'jowar', 'jowar roti', 'kamut', 'khamiri roti', 'kulcha', 'kuttu', 'lachha paratha', 'lasagna', 'linguine', 'lobia', 'luchi', 'macaroni', 'maida', 'makki', 'makki di roti', 'malabar parotta', 'masala dosa', 'millet', 'missi roti', 'murmura', 'naan', 'neer dosa', 'noodles', 'oats', 'orzo', 'paratha', 'parotta', 'pasta', 'penne', 'pesarattu', 'pita', 'poha', 'polenta', 'pongal', 'puri', 'pumpernickel', 'puttu', 'quinoa', 'ragi', 'ragi roti', 'ramen', 'rava', 'rava dosa', 'ravioli', 'rice', 'rice flour', 'rice noodles', 'rigatoni', 'risotto', 'roti', 'rumali roti', 'rye', 'sago', 'sabudana', 'sattu', 'semolina', 'set dosa', 'sheermal', 'soba', 'sooji', 'sorghum', 'sourdough', 'spaghetti', 'spelt', 'sticky rice', 'suji', 'sushi rice', 'taftan', 'tagliatelle', 'tapioca', 'teff', 'thalipeeth', 'thepla', 'tortellini', 'tortilla', 'udon', 'upma', 'uttapam', 'valencia', 'vermicelli', 'wheat', 'wild rice',
+    'strong', 'brew', 'brewed', 'steep', 'rolled', 'chamomile', 'ada', 'adai', 'akki roti', 'amaranth', 'appam', 'arborio', 'atta', 'bagel', 'baguette', 'bajra', 'bajra roti', 'barley', 'basmati', 'besan', 'bhakri', 'bhatura', 'bread', 'brioche', 'brown rice', 'buckwheat', 'bulgur', 'carnaroli', 'cellophane noodles', 'chapati', 'cheela', 'chawal', 'ciabatta', 'cornbread', 'cornmeal', 'couscous', 'cracker', 'croissant', 'dosa', 'egg noodles', 'farro', 'fettuccine', 'flour', 'focaccia', 'freekeh', 'fusilli', 'gehun', 'gnocchi', 'gram flour', 'grits', 'idiyappam', 'idli', 'jau', 'jowar', 'jowar roti', 'kamut', 'khamiri roti', 'kulcha', 'kuttu', 'lachha paratha', 'lasagna', 'linguine', 'lobia', 'luchi', 'macaroni', 'maida', 'makki', 'makki di roti', 'malabar parotta', 'masala dosa', 'millet', 'missi roti', 'murmura', 'naan', 'neer dosa', 'noodles', 'oats', 'orzo', 'paratha', 'parotta', 'pasta', 'penne', 'pesarattu', 'pita', 'poha', 'polenta', 'pongal', 'puri', 'pumpernickel', 'puttu', 'quinoa', 'ragi', 'ragi roti', 'ramen', 'rava', 'rava dosa', 'ravioli', 'rice', 'rice flour', 'rice noodles', 'rigatoni', 'risotto', 'roti', 'rumali roti', 'rye', 'sago', 'sabudana', 'sattu', 'semolina', 'set dosa', 'sheermal', 'soba', 'sooji', 'sorghum', 'sourdough', 'spaghetti', 'spelt', 'sticky rice', 'suji', 'sushi rice', 'taftan', 'tagliatelle', 'tapioca', 'teff', 'thalipeeth', 'thepla', 'tortellini', 'tortilla', 'udon', 'upma', 'uttapam', 'valencia', 'vermicelli', 'wheat', 'wild rice',
 
     // proteins (meat, poultry, seafood, dairy, legumes, nuts, seeds)
     'abalone', 'albacore', 'almond', 'anchovy', 'arhar dal', 'bacon', 'bass', 'bean', 'beans', 'beef', 'black bean', 'black chana', 'brie', 'camembert', 'carp', 'cashew', 'catfish', 'chana', 'chana dal', 'cheddar', 'cheese', 'chenna', 'cherrystone', 'chia', 'chickpea', 'chickpeas', 'chicken', 'clam', 'cod', 'conch', 'cottage cheese', 'crab', 'crayfish', 'cream cheese', 'curd', 'dahi', 'dal', 'doodh', 'duck', 'edamame', 'eel', 'egg', 'eggs', 'emmental', 'escargot', 'fava bean', 'feta', 'fish', 'flax', 'gorgonzola', 'gosht', 'gouda', 'gram', 'grouper', 'gruyere', 'haddock', 'halibut', 'halloumi', 'ham', 'hazelnut', 'hemp', 'herring', 'jerky', 'kabuli chana', 'kala chana', 'kefir', 'khoya', 'kidney', 'kulthi', 'lamb', 'langoustine', 'lentil', 'lentils', 'lima bean', 'liver', 'lobster', 'lobia', 'macadamia', 'mackerel', 'mahi-mahi', 'malai', 'manchego', 'mascarpone', 'masoor', 'masoor dal', 'matar', 'matki', 'mawa', 'milk', 'monkfish', 'moong', 'moong dal', 'mortadella', 'moth bean', 'mozzarella', 'mung', 'mussel', 'mutton', 'natto', 'nut', 'nuts', 'octopus', 'offal', 'oyster', 'pancetta', 'paneer', 'parmesan', 'pea', 'peanut', 'peas', 'pecan', 'pecorino', 'pepperoni', 'perch', 'pike', 'pine nut', 'pinto bean', 'pistachio', 'pollock', 'pork', 'prawn', 'prosciutto', 'provolone', 'pumpkin seed', 'quail', 'rabbit', 'rajma', 'red snapper', 'ricotta', 'roquefort', 'salami', 'salmon', 'sardine', 'sausage', 'scallop', 'sea urchin', 'seed', 'seeds', 'seitan', 'sesame seed', 'shrimp', 'snapper', 'soy', 'squid', 'steak', 'stilton', 'sunflower seed', 'swordfish', 'tempeh', 'tilapia', 'tofu', 'toor dal', 'tripe', 'trout', 'tuna', 'turbot', 'turkey', 'uni', 'urad', 'urad dal', 'veal', 'venison', 'walnut', 'white bean', 'yogurt',
@@ -82,13 +82,13 @@ const SubmitRecipe = () => {
 
     // units, commons & descriptors
     'baked', 'blanched', 'blend', 'boiled', 'braised', 'broiled', 'bunch', 'canned', 'charred', 'chiffonade', 'chop', 'chopped', 'clove', 'coarse', 'confit', 'core', 'creamed', 'crushed', 'crystalized', 'cube', 'cubed', 'cups', 'cured', 'dash', 'deglazed', 'dehydrated', 'deseeded', 'dice', 'diced', 'distilled', 'dollop', 'dried', 'dum', 'emulsify', 'fermented', 'filet', 'fillet', 'fine', 'flambe', 'floret', 'fold', 'fresh', 'fried', 'frozen', 'g', 'gallon', 'glaze', 'grated', 'grilled', 'grind', 'ground', 'half', 'head', 'infused', 'julienne', 'kg', 'knead', 'l', 'lb', 'marinated', 'mashed', 'melted', 'minced', 'mix', 'ml', 'ounce', 'oz', 'parboiled', 'pasteurized', 'peel', 'peeled', 'pickled', 'piece', 'pieces', 'pinch', 'pint', 'pitted', 'poached', 'powdered', 'pressed', 'pureed', 'quart', 'raw', 'reduce', 'rendered', 'ribbon', 'roasted', 'rough', 'scalded', 'scored', 'seared', 'shaved', 'shredded', 'sifted', 'simmered', 'slice', 'sliced', 'slices', 'smoked', 'soaked', 'spoonful', 'sprig', 'steamed', 'stewed', 'stir', 'stuffed', 'tadka', 'tarka', 'tablespoon', 'tbsp', 'teaspoon', 'thick', 'thin', 'toasted', 'tsp', 'whipped', 'whole', 'zest',
-    
+
     // NEW: Basic Instruction Terms
-    'saucepan','add', 'adjust', 'allow', 'arrange', 'bake', 'beat', 'blanch', 'blend', 'boil', 'braise', 'break', 'brew', 'bring to a boil', 'brush', 'caramelize', 'chill', 'churn', 'combine', 'cool', 'cook', 'cover', 'cream', 'crush', 'cure', 'cut', 'deglaze', 'dice', 'dissolve', 'drain', 'dredge', 'drizzle', 'dust', 'emulsify', 'ferment', 'filter', 'fold', 'freeze', 'fry', 'garnish', 'grate', 'grill', 'heat', 'incorporate', 'infuse', 'knead', 'let sit', 'marinate', 'mash', 'melt', 'mince', 'mix', 'pat dry', 'preheat', 'press', 'puree', 'reduce', 'refrigerate', 'remove', 'rest', 'rinse', 'roast', 'roll', 'sauté', 'scald', 'sear', 'season', 'serve', 'set aside', 'shred', 'sift', 'simmer', 'slice', 'smoke', 'soak', 'spread', 'sprinkle', 'steam', 'steep', 'stir', 'strain', 'stuff', 'thicken', 'toast', 'toss', 'whip', 'whisk', 'wrap'
-]);
+    'saucepan', 'add', 'adjust', 'allow', 'arrange', 'bake', 'beat', 'blanch', 'blend', 'boil', 'braise', 'break', 'brew', 'bring to a boil', 'brush', 'caramelize', 'chill', 'churn', 'combine', 'cool', 'cook', 'cover', 'cream', 'crush', 'cure', 'cut', 'deglaze', 'dice', 'dissolve', 'drain', 'dredge', 'drizzle', 'dust', 'emulsify', 'ferment', 'filter', 'fold', 'freeze', 'fry', 'garnish', 'grate', 'grill', 'heat', 'incorporate', 'infuse', 'knead', 'let sit', 'marinate', 'mash', 'melt', 'mince', 'mix', 'pat dry', 'preheat', 'press', 'puree', 'reduce', 'refrigerate', 'remove', 'rest', 'rinse', 'roast', 'roll', 'sauté', 'scald', 'sear', 'season', 'serve', 'set aside', 'shred', 'sift', 'simmer', 'slice', 'smoke', 'soak', 'spread', 'sprinkle', 'steam', 'steep', 'stir', 'strain', 'stuff', 'thicken', 'toast', 'toss', 'whip', 'whisk', 'wrap'
+  ]);
 
   const NON_FOOD_BLOCKLIST = new Set([
-    'laptop','phone','mobile','tyre','tire','desk','pen','pencil','keyboard','mouse','charger','screen','monitor','denim','shirt','paint','engine','petrol','diesel','cable','earphone','headphone','speaker','sofa','table','chair','notebook','book','bottle','battery'
+    'laptop', 'phone', 'mobile', 'tyre', 'tire', 'desk', 'pen', 'pencil', 'keyboard', 'mouse', 'charger', 'screen', 'monitor', 'denim', 'shirt', 'paint', 'engine', 'petrol', 'diesel', 'cable', 'earphone', 'headphone', 'speaker', 'sofa', 'table', 'chair', 'notebook', 'book', 'bottle', 'battery'
   ]);
 
   const tokenize = (text) => (text || '')
@@ -99,7 +99,7 @@ const SubmitRecipe = () => {
 
   const isUnitOrNumber = (token) => /^(\d+([\.\/]\d+)?|tsp|tbsp|cup|cups|ml|l|g|kg|mg|cm|mm)$/i.test(token);
 
-  const COOKING_VERBS = ['mix','add','boil','bake','fry','saute','sauté','grill','roast','stir','cook','heat','serve','garnish','steam','simmer','blend','chop','marinate','knead','toast','season','whisk','reduce','preheat','put','place','keep','cover','mash'];
+  const COOKING_VERBS = ['mix', 'add', 'boil', 'bake', 'fry', 'saute', 'sauté', 'grill', 'roast', 'stir', 'cook', 'heat', 'serve', 'garnish', 'steam', 'simmer', 'blend', 'chop', 'marinate', 'knead', 'toast', 'season', 'whisk', 'reduce', 'preheat', 'put', 'place', 'keep', 'cover', 'mash'];
 
   const hasFoodSignal = (text) => {
     const tokens = tokenize(text);
@@ -119,7 +119,7 @@ const SubmitRecipe = () => {
   };
 
   const GENERIC_ALLOWED = new Set([
-    'ingredient','ingredients','good','great','nice','tasty','delicious','yummy','awesome','hearty','savory','sweet','spicy','mild','flavorful','aromatic','fresh','healthy','simple','quick','easy','homemade','home','style','authentic','classic','comfort','comforting','diet','dish','meal','food','really','very','super','ultra','best'
+    'ingredient', 'ingredients', 'good', 'great', 'nice', 'tasty', 'delicious', 'yummy', 'awesome', 'hearty', 'savory', 'sweet', 'spicy', 'mild', 'flavorful', 'aromatic', 'fresh', 'healthy', 'simple', 'quick', 'easy', 'homemade', 'home', 'style', 'authentic', 'classic', 'comfort', 'comforting', 'diet', 'dish', 'meal', 'food', 'really', 'very', 'super', 'ultra', 'best'
   ]);
 
   const findNonFoodTokens = (text) => {
@@ -134,7 +134,7 @@ const SubmitRecipe = () => {
       // allow generic descriptive words
       if (GENERIC_ALLOWED.has(t)) continue;
       // ignore trivial connectors
-      if (['and','or','with','for','of','the','a','an','to','in'].includes(t)) continue;
+      if (['and', 'or', 'with', 'for', 'of', 'the', 'a', 'an', 'to', 'in'].includes(t)) continue;
       // token looks suspicious if length > 3 and not recognized
       if (t.length > 3) invalid.push(t);
     }
@@ -154,13 +154,13 @@ const SubmitRecipe = () => {
     if (!title.trim()) return "Recipe title is required";
     if (title.trim().length < 3) return "Title must be at least 3 characters";
     if (title.trim().length > 100) return "Title must be less than 100 characters";
-    
+
     // Check for numbers
     if (/\d/.test(title.trim())) return "Title cannot contain numbers";
-    
+
     // Check for special characters (allow only alphabets and spaces)
     if (!/^[a-zA-Z\s]+$/.test(title.trim())) return "Title can only contain alphabets and spaces";
-    
+
     return null;
   };
 
@@ -168,14 +168,14 @@ const SubmitRecipe = () => {
     if (!description.trim()) return "Description is required";
     if (description.trim().length < 10) return "Description must be at least 10 characters";
     if (description.trim().length > 500) return "Description must be less than 500 characters";
-    
+
     // Check for numbers
     if (/\d/.test(description.trim())) return "Description cannot contain numbers";
-    
+
     // Check for special characters (allow only alphabets and spaces)
     if (!/^[a-zA-Z\s]+$/.test(description.trim())) return "Description can only contain alphabets and spaces";
-    
-    
+
+
     return null;
   };
 
@@ -206,13 +206,13 @@ const SubmitRecipe = () => {
     if (validIngredients.length === 0) return "At least one ingredient is required";
     if (validIngredients.length < 2) return "Please add at least 2 ingredients";
     if (validIngredients.length > 20) return "Maximum 20 ingredients allowed";
-    
+
     // Check for duplicate ingredients
-    const duplicates = validIngredients.filter((item, index) => 
+    const duplicates = validIngredients.filter((item, index) =>
       validIngredients.indexOf(item) !== index
     );
     if (duplicates.length > 0) return "Duplicate ingredients found";
-    
+
     // Check ingredient format
     for (let ingredient of validIngredients) {
       if (ingredient.trim().length < 2) return "Each ingredient must be at least 2 characters";
@@ -229,7 +229,7 @@ const SubmitRecipe = () => {
     if (validInstructions.length === 0) return "At least one instruction is required";
     if (validInstructions.length < 2) return "Please add at least 2 instructions";
     if (validInstructions.length > 15) return "Maximum 15 instructions allowed";
-    
+
     // Check instruction format
     for (let instruction of validInstructions) {
       if (instruction.trim().length < 10) return "Each instruction must be at least 10 characters";
@@ -262,7 +262,7 @@ const SubmitRecipe = () => {
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Live validation
     let error = null;
     switch (field) {
@@ -293,7 +293,7 @@ const SubmitRecipe = () => {
       default:
         break;
     }
-    
+
     setValidationErrors(prev => ({
       ...prev,
       [field]: error
@@ -304,7 +304,7 @@ const SubmitRecipe = () => {
     const newArray = [...formData[field]];
     newArray[index] = value;
     setFormData(prev => ({ ...prev, [field]: newArray }));
-    
+
     // Live validation for array fields
     let error = null;
     switch (field) {
@@ -317,7 +317,7 @@ const SubmitRecipe = () => {
       default:
         break;
     }
-    
+
     setValidationErrors(prev => ({
       ...prev,
       [field]: error
@@ -346,7 +346,7 @@ const SubmitRecipe = () => {
         tags: newTags
       }));
       setNewTag("");
-      
+
       // Validate tags after adding
       const error = validateTags(newTags);
       setValidationErrors(prev => ({
@@ -362,7 +362,7 @@ const SubmitRecipe = () => {
       ...prev,
       tags: newTags
     }));
-    
+
     // Validate tags after removing
     const error = validateTags(newTags);
     setValidationErrors(prev => ({
@@ -385,7 +385,7 @@ const SubmitRecipe = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFiles(e.dataTransfer.files);
     }
@@ -400,17 +400,17 @@ const SubmitRecipe = () => {
         ...prev,
         image: error
       }));
-      
+
       if (!error) {
-      // Store the file for upload
-      setFormData(prev => ({ ...prev, imageFile: file }));
-      
-      // Also create a preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormData(prev => ({ ...prev, image: e.target.result }));
-      };
-      reader.readAsDataURL(file);
+        // Store the file for upload
+        setFormData(prev => ({ ...prev, imageFile: file }));
+
+        // Also create a preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setFormData(prev => ({ ...prev, image: e.target.result }));
+        };
+        reader.readAsDataURL(file);
       }
     } else {
       setValidationErrors(prev => ({
@@ -508,7 +508,7 @@ const SubmitRecipe = () => {
       // }
 
       let imageUrl = null;
-      
+
       // Upload image to Cloudinary if there's an image file
       if (formData.imageFile) {
         try {
@@ -569,7 +569,7 @@ const SubmitRecipe = () => {
       const data = await response.json();
       console.log('Success response:', data);
       alert("Recipe submitted successfully!");
-      
+
       // Reset the form
       setFormData({
         title: "",
@@ -584,7 +584,7 @@ const SubmitRecipe = () => {
         image: null,
         imageFile: null
       });
-      
+
       // Clear validation errors
       setValidationErrors({});
     } catch (error) {
@@ -602,11 +602,70 @@ const SubmitRecipe = () => {
       exit={{ opacity: 0 }}
       className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 relative overflow-hidden"
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#F10100] rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-2000"></div>
+      {/* Hero Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-red-900 to-rose-900" style={{ minHeight: '320px' }}>
+        <img
+          src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-overlay"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/50 via-red-900/60 to-rose-900/80" />
+
+        {/* Floating food emojis */}
+        {[
+          { emoji: "🍳", top: "12%", left: "6%", delay: 0 },
+          { emoji: "🥘", top: "25%", left: "82%", delay: 0.5 },
+          { emoji: "🧑‍🍳", top: "55%", left: "8%", delay: 1 },
+          { emoji: "🍰", top: "70%", left: "88%", delay: 1.5 },
+          { emoji: "🥗", top: "40%", left: "92%", delay: 2 },
+          { emoji: "❤️", top: "85%", left: "15%", delay: 0.8 },
+        ].map((icon, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-3xl select-none pointer-events-none"
+            style={{ top: icon.top, left: icon.left }}
+            animate={{ y: [0, -18, 0], rotate: [0, 8, -8, 0], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 4 + i * 0.5, repeat: Infinity, delay: icon.delay, ease: "easeInOut" }}
+          >
+            {icon.emoji}
+          </motion.div>
+        ))}
+
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }} />
+
+        <div className="relative z-10 max-w-4xl mx-auto px-4 py-16 text-center">
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <span className="inline-block px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-white/90 font-semibold text-sm mb-6 tracking-wide uppercase border border-white/20">
+              Share With Community
+            </span>
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 font-display leading-tight">
+              Share Your <span className="bg-gradient-to-r from-rose-300 to-pink-200 bg-clip-text text-transparent">Recipe</span>
+            </h1>
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+              Help others discover amazing mood-boosting meals by sharing your favorite recipes
+            </p>
+          </motion.div>
+          {!user && (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-8 inline-flex items-center space-x-3 px-6 py-3 bg-amber-500/20 backdrop-blur-md border border-amber-400/30 rounded-2xl"
+            >
+              <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xs">!</span>
+              </div>
+              <p className="text-amber-200 font-semibold">Please log in to submit a recipe</p>
+            </motion.div>
+          )}
+        </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
@@ -622,38 +681,6 @@ const SubmitRecipe = () => {
             </div>
           </div>
         )}
-        {/* Header */}
-        <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#F10100] to-[#FF4444] rounded-2xl mb-6 shadow-2xl">
-            <Heart className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 leading-tight">
-            Share Your <span className="bg-gradient-to-r from-[#F10100] to-[#FF4444] bg-clip-text text-transparent">Recipe</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-light">
-            Help others discover amazing mood-boosting meals by sharing your favorite recipes
-          </p>
-          {!user && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl shadow-lg backdrop-blur-sm"
-            >
-              <div className="flex items-center justify-center space-x-3">
-                <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">!</span>
-                </div>
-                <p className="text-amber-800 font-semibold text-lg">Please log in to submit a recipe</p>
-              </div>
-            </motion.div>
-          )}
-        </motion.div>
 
         <form onSubmit={handleSubmit} className="space-y-12">
           {/* Basic Information */}
@@ -670,7 +697,7 @@ const SubmitRecipe = () => {
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Basic Information</h2>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-2">
                 <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center space-x-2">
@@ -685,18 +712,17 @@ const SubmitRecipe = () => {
                     onChange={(e) => handleInputChange("title", e.target.value)}
                     onKeyUp={(e) => handleInputChange("title", e.target.value)}
                     placeholder="Enter recipe name..."
-                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-medium bg-white/50 backdrop-blur-sm ${
-                      validationErrors.title 
-                        ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50' 
-                        : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
-                    }`}
+                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-medium bg-white/50 backdrop-blur-sm ${validationErrors.title
+                      ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50'
+                      : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
+                      }`}
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-4">
                     <div className="w-2 h-2 bg-[#F10100] rounded-full"></div>
                   </div>
                 </div>
                 {validationErrors.title && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-sm font-semibold mt-2 flex items-center space-x-1"
@@ -717,11 +743,10 @@ const SubmitRecipe = () => {
                     required
                     value={formData.mood}
                     onChange={(e) => handleInputChange("mood", e.target.value)}
-                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-medium bg-white/50 backdrop-blur-sm appearance-none cursor-pointer ${
-                      validationErrors.mood 
-                        ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50' 
-                        : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
-                    }`}
+                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-medium bg-white/50 backdrop-blur-sm appearance-none cursor-pointer ${validationErrors.mood
+                      ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50'
+                      : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
+                      }`}
                   >
                     <option value="">Select a mood...</option>
                     {mockMoods.map((mood) => (
@@ -737,7 +762,7 @@ const SubmitRecipe = () => {
                   </div>
                 </div>
                 {validationErrors.mood && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-sm font-semibold mt-2 flex items-center space-x-1"
@@ -762,18 +787,17 @@ const SubmitRecipe = () => {
                     onChange={(e) => handleInputChange("cookTime", e.target.value)}
                     onKeyUp={(e) => handleInputChange("cookTime", e.target.value)}
                     placeholder="e.g., 30 minutes"
-                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-medium bg-white/50 backdrop-blur-sm ${
-                      validationErrors.cookTime 
-                        ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50' 
-                        : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
-                    }`}
+                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-medium bg-white/50 backdrop-blur-sm ${validationErrors.cookTime
+                      ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50'
+                      : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
+                      }`}
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-4">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   </div>
                 </div>
                 {validationErrors.cookTime && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-sm font-semibold mt-2 flex items-center space-x-1"
@@ -798,18 +822,17 @@ const SubmitRecipe = () => {
                     onChange={(e) => handleInputChange("servings", e.target.value)}
                     onKeyUp={(e) => handleInputChange("servings", e.target.value)}
                     placeholder="Number of servings"
-                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-medium bg-white/50 backdrop-blur-sm ${
-                      validationErrors.servings 
-                        ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50' 
-                        : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
-                    }`}
+                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-medium bg-white/50 backdrop-blur-sm ${validationErrors.servings
+                      ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50'
+                      : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
+                      }`}
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-4">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   </div>
                 </div>
                 {validationErrors.servings && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-sm font-semibold mt-2 flex items-center space-x-1"
@@ -832,11 +855,10 @@ const SubmitRecipe = () => {
                       onClick={() => handleInputChange("difficulty", difficulty)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 relative overflow-hidden ${
-                        formData.difficulty === difficulty
-                          ? "bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white shadow-2xl transform scale-105"
-                          : "bg-white/70 text-gray-700 hover:bg-white/90 border-2 border-gray-200 hover:border-[#F10100]/30 hover:shadow-lg backdrop-blur-sm"
-                      }`}
+                      className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 relative overflow-hidden ${formData.difficulty === difficulty
+                        ? "bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white shadow-2xl transform scale-105"
+                        : "bg-white/70 text-gray-700 hover:bg-white/90 border-2 border-gray-200 hover:border-[#F10100]/30 hover:shadow-lg backdrop-blur-sm"
+                        }`}
                     >
                       {formData.difficulty === difficulty && (
                         <motion.div
@@ -864,18 +886,17 @@ const SubmitRecipe = () => {
                     onKeyUp={(e) => handleInputChange("description", e.target.value)}
                     placeholder="Describe your recipe and what makes it special..."
                     rows={5}
-                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 resize-none text-lg font-medium bg-white/50 backdrop-blur-sm ${
-                      validationErrors.description 
-                        ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50' 
-                        : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
-                    }`}
+                    className={`w-full px-6 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-300 resize-none text-lg font-medium bg-white/50 backdrop-blur-sm ${validationErrors.description
+                      ? 'border-red-400 focus:ring-red-200 focus:border-red-500 bg-red-50/50'
+                      : 'border-gray-200 focus:ring-[#F10100]/20 focus:border-[#F10100] hover:border-gray-300'
+                      }`}
                   />
                   <div className="absolute top-4 right-4">
                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                   </div>
                 </div>
                 {validationErrors.description && (
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-red-500 text-sm font-semibold mt-2 flex items-center space-x-1"
@@ -903,22 +924,21 @@ const SubmitRecipe = () => {
               <h2 className="text-3xl font-bold text-gray-900">Recipe Photo</h2>
               <span className="text-[#F10100] text-2xl font-bold">*</span>
             </div>
-            
+
             <div
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
-              className={`relative border-3 border-dashed rounded-3xl p-12 text-center transition-all duration-500 group ${
-                validationErrors.image
-                  ? "border-red-400 bg-gradient-to-br from-red-50 to-red-100"
-                  : dragActive
+              className={`relative border-3 border-dashed rounded-3xl p-12 text-center transition-all duration-500 group ${validationErrors.image
+                ? "border-red-400 bg-gradient-to-br from-red-50 to-red-100"
+                : dragActive
                   ? "border-[#F10100] bg-gradient-to-br from-[#F10100]/5 to-[#FF4444]/5 scale-105 shadow-2xl"
                   : "border-gray-300 hover:border-[#F10100] hover:bg-gradient-to-br hover:from-gray-50 hover:to-white hover:shadow-xl"
-              }`}
+                }`}
             >
               {formData.image ? (
-                <motion.div 
+                <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   className="relative group"
@@ -975,7 +995,7 @@ const SubmitRecipe = () => {
               )}
             </div>
             {validationErrors.image && (
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-red-500 text-sm font-semibold mt-4 flex items-center justify-center space-x-2"
@@ -1001,11 +1021,11 @@ const SubmitRecipe = () => {
               <h2 className="text-3xl font-bold text-gray-900">Ingredients</h2>
               <span className="text-[#F10100] text-2xl font-bold">*</span>
             </div>
-            
+
             <div className="space-y-6">
               {formData.ingredients.map((ingredient, index) => (
-                <motion.div 
-                  key={index} 
+                <motion.div
+                  key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -1035,7 +1055,7 @@ const SubmitRecipe = () => {
                 </motion.div>
               ))}
             </div>
-            
+
             <motion.button
               type="button"
               onClick={() => addArrayItem("ingredients")}
@@ -1047,7 +1067,7 @@ const SubmitRecipe = () => {
               <span>Add Ingredient</span>
             </motion.button>
             {validationErrors.ingredients && (
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-red-500 text-sm font-semibold mt-4 flex items-center space-x-2"
@@ -1073,11 +1093,11 @@ const SubmitRecipe = () => {
               <h2 className="text-3xl font-bold text-gray-900">Instructions</h2>
               <span className="text-[#F10100] text-2xl font-bold">*</span>
             </div>
-            
+
             <div className="space-y-6">
               {formData.instructions.map((instruction, index) => (
-                <motion.div 
-                  key={index} 
+                <motion.div
+                  key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -1112,7 +1132,7 @@ const SubmitRecipe = () => {
                 </motion.div>
               ))}
             </div>
-            
+
             <motion.button
               type="button"
               onClick={() => addArrayItem("instructions")}
@@ -1124,7 +1144,7 @@ const SubmitRecipe = () => {
               <span>Add Step</span>
             </motion.button>
             {validationErrors.instructions && (
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-red-500 text-sm font-semibold mt-4 flex items-center space-x-2"
@@ -1149,7 +1169,7 @@ const SubmitRecipe = () => {
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Tags</h2>
             </div>
-            
+
             <div className="flex flex-wrap gap-3 mb-8">
               {formData.tags.map((tag, index) => (
                 <motion.span
@@ -1172,7 +1192,7 @@ const SubmitRecipe = () => {
                 </motion.span>
               ))}
             </div>
-            
+
             <div className="flex space-x-4">
               <div className="flex-1 relative">
                 <input
@@ -1198,7 +1218,7 @@ const SubmitRecipe = () => {
               </motion.button>
             </div>
             {validationErrors.tags && (
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-red-500 text-sm font-semibold mt-4 flex items-center space-x-2"
@@ -1219,9 +1239,9 @@ const SubmitRecipe = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-[#F10100] via-[#FF4444] to-[#F10100] rounded-3xl blur-xl opacity-30 scale-110"></div>
             <motion.button
               type="submit"
-              whileHover={{ 
-                scale: 1.05, 
-                boxShadow: "0 30px 60px rgba(241, 1, 0, 0.4)" 
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 30px 60px rgba(241, 1, 0, 0.4)"
               }}
               whileTap={{ scale: 0.95 }}
               className="relative bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white px-16 py-6 rounded-3xl font-black text-2xl flex items-center space-x-4 shadow-2xl hover:shadow-3xl transition-all duration-500 mx-auto group overflow-hidden"
@@ -1252,9 +1272,9 @@ const SubmitRecipe = () => {
                 </motion.div>
               )}
             </motion.button>
-            
+
             {!user && (
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}

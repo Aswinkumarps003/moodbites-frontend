@@ -1,12 +1,11 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import Webcam from "react-webcam";
-import { Camera, Upload, Scan, X, ChefHat, Clock, Zap, RefreshCw, CheckCircle, Plus, Trash2, Edit3 } from "lucide-react";
+import { Upload, Scan, X, ChefHat, Clock, Zap, RefreshCw, CheckCircle, Plus, Trash2, Edit3 } from "lucide-react";
 import ScrollReveal from "../components/ScrollReveal";
 import { mockFridgeScans } from "../mock.jsx";
 
 const FridgeScanner = () => {
-  const [scanMode, setScanMode] = useState("camera"); // camera, upload, results, manage
+  const [scanMode, setScanMode] = useState("upload"); // upload, results, manage
   const [activeCategory, setActiveCategory] = useState("All");
   const [isScanning, setIsScanning] = useState(false);
   const [isFetchingRecipes, setIsFetchingRecipes] = useState(false);
@@ -18,7 +17,6 @@ const FridgeScanner = () => {
   const [manualIngredients, setManualIngredients] = useState([]);
   const [newIngredient, setNewIngredient] = useState("");
   const [ingredientError, setIngredientError] = useState("");
-  const webcamRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // Food validation keywords (imported from SubmitRecipe validation)
@@ -174,16 +172,6 @@ const FridgeScanner = () => {
     }
   };
 
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (!imageSrc || typeof imageSrc !== 'string' || !imageSrc.startsWith('data:image')) {
-      setError('Could not capture image from camera. Please allow camera access and try again.');
-      return;
-    }
-    setCapturedImage(imageSrc);
-    performScan(imageSrc);
-  }, [webcamRef]);
-
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -207,7 +195,7 @@ const FridgeScanner = () => {
   const performScan = async (imageData) => {
     if (!imageData || typeof imageData !== 'string' || !imageData.startsWith('data:image')) {
       setError('Invalid image data for scanning.');
-      setScanMode('camera');
+      setScanMode('upload');
       setIsScanning(false);
       return;
     }
@@ -251,7 +239,7 @@ const FridgeScanner = () => {
       if (detectedIngredients.length === 0) {
         setError("No ingredients detected. Try taking a clearer photo with better lighting.");
         setIsScanning(false);
-        setScanMode("camera");
+        setScanMode("upload");
         return;
       }
 
@@ -286,7 +274,7 @@ const FridgeScanner = () => {
     } catch (error) {
       console.error('Scan error:', error);
       setError(`Scanning failed: ${error.message}. Make sure the YOLO model server is running on port 4010.`);
-      setScanMode("camera");
+      setScanMode("upload");
     } finally {
       setIsScanning(false);
       setIsFetchingRecipes(false);
@@ -526,7 +514,7 @@ const FridgeScanner = () => {
   };
 
   const resetScanner = () => {
-    setScanMode("camera");
+    setScanMode("upload");
     setScanResults(null);
     setCapturedImage(null);
     setIsScanning(false);
@@ -1154,47 +1142,59 @@ const FridgeScanner = () => {
       exit={{ opacity: 0 }}
       className="pt-16 min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50"
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <ScrollReveal>
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-display">
-              Smart Fridge <span className="text-orange-600">Scanner</span>
+      {/* Hero Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-orange-900 via-amber-800 to-yellow-900" style={{ minHeight: '300px' }}>
+        <img
+          src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-overlay"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-orange-900/50 via-amber-800/60 to-yellow-900/80" />
+
+        {/* Floating emojis */}
+        {[
+          { emoji: "🥦", top: "12%", left: "6%", delay: 0 },
+          { emoji: "🍎", top: "28%", left: "82%", delay: 0.5 },
+          { emoji: "🥕", top: "55%", left: "10%", delay: 1 },
+          { emoji: "🍋", top: "70%", left: "88%", delay: 1.5 },
+          { emoji: "🫑", top: "40%", left: "92%", delay: 2 },
+          { emoji: "🍊", top: "85%", left: "15%", delay: 0.8 },
+        ].map((icon, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-3xl select-none pointer-events-none"
+            style={{ top: icon.top, left: icon.left }}
+            animate={{ y: [0, -18, 0], rotate: [0, 8, -8, 0], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 4 + i * 0.5, repeat: Infinity, delay: icon.delay, ease: "easeInOut" }}
+          >
+            {icon.emoji}
+          </motion.div>
+        ))}
+
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }} />
+
+        <div className="relative z-10 max-w-4xl mx-auto px-4 py-14 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+            <span className="inline-block px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-white/90 font-semibold text-sm mb-6 tracking-wide uppercase border border-white/20">
+              AI-Powered Scanner
+            </span>
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 font-display leading-tight">
+              Smart Fridge <span className="bg-gradient-to-r from-orange-300 to-yellow-200 bg-clip-text text-transparent">Scanner</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
               Scan your fridge and get personalized recipe recommendations based on available ingredients
             </p>
-          </div>
-        </ScrollReveal>
+          </motion.div>
+        </div>
+      </div>
 
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20 pb-8">
         {/* Scanner Interface */}
         <ScrollReveal delay={0.2}>
-          <div className="bg-white rounded-3xl shadow-professional overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center justify-center space-x-4">
-                <button
-                  onClick={() => setScanMode("camera")}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${scanMode === "camera"
-                    ? "bg-orange-500 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                  <Camera className="w-4 h-4" />
-                  <span>Use Camera</span>
-                </button>
-                <button
-                  onClick={() => setScanMode("upload")}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${scanMode === "upload"
-                    ? "bg-orange-500 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                  <Upload className="w-4 h-4" />
-                  <span>Upload Photo</span>
-                </button>
-              </div>
-            </div>
-
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 overflow-hidden">
             <div className="p-8">
               {/* Error Display */}
               {error && (
@@ -1210,55 +1210,30 @@ const FridgeScanner = () => {
                 </motion.div>
               )}
 
-              {scanMode === "camera" ? (
-                <div className="space-y-6">
-                  <div className="relative bg-gray-900 rounded-2xl overflow-hidden">
-                    <Webcam
-                      ref={webcamRef}
-                      audio={false}
-                      className="w-full h-80 object-cover"
-                      screenshotFormat="image/jpeg"
-                      videoConstraints={{ facingMode: "environment" }}
-                    />
-                    <div className="absolute inset-0 border-4 border-dashed border-[#FFD122]/50 m-4 rounded-xl pointer-events-none" />
-                    <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm">
-                      Point camera at your fridge contents
+              <div className="space-y-6">
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-300 hover:border-orange-500 rounded-2xl p-12 text-center cursor-pointer transition-all duration-500 hover:bg-orange-50/30 hover:shadow-lg group"
+                >
+                  <div className="relative mx-auto mb-4 w-16 h-16">
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-full animate-pulse opacity-0 group-hover:opacity-20 transition-opacity" />
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                      <Upload className="w-16 h-16 text-gray-400 group-hover:text-orange-500 transition-colors duration-300" />
                     </div>
                   </div>
-                  <div className="text-center">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={capture}
-                      disabled={isScanning}
-                      className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center space-x-3 shadow-xl hover:shadow-2xl transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Scan className="w-6 h-6" />
-                      <span>{isScanning ? 'Scanning...' : 'Scan Fridge'}</span>
-                    </motion.button>
-                  </div>
+                  <p className="text-lg font-medium text-gray-700 mb-2">
+                    Click to upload fridge photo
+                  </p>
+                  <p className="text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-gray-300 hover:border-orange-500 rounded-2xl p-12 text-center cursor-pointer transition-colors duration-300"
-                  >
-                    <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-lg font-medium text-gray-700 mb-2">
-                      Click to upload fridge photo
-                    </p>
-                    <p className="text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </ScrollReveal>
@@ -1274,13 +1249,14 @@ const FridgeScanner = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-3xl shadow-professional p-6 hover:shadow-professional-hover transition-all duration-300"
+                  className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
                 >
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-yellow-500 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-gray-900 font-display">
                       Scan from {new Date(scan.date).toLocaleDateString()}
                     </h3>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 bg-orange-50 px-3 py-1 rounded-full">
                       {scan.ingredients.length} ingredients
                     </span>
                   </div>
@@ -1288,7 +1264,7 @@ const FridgeScanner = () => {
                     {scan.ingredients.slice(0, 4).map((ingredient) => (
                       <span
                         key={ingredient}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                        className="px-3 py-1 bg-gradient-to-r from-orange-50 to-yellow-50 text-gray-700 rounded-full text-sm border border-orange-100"
                       >
                         {ingredient}
                       </span>

@@ -286,18 +286,50 @@ const Recipes = () => {
       className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-white to-stone-100"
     >
       {/* Hero Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#F10100]/5 via-[#FFD122]/5 to-[#476E00]/5 py-16">
-        <div className="absolute inset-0 dots-pattern opacity-30" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-red-900 to-orange-900" style={{ minHeight: '320px' }}>
+        <img
+          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/50 via-red-900/60 to-orange-900/80" />
+
+        {/* Floating food emojis */}
+        {[
+          { emoji: "🍲", top: "15%", left: "8%", delay: 0 },
+          { emoji: "🥗", top: "25%", left: "82%", delay: 0.5 },
+          { emoji: "🍳", top: "60%", left: "5%", delay: 1 },
+          { emoji: "🥘", top: "70%", left: "88%", delay: 1.5 },
+          { emoji: "🧁", top: "45%", left: "92%", delay: 2 },
+          { emoji: "🍜", top: "85%", left: "15%", delay: 0.8 },
+        ].map((icon, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-3xl select-none pointer-events-none"
+            style={{ top: icon.top, left: icon.left }}
+            animate={{ y: [0, -18, 0], rotate: [0, 8, -8, 0], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 4 + i * 0.5, repeat: Infinity, delay: icon.delay, ease: "easeInOut" }}
+          >
+            {icon.emoji}
+          </motion.div>
+        ))}
+
+        {/* Dot pattern */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }} />
+
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-center relative z-10 max-w-4xl mx-auto px-4"
+          className="text-center relative z-10 max-w-4xl mx-auto px-4 py-16"
         >
-          <span className="inline-block px-4 py-2 rounded-full bg-[#F10100]/10 text-[#F10100] font-semibold text-sm mb-6 tracking-wide uppercase">Community Recipes</span>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4 font-display">
-            Recipe <span className="gradient-text">Collection</span>
+          <span className="inline-block px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-white/90 font-semibold text-sm mb-6 tracking-wide uppercase border border-white/20">Community Recipes</span>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 font-display leading-tight">
+            Recipe <span className="bg-gradient-to-r from-orange-300 to-yellow-200 bg-clip-text text-transparent">Collection</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
             Discover mood-based recipes shared by our community of wellness enthusiasts
           </p>
         </motion.div>
@@ -310,7 +342,7 @@ const Recipes = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="glass-card rounded-3xl p-6 mb-8 -mt-8 relative z-20"
+          className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 mb-8 -mt-12 relative z-20 shadow-2xl border border-white/30"
         >
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             {/* Search Bar */}
@@ -351,8 +383,8 @@ const Recipes = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedFilter(filter)}
                   className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${selectedFilter === filter
-                      ? "bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white shadow-lg shadow-[#F10100]/20"
-                      : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
+                    ? "bg-gradient-to-r from-[#F10100] to-[#FF4444] text-white shadow-lg shadow-[#F10100]/20"
+                    : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
                     }`}
                 >
                   {filter}
@@ -435,8 +467,10 @@ const Recipes = () => {
                   y: -10,
                   boxShadow: "0 25px 50px rgba(0,0,0,0.15)"
                 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-elevated hover:shadow-elevated-hover transition-all duration-500 cursor-pointer group border border-gray-100/50"
+                className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer group border border-gray-100/50 relative"
               >
+                {/* Gradient bottom border */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F10100] via-[#FFD122] to-[#476E00] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 {/* Recipe Image */}
                 <div className="relative h-48 overflow-hidden">
                   <img
