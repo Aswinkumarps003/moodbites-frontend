@@ -419,10 +419,10 @@ const Chat = () => {
       try {
         const subjectUserId = isDietician ? chatPartnerId : user._id;
         if (!subjectUserId) return;
-        const response = await fetch(`http://localhost:5005/api/diet-plans/${subjectUserId}`, {
+        const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log(`Fetching diet plans for: http://localhost:5005/api/diet-plans/${subjectUserId}`);
+        console.log(`Fetching diet plans for: https://diet-service-latest.onrender.com/api/diet-plans/${subjectUserId}`);
         if (response.ok) {
           const data = await response.json();
           // Backend returns { count, diets: [...] }
@@ -495,7 +495,7 @@ const Chat = () => {
   const handleSharePlan = async (plan) => {
     try {
       // 1) Mark as shared in diet-service
-      await fetch(`http://localhost:5005/api/diet-plans/${plan._id}/share`, {
+      await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${plan._id}/share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ dieticianId })
@@ -754,7 +754,7 @@ const Chat = () => {
 
   const generateDietPlan = async () => {
     try {
-      const response = await fetch(`http://localhost:5005/api/diet-planner/generate/${user._id}`, {
+      const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-planner/generate/${user._id}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -764,7 +764,7 @@ const Chat = () => {
         setSelectedDietPlan(data.plan);
 
         // Refresh diet plans — backend returns { count, diets: [...] }
-        const plansResponse = await fetch(`http://localhost:5005/api/diet-plans/${user._id}`, {
+        const plansResponse = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${user._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (plansResponse.ok) {

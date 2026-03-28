@@ -350,7 +350,7 @@ const FridgeScanner = () => {
         mlMaxCalories: mlMaxCalories || ''
       }).toString();
 
-      const spoonacularResponse = await fetch(`http://localhost:5005/api/spoonacular/recipes/by-ingredients?${queryParams}`, {
+      const spoonacularResponse = await fetch(`https://diet-service-latest.onrender.com/api/spoonacular/recipes/by-ingredients?${queryParams}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -494,7 +494,7 @@ const FridgeScanner = () => {
     setIsLoadingRecipeDetails(true);
     try {
       if (recipe.spoonacularId) {
-        const response = await fetch(`http://localhost:5005/api/spoonacular/recipes/${recipe.spoonacularId}`);
+        const response = await fetch(`https://diet-service-latest.onrender.com/api/spoonacular/recipes/${recipe.spoonacularId}`);
         if (response.ok) {
           const responseData = await response.json();
           const detailData = responseData.recipe || responseData;

@@ -14,7 +14,7 @@ const DietPlansPage = () => {
         setError(null);
 
         // 1) Fetch all active diet plans from diet-service
-        const dietResp = await fetch('http://localhost:5005/api/diet-plans');
+        const dietResp = await fetch('https://diet-service-latest.onrender.com/api/diet-plans');
         if (!dietResp.ok) throw new Error(`diet-service ${dietResp.status}`);
         const dietJson = await dietResp.json();
         const dietPlans = dietJson?.dietPlans || [];
@@ -61,7 +61,7 @@ const DietPlansPage = () => {
   const toggleStatus = async (planId, nextActive) => {
     try {
       setSavingId(planId);
-      const resp = await fetch(`http://localhost:5005/api/diet-plans/${planId}/status`, {
+      const resp = await fetch(`https://diet-service-latest.onrender.com/api/diet-plans/${planId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: nextActive })

@@ -323,7 +323,7 @@ const Dashboard = () => {
   const fetchDietPlan = async (userId) => {
     try {
       setDietPlanLoading(true);
-      const response = await fetch(`http://localhost:5005/api/diet-planner/${userId}`);
+      const response = await fetch(`https://diet-service-latest.onrender.com/api/diet-planner/${userId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.diets && data.diets.length > 0) {

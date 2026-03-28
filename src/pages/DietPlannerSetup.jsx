@@ -74,7 +74,7 @@ const DietPlannerSetup = () => {
       setGenerating(true);
       setGeneratedPlan(null);
 
-      const resp = await fetch('http://localhost:5005/api/diet-planner', {
+      const resp = await fetch('https://diet-service-latest.onrender.com/api/diet-planner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id, ...form })
@@ -83,7 +83,7 @@ const DietPlannerSetup = () => {
       const data = await resp.json();
       console.log('Saved diet:', data);
 
-      const genResp = await fetch(`http://localhost:5005/api/diet-planner/generate/${user._id}`, {
+      const genResp = await fetch(`https://diet-service-latest.onrender.com/api/diet-planner/generate/${user._id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
