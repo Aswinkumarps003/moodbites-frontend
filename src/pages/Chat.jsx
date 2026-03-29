@@ -74,6 +74,7 @@ import WebRTCCall from '../components/WebRTCCall';
 import AudioRecorder from '../components/AudioRecorder';
 import FileUploader from '../components/FileUploader';
 import MessageBubble from '../components/MessageBubble';
+import { logCall } from '../utils/callLogger';
 
 const Chat = () => {
   const [socket, setSocket] = useState(null);
@@ -106,6 +107,7 @@ const Chat = () => {
   const [showCallRequest, setShowCallRequest] = useState(false);
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const [showFileUploader, setShowFileUploader] = useState(false);
+  const [callStartTime, setCallStartTime] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -295,7 +297,7 @@ const Chat = () => {
   // Initialize signaling socket for WebRTC call requests
   useEffect(() => {
     if (!user) return;
-    const s = io('http://localhost:3007', {
+    const s = io('https://webrtc-signaling-service-47a8.onrender.com', {
       query: { userId: user._id, userName: user.name }
     });
     s.on('connect', () => {
@@ -805,17 +807,37 @@ const Chat = () => {
   // WebRTC call handlers
   const handleStartVideoCall = () => {
     setWebRTCCallType('video');
+    setCallStartTime(new Date());
     setShowWebRTCCall(true);
   };
 
   const handleStartAudioCall = () => {
     setWebRTCCallType('audio');
+    setCallStartTime(new Date());
     setShowWebRTCCall(true);
   };
 
   const handleEndWebRTCCall = () => {
+    const endTime = new Date();
+    const duration = callStartTime ? Math.round((endTime - callStartTime) / 1000) : 0;
+
+    // Log the call
+    if (user && dietician) {
+      logCall({
+        callerId: user._id,
+        callerName: user.name,
+        receiverId: dietician._id || dieticianId,
+        receiverName: dietician.name || 'Dietician',
+        callType: webRTCCallType,
+        duration,
+        startedAt: callStartTime?.toISOString(),
+        endedAt: endTime.toISOString(),
+      });
+    }
+
     setShowWebRTCCall(false);
     setWebRTCCallType('video');
+    setCallStartTime(null);
   };
 
   // Accept/Reject incoming video calls
@@ -829,6 +851,7 @@ const Chat = () => {
       roomId: incomingCall.roomId
     });
     setShowCallRequest(false);
+    setCallStartTime(new Date());
     setShowWebRTCCall(true);
   };
 
@@ -1479,6 +1502,15 @@ const Chat = () => {
             isOpen={showFileUploader}
             onSendFile={handleSendFile}
             onCancel={() => setShowFileUploader(false)}
+          />
+
+          {/* WebRTC Call Component */}
+          <WebRTCCall
+            isOpen={showWebRTCCall}
+            onClose={() => setShowWebRTCCall(false)}
+            targetUser={dietician ? { id: dietician._id || dieticianId, name: dietician.name, profileImage: dietician.profileImage } : (incomingCall ? { id: incomingCall.callerId, name: incomingCall.callerName } : null)}
+            callType={webRTCCallType}
+            onCallEnd={handleEndWebRTCCall}
           />
         </motion.div>
       </div>

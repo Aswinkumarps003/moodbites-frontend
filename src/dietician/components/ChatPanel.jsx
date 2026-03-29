@@ -16,6 +16,9 @@ import { io } from 'socket.io-client';
 import AudioRecorder from '../../components/AudioRecorder';
 import FileUploader from '../../components/FileUploader';
 import MessageBubble from '../../components/MessageBubble';
+import WebRTCCall from '../../components/WebRTCCall';
+import CallRequestModal from '../../components/CallRequestModal';
+import { logCall } from '../../utils/callLogger';
 
 const ChatPanel = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -31,6 +34,12 @@ const ChatPanel = () => {
   const [conversationId, setConversationId] = useState(null);
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const [showFileUploader, setShowFileUploader] = useState(false);
+  const [showWebRTCCall, setShowWebRTCCall] = useState(false);
+  const [webRTCCallType, setWebRTCCallType] = useState('video');
+  const [signalSocket, setSignalSocket] = useState(null);
+  const [incomingCall, setIncomingCall] = useState(null);
+  const [showCallRequest, setShowCallRequest] = useState(false);
+  const [callStartTime, setCallStartTime] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -378,6 +387,99 @@ const ChatPanel = () => {
 
   const emojis = ['😊', '😂', '❤️', '👍', '👎', '😢', '😮', '😡', '🎉', '🔥', '💯', '👏'];
 
+  // ── WebRTC Signaling Socket ──
+  useEffect(() => {
+    if (!dietician) return;
+    const s = io('https://webrtc-signaling-service-47a8.onrender.com', {
+      query: { userId: dietician._id, userName: dietician.name }
+    });
+    s.on('connect', () => s.emit('join-room', dietician._id));
+    s.on('webrtc-call-request', (data) => {
+      setIncomingCall({
+        callerId: data.callerId,
+        callerName: data.callerName,
+        callType: data.callType || 'video',
+        roomId: data.roomId
+      });
+      setShowCallRequest(true);
+    });
+    s.on('webrtc-end-call', () => {
+      setShowWebRTCCall(false);
+      setIncomingCall(null);
+      setShowCallRequest(false);
+    });
+    setSignalSocket(s);
+    return () => s.disconnect();
+  }, [dietician]);
+
+  // ── Call Handlers ──
+  const handleStartVideoCall = () => {
+    if (!selectedPatient) return;
+    setWebRTCCallType('video');
+    setCallStartTime(new Date());
+    setShowWebRTCCall(true);
+  };
+
+  const handleStartAudioCall = () => {
+    if (!selectedPatient) return;
+    setWebRTCCallType('audio');
+    setCallStartTime(new Date());
+    setShowWebRTCCall(true);
+  };
+
+  const handleAcceptIncomingCall = () => {
+    if (signalSocket && incomingCall && dietician) {
+      signalSocket.emit('webrtc-call-response', {
+        callerId: incomingCall.callerId,
+        responderId: dietician._id,
+        responderName: dietician.name,
+        accepted: true,
+        roomId: incomingCall.roomId
+      });
+    }
+    setShowCallRequest(false);
+    setCallStartTime(new Date());
+    setShowWebRTCCall(true);
+  };
+
+  const handleRejectIncomingCall = (reason) => {
+    if (signalSocket && incomingCall && dietician) {
+      signalSocket.emit('webrtc-call-response', {
+        callerId: incomingCall.callerId,
+        responderId: dietician._id,
+        responderName: dietician.name,
+        accepted: false,
+        reason
+      });
+    }
+    setShowCallRequest(false);
+    setIncomingCall(null);
+  };
+
+  const handleEndWebRTCCall = () => {
+    const endTime = new Date();
+    const duration = callStartTime ? Math.round((endTime - callStartTime) / 1000) : 0;
+
+    // Log the call
+    if (dietician && (selectedPatient || incomingCall)) {
+      const partner = selectedPatient || { _id: incomingCall?.callerId, name: incomingCall?.callerName };
+      logCall({
+        callerId: dietician._id,
+        callerName: dietician.name,
+        receiverId: partner._id,
+        receiverName: partner.name || 'Patient',
+        callType: webRTCCallType,
+        duration,
+        startedAt: callStartTime?.toISOString(),
+        endedAt: endTime.toISOString(),
+      });
+    }
+
+    setShowWebRTCCall(false);
+    setCallStartTime(null);
+    setIncomingCall(null);
+  };
+
 
   return (
     <motion.div
@@ -491,10 +593,20 @@ const ChatPanel = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <button className="p-3.5 bg-white/60 border border-white hover:bg-white hover:shadow-md hover:text-indigo-600 rounded-2xl transition-all duration-300 text-slate-500" title="Voice Call">
+                  <button
+                    onClick={handleStartAudioCall}
+                    disabled={!selectedPatient}
+                    className="p-3.5 bg-white/60 border border-white hover:bg-white hover:shadow-md hover:text-indigo-600 rounded-2xl transition-all duration-300 text-slate-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="Voice Call"
+                  >
                     <Phone className="w-5 h-5" />
                   </button>
-                  <button className="p-3.5 bg-white/60 border border-white hover:bg-white hover:shadow-md hover:text-indigo-600 rounded-2xl transition-all duration-300 text-slate-500" title="Video Call">
+                  <button
+                    onClick={handleStartVideoCall}
+                    disabled={!selectedPatient}
+                    className="p-3.5 bg-white/60 border border-white hover:bg-white hover:shadow-md hover:text-indigo-600 rounded-2xl transition-all duration-300 text-slate-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="Video Call"
+                  >
                     <Video className="w-5 h-5" />
                   </button>
                 </div>
@@ -694,6 +806,24 @@ const ChatPanel = () => {
         isOpen={showFileUploader}
         onSendFile={handleSendFile}
         onCancel={() => setShowFileUploader(false)}
+      />
+
+      {/* WebRTC Call Component */}
+      <WebRTCCall
+        isOpen={showWebRTCCall}
+        onClose={() => setShowWebRTCCall(false)}
+        targetUser={selectedPatient ? { id: selectedPatient._id, name: selectedPatient.name, profileImage: selectedPatient.profileImage } : (incomingCall ? { id: incomingCall.callerId, name: incomingCall.callerName } : null)}
+        callType={webRTCCallType}
+        onCallEnd={handleEndWebRTCCall}
+      />
+
+      {/* Incoming Call Request Modal */}
+      <CallRequestModal
+        isOpen={showCallRequest}
+        callerInfo={incomingCall}
+        callType={incomingCall?.callType || 'video'}
+        onAccept={handleAcceptIncomingCall}
+        onReject={handleRejectIncomingCall}
       />
     </motion.div>
   );

@@ -9,6 +9,7 @@ import PatientsList from './components/PatientsList';
 import ChatPanel from './components/ChatPanel';
 import AIRecommendations from './components/AIRecommendations';
 import Reports from './components/Reports';
+import VideoConsultations from './components/VideoConsultations';
 
 const DieticianDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -121,6 +122,8 @@ const DieticianDashboard = () => {
         return <PatientsList fullWidth />;
       case 'chat':
         return <ChatPanel />;
+      case 'consultations':
+        return <VideoConsultations user={user} />;
       case 'reports':
         return <Reports />;
       

@@ -53,7 +53,7 @@ const VideoConsultation = () => {
   useEffect(() => {
     if (!user) return;
 
-    const signalingSocket = io('http://localhost:3007', {
+    const signalingSocket = io('https://webrtc-signaling-service-47a8.onrender.com', {
       query: {
         userId: user._id,
         userName: user.name

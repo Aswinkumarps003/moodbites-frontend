@@ -16,6 +16,7 @@ const Sidebar = ({ collapsed, onToggle, activeSection, onSectionChange, user }) 
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'patients', label: 'Patients', icon: Users },
     { id: 'chat', label: 'Chat', icon: MessageCircle },
+    { id: 'consultations', label: 'Consultations', icon: Video },
     { id: 'reports', label: 'Reports', icon: FileText },
   ];
 
