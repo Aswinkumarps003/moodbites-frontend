@@ -815,6 +815,7 @@ const ChatPanel = () => {
         targetUser={selectedPatient ? { id: selectedPatient._id, name: selectedPatient.name, profileImage: selectedPatient.profileImage } : (incomingCall ? { id: incomingCall.callerId, name: incomingCall.callerName } : null)}
         callType={webRTCCallType}
         onCallEnd={handleEndWebRTCCall}
+        autoStart={!incomingCall}
       />
 
       {/* Incoming Call Request Modal */}

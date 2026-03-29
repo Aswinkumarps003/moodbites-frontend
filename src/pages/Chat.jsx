@@ -298,7 +298,7 @@ const Chat = () => {
   useEffect(() => {
     if (!user) return;
     const s = io('https://webrtc-signaling-service-47a8.onrender.com', {
-      query: { userId: user._id, userName: user.name }
+      query: { userId: user._id || user.id, userName: user.name || user.username || 'User' }
     });
     s.on('connect', () => {
       // also join personal room explicitly for compatibility
@@ -1450,14 +1450,7 @@ const Chat = () => {
             )}
           </AnimatePresence>
 
-          {/* WebRTC Call Component */}
-          <WebRTCCall
-            isOpen={showWebRTCCall}
-            onClose={() => setShowWebRTCCall(false)}
-            targetUser={{ id: dietician?._id, name: dietician?.name, profileImage: dietician?.profileImage }}
-            callType={webRTCCallType}
-            onCallEnd={handleEndWebRTCCall}
-          />
+
 
           {/* Incoming Call Modal */}
           <AnimatePresence>
@@ -1511,6 +1504,7 @@ const Chat = () => {
             targetUser={dietician ? { id: dietician._id || dieticianId, name: dietician.name, profileImage: dietician.profileImage } : (incomingCall ? { id: incomingCall.callerId, name: incomingCall.callerName } : null)}
             callType={webRTCCallType}
             onCallEnd={handleEndWebRTCCall}
+            autoStart={!incomingCall}
           />
         </motion.div>
       </div>

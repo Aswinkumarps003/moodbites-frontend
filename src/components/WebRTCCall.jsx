@@ -45,8 +45,8 @@ const WebRTCCall = ({
 
     const signalingSocket = io('https://webrtc-signaling-service-47a8.onrender.com', {
       query: {
-        userId: user._id,
-        userName: user.name
+        userId: user._id || user.id,
+        userName: user.name || user.username || 'User'
       }
     });
 
