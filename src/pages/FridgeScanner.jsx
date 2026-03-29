@@ -387,7 +387,7 @@ const FridgeScanner = () => {
 
       // Fallback to local food service API
       console.log('Mood-analysis service failed, trying local food service...');
-      const foodServiceResponse = await fetch(`https://food-service-latest.onrender.com/api/food/recipes/by-ingredients?ingredients=${encodeURIComponent(ingredientNames)}`, {
+      const foodServiceResponse = await fetch(`https://food-service-new.onrender.com/api/food/recipes/by-ingredients?ingredients=${encodeURIComponent(ingredientNames)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'

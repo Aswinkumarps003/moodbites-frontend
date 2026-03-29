@@ -199,7 +199,7 @@ const Recipes = () => {
           setSavedRecipes([]);
           return;
         }
-        const resp = await fetch(`https://food-service-latest.onrender.com/api/food/users/${user._id}/saved-recipes`);
+        const resp = await fetch(`https://food-service-new.onrender.com/api/food/users/${user._id}/saved-recipes`);
         if (!resp.ok) throw new Error('Failed to fetch saved recipes');
         const data = await resp.json();
         if (!isMounted) return;

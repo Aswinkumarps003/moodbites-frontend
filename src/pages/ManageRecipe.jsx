@@ -17,8 +17,8 @@ import {
 } from "lucide-react";
 import { mockMoods } from "../mock.jsx";
 
-const API_URL = "https://food-service-latest.onrender.com/api/food/dishes";
-const CLOUDINARY_UPLOAD_URL = "https://food-service-latest.onrender.com/api/food/upload-recipe-image";
+const API_URL = "https://food-service-new.onrender.com/api/food/dishes";
+const CLOUDINARY_UPLOAD_URL = "https://food-service-new.onrender.com/api/food/upload-recipe-image";
 
 const ManageRecipe = () => {
   const { id } = useParams();

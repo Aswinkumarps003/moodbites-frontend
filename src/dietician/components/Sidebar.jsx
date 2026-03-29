@@ -16,42 +16,41 @@ const Sidebar = ({ collapsed, onToggle, activeSection, onSectionChange, user }) 
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'patients', label: 'Patients', icon: Users },
     { id: 'chat', label: 'Chat', icon: MessageCircle },
-    { id: 'consultations', label: 'Consultations', icon: Video },
     { id: 'reports', label: 'Reports', icon: FileText },
   ];
 
   return (
     <motion.aside
       initial={false}
-      animate={{ width: collapsed ? 64 : 256 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="fixed left-0 top-0 h-full bg-white/90 backdrop-blur-sm border-r border-gray-200/50 shadow-lg z-40"
+      animate={{ width: collapsed ? 80 : 288 }}
+      transition={{ duration: 0.4, type: "spring", bounce: 0.1 }}
+      className="fixed left-0 top-0 h-full bg-white/60 backdrop-blur-2xl border-r border-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40 overflow-hidden"
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full bg-gradient-to-b from-white/40 to-transparent">
         {/* Logo Section */}
-        <div className="p-4 border-b border-gray-200/50">
+        <div className="p-6">
           <div className="flex items-center justify-between">
             {!collapsed && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-3 shrink-0"
               >
-                <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
-                  <Stethoscope className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  <Stethoscope className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-xl font-bold text-gray-800">MoodBites</span>
+                <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-700 to-teal-600 tracking-tight">MoodBites</span>
               </motion.div>
             )}
             <button
               onClick={onToggle}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2.5 rounded-xl hover:bg-white/80 text-gray-400 hover:text-gray-700 hover:shadow-sm transition-all absolute right-4"
             >
               {collapsed ? (
-                <ChevronRight className="w-5 h-5 text-gray-600" />
+                <ChevronRight className="w-5 h-5" />
               ) : (
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
+                <ChevronLeft className="w-5 h-5" />
               )}
             </button>
           </div>
@@ -95,17 +94,17 @@ const Sidebar = ({ collapsed, onToggle, activeSection, onSectionChange, user }) 
         </nav>
 
         {/* User Profile Section */}
-        <div className="p-4 border-t border-gray-200/50">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+        <div className="p-4 mt-auto">
+          <div className="p-3 bg-white/50 backdrop-blur-md rounded-2xl border border-white max-w-full overflow-hidden flex items-center space-x-3">
+            <div className="w-12 h-12 shrink-0 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center shadow-inner overflow-hidden border-2 border-white">
               {user?.profileImage ? (
                 <img 
                   src={user.profileImage} 
                   alt="Profile"
-                  className="w-full h-full rounded-full object-cover"
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-white font-semibold text-sm">
+                <span className="text-white font-bold text-lg">
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'D'}
                 </span>
               )}
@@ -114,11 +113,14 @@ const Sidebar = ({ collapsed, onToggle, activeSection, onSectionChange, user }) 
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="flex-1"
+                transition={{ delay: 0.2 }}
+                className="flex-1 min-w-0"
               >
-                <p className="text-sm font-semibold text-gray-800">{user?.name || 'Dietician'}</p>
-                <p className="text-xs text-gray-500">Licensed Dietician</p>
+                <p className="text-[15px] font-bold text-slate-800 truncate">{user?.name || 'Dietician'}</p>
+                <div className="flex items-center mt-0.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></div>
+                  <p className="text-xs font-semibold text-emerald-600">Online</p>
+                </div>
               </motion.div>
             )}
           </div>

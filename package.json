@@ -45,6 +45,8 @@
     "cors": "^2.8.5",
     "framer-motion": "^10.16.4",
     "jose": "^6.1.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "livekit-client": "^2.15.7",
     "lucide-react": "^0.292.0",
     "node-fetch": "^3.3.2",

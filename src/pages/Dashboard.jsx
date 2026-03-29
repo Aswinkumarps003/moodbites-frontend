@@ -1363,7 +1363,7 @@ const Dashboard = () => {
                                       ready_in_minutes: null,
                                       nutrition: null
                                     };
-                                    await fetch('https://food-service-latest.onrender.com/api/food/saved-recipes', {
+                                    await fetch('https://food-service-new.onrender.com/api/food/saved-recipes', {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json' },
                                       body: JSON.stringify(body)
@@ -1508,7 +1508,7 @@ const Dashboard = () => {
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   try {
-                                    await fetch(`https://food-service-latest.onrender.com/api/food/saved-recipes/${recipe.id}`, { method: 'DELETE' });
+                                    await fetch(`https://food-service-new.onrender.com/api/food/saved-recipes/${recipe.id}`, { method: 'DELETE' });
                                     setSavedRecipes(prev => prev.filter(r => r.id !== recipe.id));
                                   } catch (err) {
                                     console.error('Failed to delete saved recipe', err);

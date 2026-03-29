@@ -7,7 +7,6 @@ import PatientOverview from './components/PatientOverview';
 import MoodAnalytics from './components/MoodAnalytics';
 import PatientsList from './components/PatientsList';
 import ChatPanel from './components/ChatPanel';
-import VideoConsultation from './components/VideoConsultation';
 import AIRecommendations from './components/AIRecommendations';
 import Reports from './components/Reports';
 
@@ -75,10 +74,17 @@ const DieticianDashboard = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        </div>
+        <div className="text-center relative z-10 bg-white/50 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white">
+          <div className="relative w-20 h-20 mx-auto mb-6">
+            <div className="absolute inset-0 border-4 border-emerald-100 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-gray-800 font-medium text-lg tracking-wide">Initializing workspace...</p>
         </div>
       </div>
     );
@@ -87,10 +93,10 @@ const DieticianDashboard = () => {
   // Not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please log in to access your dashboard</h2>
-          <p className="text-gray-600">You need to be logged in to view this page.</p>
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-xl border border-white">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">Access Restricted</h2>
+          <p className="text-gray-600">Please log in to access your dietician portal.</p>
         </div>
       </div>
     );
@@ -108,7 +114,6 @@ const DieticianDashboard = () => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <AIRecommendations />
-              <VideoConsultation />
             </div>
           </div>
         );
@@ -116,8 +121,6 @@ const DieticianDashboard = () => {
         return <PatientsList fullWidth />;
       case 'chat':
         return <ChatPanel />;
-      case 'consultations':
-        return <VideoConsultation fullWidth />;
       case 'reports':
         return <Reports />;
       
@@ -127,8 +130,13 @@ const DieticianDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-purple-50">
-      <div className="flex">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-300/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-300/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="fixed top-[40%] left-[60%] w-[30%] h-[30%] bg-teal-300/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div className="flex relative z-10">
         {/* Sidebar */}
         <Sidebar 
           collapsed={sidebarCollapsed}
@@ -139,7 +147,7 @@ const DieticianDashboard = () => {
         />
         
         {/* Main Content */}
-        <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+        <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-72'}`}>
           <Navbar 
             onSidebarToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
             sidebarCollapsed={sidebarCollapsed}
@@ -147,23 +155,23 @@ const DieticianDashboard = () => {
             onLogout={handleLogout}
           />
           
-          <main className="p-6">
+          <main className="p-6 md:p-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeSection}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, y: 30, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -30, scale: 0.98 }}
+                transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
               >
                 {renderMainContent()}
               </motion.div>
             </AnimatePresence>
           </main>
         </div>
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default DieticianDashboard;

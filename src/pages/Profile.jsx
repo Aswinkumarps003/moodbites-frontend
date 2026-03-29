@@ -182,7 +182,7 @@ const Profile = () => {
     try {
       console.log('Fetching recipes for user:', userId);
       
-      const response = await fetch(`https://food-service-latest.onrender.com/api/food/users/${userId}/dishes`);
+      const response = await fetch(`https://food-service-new.onrender.com/api/food/users/${userId}/dishes`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch user recipes');
